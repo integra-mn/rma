@@ -1,0 +1,42 @@
+Options -Indexes
+
+RewriteEngine On
+RewriteBase /
+
+# Block direct access to sensitive directories
+RewriteRule ^(config|helpers|controllers|models|views|lang|adapters|cron)/ - [F,L]
+
+# Block direct access to dotfiles (including .env, .git, .htpasswd, etc.)
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+
+# Skip real files and directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Route everything else to index.php
+RewriteRule ^ index.php [QSA,L]
+
+# Security headers
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=()"
+</IfModule>
+
+# Cache static assets
+<FilesMatch "\.(css|js|webp|png|jpg|svg|woff2)$">
+  Header set Cache-Control "public, max-age=2592000"
+</FilesMatch>
+
+# No caching for PHP responses
+<FilesMatch "\.php$">
+  Header set Cache-Control "no-store, no-cache, must-revalidate"
+</FilesMatch>
+
+# Block uploads directory from executing PHP
+<FilesMatch "uploads/.*\.php$">
+  Deny from all
+</FilesMatch>

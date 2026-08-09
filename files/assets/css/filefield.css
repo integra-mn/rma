@@ -1,0 +1,65 @@
+/* Integra File Field — split upload control: [ Choose File │ filename ]
+   From _components/file-field, adapted for this app:
+   - scoped to `.file-field` so it only styles opted-in <input type="file">
+   - mapped to the theme variables so it follows light/dark/blue/contrast
+   - sized to match the app's standard 36px form inputs
+   Pure CSS, no JavaScript. Add class="file-field" to opt an input in. */
+
+input[type="file"].file-field {
+    width: 100%;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-muted);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-surface);
+    box-sizing: border-box;
+    cursor: pointer;
+    line-height: 34px;
+}
+
+input[type="file"].file-field::file-selector-button {
+    height: 35px;
+    margin: 0 12px 0 0;
+    padding: 0 14px;
+    font-family: inherit;
+    font-size: 13px;
+    border: none;
+    border-right: 0.5px solid var(--border);
+    border-radius: 7px 0 0 7px;
+    background: var(--bg-subtle);   /* light-gray Integra standard */
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+input[type="file"].file-field::file-selector-button:hover {
+    background: var(--bg-hover);
+}
+
+/* ── Translated split control (built by file-field.js) ──────────────────────
+   The native input keeps its value but is visually removed; .ff-btn / .ff-name
+   render translated, themeable text in the [ button │ filename ] layout. */
+input[type="file"].file-field.ff-native {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; opacity: 0; border: 0; pointer-events: none;
+}
+.ff-wrap {
+    display: flex; align-items: center; width: 100%; height: 40px; box-sizing: border-box;
+    border: 0.5px solid var(--border); border-radius: 8px; background: var(--bg-surface);
+    overflow: hidden; cursor: pointer;
+}
+.ff-btn {
+    height: 100%; padding: 0 14px; flex-shrink: 0; border: none;
+    border-right: 0.5px solid var(--border); border-radius: 0;
+    background: var(--bg-subtle); color: var(--text-primary);
+    font-family: inherit; font-size: 13px; cursor: pointer;
+}
+.ff-btn:hover { background: var(--bg-hover); }
+.ff-name {
+    padding: 0 12px; font-size: 13px; color: var(--text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ff-name.empty { color: var(--text-muted); }

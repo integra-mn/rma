@@ -1,0 +1,16 @@
+{
+    "name": "integra/rma",
+    "description": "Integra RMA application dependencies",
+    "require": {
+        "php": "^8.1",
+        "mpdf/mpdf": "^8.3",
+        "phpmailer/phpmailer": "^6.9",
+        "phpoffice/phpspreadsheet": "^3.5",
+        "chillerlan/php-qrcode": "^6.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}

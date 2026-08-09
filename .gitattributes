@@ -1,0 +1,23 @@
+# Normalise line endings. Development is on Windows, the server is Linux —
+# without this, shell scripts committed with CRLF fail on the server with
+# "bad interpreter: /bin/bash^M".
+* text=auto eol=lf
+
+# Never touch binary files.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.gif   binary
+*.ico   binary
+*.svg   text eol=lf
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.pdf   binary
+*.xlsx  binary
+*.phar  binary
+
+# Scripts that must stay LF whatever happens.
+*.sh    text eol=lf
+*.py    text eol=lf

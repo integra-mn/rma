@@ -1,0 +1,39 @@
+# ---------------------------------------------------------------------------
+#  Integra RMA — what stays out of version control
+# ---------------------------------------------------------------------------
+
+# Composer dependencies. Installed on the server with `composer install
+# --no-dev`. Keeping them out cuts the repo from ~113 MB to ~11 MB, and
+# composer.lock already pins the exact versions.
+/files/vendor/
+
+# Secrets — database and mail credentials.
+# Catch-all on purpose: .env.local.mysql-backup slipped through a narrower rule
+# and contained a real password. Only the example template is tracked.
+/files/.env*
+!/files/.env.example
+
+# Machine-local Claude Code settings (permissions differ per machine).
+/.claude/settings.local.json
+/.claude/settings.local.json.bak-*
+
+# CUSTOMER DATA — evidence photos and signatures collected from real people.
+# These must never leave the server (GDPR). The directories are recreated at
+# runtime; only the .htaccess guards are tracked.
+/files/storage/evidence/
+/files/storage/signatures/
+/files/storage/tmp/
+/files/uploads/*
+!/files/uploads/.gitkeep
+!/files/uploads/.htaccess
+
+# Build / tooling leftovers
+/files/composer-temp.phar
+*.phar
+
+# OS and editor noise
+Thumbs.db
+.DS_Store
+desktop.ini
+*.swp
+*~

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "integra-rma",
+      "runtimeExecutable": "C:\\php\\php.exe",
+      "runtimeArgs": ["-S", "0.0.0.0:8090", "-t", "files", "router.php"],
+      "port": 8090,
+      "autoPort": false
+    }
+  ]
+}

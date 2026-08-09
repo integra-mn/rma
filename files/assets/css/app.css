@@ -1,0 +1,432 @@
+/* Fonts are self-hosted — see assets/css/fonts.css (linked in the header).
+   The active font is chosen in Settings → Appearance and applied via the
+   --app-font variable set in the header; this is the fallback if it's unset. */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--app-font, 'Montserrat', system-ui, -apple-system, sans-serif);
+  font-size: 14px;
+  line-height: 1.6;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  overflow-y: scroll;
+}
+
+/* ── Themes ─────────────────────────────────────────────────── */
+body.theme-midnight {
+  --bg-page:       #f4f4f0;
+  --bg-surface:    #ffffff;
+  --bg-subtle:     #f4f4f0;
+  --bg-hover:      #ededea;
+  --border:        #d3d1c7;
+  --border-subtle: #e8e6e0;
+  --text-primary:  #2c2c2a;
+  --text-secondary:#5f5e5a;
+  --text-muted:    #888780;
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23888780' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 2.5 6 6.5l4.5-4'/%3E%3C/svg%3E");
+  --accent:        #1D9E75;
+  --accent-dark:   #0F6E56;
+  --accent-bg:     #e1f5ee;
+  --accent-text:   #085041;
+  --sidebar-bg:    #1A1A1F;
+  --sidebar-text:  #9b99a4;
+  --sidebar-hover: #26262c;
+  --sidebar-active:#1D9E75;
+  --sidebar-logo:  #ffffff;
+}
+body.theme-dark {
+  --bg-page:       #1a1a18;
+  --bg-surface:    #242422;
+  --bg-subtle:     #2c2c2a;
+  --bg-hover:      #333331;
+  --border:        #444441;
+  --border-subtle: #383836;
+  --text-primary:  #e8e6e0;
+  --text-secondary:#b4b2a9;
+  --text-muted:    #888780;
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23888780' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 2.5 6 6.5l4.5-4'/%3E%3C/svg%3E");
+  --accent:        #1D9E75;
+  --accent-dark:   #5DCAA5;
+  --accent-bg:     #04342c;
+  --accent-text:   #9fe1cb;
+  --sidebar-bg:    #1A1A1F;
+  --sidebar-text:  #9b99a4;
+  --sidebar-hover: #26262c;
+  --sidebar-active:#1D9E75;
+  --sidebar-logo:  #e8e6e0;
+}
+body.theme-ocean {
+  --bg-page:       #eef3f9;
+  --bg-surface:    #ffffff;
+  --bg-subtle:     #eef3f9;
+  --bg-hover:      #dde8f3;
+  --border:        #b5d4f4;
+  --border-subtle: #cfe3f8;
+  --text-primary:  #042c53;
+  --text-secondary:#185fa5;
+  --text-muted:    #378add;
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23378add' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 2.5 6 6.5l4.5-4'/%3E%3C/svg%3E");
+  --accent:        #185fa5;
+  --accent-dark:   #0c447c;
+  --accent-bg:     #e6f1fb;
+  --accent-text:   #042c53;
+  --sidebar-bg:    #1A1A1F;
+  --sidebar-text:  #9b99a4;
+  --sidebar-hover: #26262c;
+  --sidebar-active:#5dcaa5;
+  --sidebar-logo:  #ffffff;
+}
+body.theme-focus {
+  --bg-page:       #ffffff;
+  --bg-surface:    #ffffff;
+  --bg-subtle:     #f0f0f0;
+  --bg-hover:      #e0e0e0;
+  --border:        #000000;
+  --border-subtle: #555555;
+  --text-primary:  #000000;
+  --text-secondary:#222222;
+  --text-muted:    #555555;
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23555555' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 2.5 6 6.5l4.5-4'/%3E%3C/svg%3E");
+  --accent:        #005a32;
+  --accent-dark:   #003d22;
+  --accent-bg:     #d4edda;
+  --accent-text:   #003d22;
+  --sidebar-bg:    #1A1A1F;
+  --sidebar-text:  #9b99a4;
+  --sidebar-hover: #26262c;
+  --sidebar-active:#00cc66;
+  --sidebar-logo:  #ffffff;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+  width: 250px;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  /* Unified spacing: 16px top + 12px sides. Each row adds 12px more, so the logo
+     and all nav content line up 24px from the top and left edges. */
+  padding: 16px 12px 0;
+}
+.sidebar-logo {
+  padding: 8px 12px;   /* + sidebar's 16px top / 12px sides = 24px above & left */
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;   /* ~40px of clear space below the logo */
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.sidebar-logo span { color: var(--sidebar-active); }
+.sidebar-section {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.25);
+  padding: 0.75rem 12px 0.25rem;
+  text-transform: uppercase;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;   /* + sidebar's 12px = 24px, aligned with the logo */
+  font-size: 15px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  border-radius: 6px;
+  margin: 1px 0;
+  transition: background 0.1s, color 0.1s;
+}
+.sidebar-link:hover {
+  background: var(--sidebar-hover);
+  color: var(--sidebar-logo);
+  /* Full-width hover reaching both sidebar edges — no accent bar (that is the
+     active state's cue). Icon stays at 24px. */
+  margin-left: -12px;
+  margin-right: -12px;
+  padding-left: 24px;
+  border-radius: 0;
+}
+.sidebar-link.active {
+  /* Active fill = Option A: follows the Sidebar hover colour. (Option B, a faint
+     accent-tinted wash, is documented in the sidebar-nav-active skill — swap in
+     `background: color-mix(in srgb, var(--accent) 16%, var(--sidebar-bg));`.) */
+  background: var(--sidebar-hover);
+  color: var(--sidebar-active);
+  font-weight: 500;
+  /* Full-width active row reaching both sidebar edges (negating the sidebar's
+     12px side padding), with a 5px accent bar down the left. */
+  margin-left: -12px;
+  margin-right: -12px;
+  padding-left: 19px;      /* 5px accent border + 19px keeps the icon at 24px */
+  border-left: 5px solid var(--accent);
+  border-radius: 0;
+}
+.sidebar-link svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+.sidebar-link.active svg, .sidebar-link:hover svg { opacity: 1; }
+.sidebar-footer {
+  margin-top: auto;
+  padding: 0.75rem 12px;
+  border-top: 0.5px solid rgba(255,255,255,0.08);
+  font-size: 12px;
+  color: var(--sidebar-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+/* The user name and Log out are peers in the footer — same font, size, weight
+   and colour, so no override on .user-name. font-size inherits from
+   .sidebar-footer, which the header sets to the sidebar-font-size setting so the
+   footer matches the sidebar links. */
+.sidebar-footer a { color: var(--sidebar-text); text-decoration: none; font-size: inherit; }
+.sidebar-footer a:hover { color: var(--sidebar-active); }
+
+/* ── Main area ───────────────────────────────────────────────── */
+.main-wrapper { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  background: var(--bg-surface);
+  border-bottom: 0.5px solid var(--border);
+  padding: 0 1.5rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-title { font-size: 18px; font-weight: 500; }
+.topbar-right { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--text-secondary); }
+.main-content { flex: 1; }
+
+/* ── Cards ───────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+.card + .card { margin-top: 1rem; }
+
+/* ── Alerts ──────────────────────────────────────────────────── */
+.alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; }
+.alert-success { background: var(--accent-bg); color: var(--accent-text); border: 0.5px solid var(--accent); }
+.alert-danger  { background: #fcebeb; color: #791f1f; border: 0.5px solid #f09595; }
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 40px; min-height: 40px; box-sizing: border-box;
+  padding: 0 16px; font-size: 13px; border-radius: 8px;
+  border: 0.5px solid var(--border); background: var(--bg-surface);
+  color: var(--text-primary); cursor: pointer; text-decoration: none;
+  transition: background 0.1s; line-height: 1;
+  white-space: nowrap; vertical-align: middle;
+  font-family: inherit;
+}
+.btn:hover { background: var(--bg-hover); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+.btn-danger  { color: #a32d2d; border-color: #f09595; }
+.btn-danger:hover { background: #fcebeb; }
+.btn-sm { height: 40px; min-height: 40px; padding: 0 10px; font-size: 12px; }
+/* Link-styled action (e.g. "Uredi" in a table's Akcije column): looks like a
+   text link, works as a button or anchor. Lighter than a full button. */
+.btn-link {
+  display: inline-block; background: none; border: none; padding: 0;
+  color: var(--accent); font: inherit; font-size: 13px; cursor: pointer;
+  text-decoration: none;
+}
+.btn-link:hover { text-decoration: underline; }
+/* Popup/modal action rows: give every button the same width for a tidy footer. */
+.modal-actions button { min-width: 90px; }
+
+/* ── Form controls ───────────────────────────────────────────── */
+input[type=text], input[type=email], input[type=password],
+input[type=date], input[type=number], input[type=search], input[type=url],
+input[type=tel],
+input.datefield,
+select {
+  width: 100%;
+  height: 40px; min-height: 40px; box-sizing: border-box;
+  padding: 0 10px;
+  font-size: 13px;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  line-height: 1; vertical-align: middle;
+}
+
+/* Unified dropdown chevron: hide the browser's native arrow and draw one
+   consistent chevron 10px from the right edge across the whole app. The extra
+   right padding keeps the selected text clear of the arrow. */
+select {
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+  padding-right: 30px;
+  background-image: var(--select-chevron, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23888780' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 2.5 6 6.5l4.5-4'/%3E%3C/svg%3E"));
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+/* Colour input: swatch + hex code as one split pill, divided by a single
+   vertical line. */
+/* ── Tabs ──────────────────────────────────────────────────────
+   Accent-underline style (default): the active tab gets a 2px underline in the
+   accent colour; no box. The bar keeps a hairline baseline the tabs sit on. */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 1.5rem;
+  border-bottom: 0.5px solid var(--border);
+}
+.tab-bar .tab {
+  padding: 9px 16px;
+  font-size: 13px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -0.5px;                 /* overlap the bar's baseline */
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.tab-bar .tab:hover { color: var(--text-primary); }
+.tab-bar .tab.active {
+  color: #1D9E75;                 /* tab name */
+  border-bottom-color: #1D9E75;   /* underline — same green */
+  font-weight: 500;
+}
+
+/* Legacy "boxed / connected" tab style — the previous design, kept as an
+   alternative. Chosen in Settings → Appearance; enabled by the body.tabs-boxed
+   class (set in the header from the tab_style setting). */
+body.tabs-boxed .tab-bar .tab {
+  border: 0.5px solid transparent;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+}
+body.tabs-boxed .tab-bar .tab.active {
+  border-color: var(--border);
+  border-bottom: 0.5px solid var(--bg-surface);
+  background: var(--bg-surface);
+  color: var(--accent);
+  font-weight: normal;
+}
+
+.color-pill {
+  display: flex;
+  align-items: stretch;
+  height: 36px;
+  width: 100%;
+  /* Full hairline border around the whole pill; overflow:hidden clips the
+     colour swatch's outer corners so they follow the pill's rounded radius. */
+  border: 0.5px solid var(--text-muted);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+.color-pill input[type="color"] {
+  width: 40px;
+  height: calc(100% - 10px);
+  margin: 5px;
+  padding: 0;
+  /* "Pill inside pill" — the swatch is an inset rounded chip with space around
+     it, sitting inside the outer bordered pill. The dark-grey frame lives on the
+     input element (not the swatch pseudo) so it renders on all four sides; a
+     swatch-level border gets its bottom edge clipped by the control. */
+  border: 0.5px solid #5f5e5a;
+  border-radius: 6px;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+}
+/* Colour fills edge-to-edge inside the framed chip; no border on the swatch. */
+.color-pill input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; height: 100%; }
+.color-pill input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; height: 100%; }
+.color-pill input[type="color"]::-moz-color-swatch { border: none; border-radius: 6px; height: 100%; }
+.color-pill input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  /* Border now lives on the pill itself; hex code is centred in this section. */
+  border: none;
+  border-radius: 0;
+  padding: 0 10px;
+  font-size: 13px;
+  text-align: center;
+  background: none;
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+}
+textarea {
+  width: 100%;
+  height: auto; min-height: 36px; box-sizing: border-box;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  resize: vertical;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 3px; }
+.field { margin-bottom: 12px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; }
+
+/* ── Tables ──────────────────────────────────────────────────── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  text-align: left; padding: 8px 10px;
+  color: var(--text-secondary); font-weight: 500;
+  border-bottom: 0.5px solid var(--border);
+}
+.data-table td { padding: 9px 10px; border-bottom: 0.5px solid var(--border-subtle); }
+.data-table tbody tr:hover { background: var(--bg-hover); cursor: pointer; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* ── Badges ──────────────────────────────────────────────────── */
+.badge {
+  display: inline-block; font-size: 11px;
+  padding: 2px 8px; border-radius: 4px;
+}
+
+/* ── Stat cards ──────────────────────────────────────────────── */
+.stat-card { background: var(--bg-subtle); border-radius: 8px; padding: 1rem; }
+.stat-card .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.stat-card .stat-value { font-size: 28px; font-weight: 500; }
+
+/* ── Mobile ──────────────────────────────────────────────────── */
+.hamburger {
+  display: none; background: none; border: none;
+  color: var(--text-primary); cursor: pointer; padding: 4px;
+}
+@media (max-width: 768px) {
+  .sidebar { position: fixed; left: -250px; z-index: 100; transition: left 0.2s; }
+  .sidebar.open { left: 0; }
+  .hamburger { display: block; }
+  .main-wrapper { width: 100%; }
+}

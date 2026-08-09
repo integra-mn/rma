@@ -1,0 +1,22 @@
+# Block direct execution of any script in storage/
+# Static files (images, PDFs) are still served via regular file requests.
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phar|pl|py|jsp|asp|sh|cgi|htaccess)$">
+  Require all denied
+</FilesMatch>
+
+# Defense in depth: disable PHP handler if possible
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+# Remove any handler mapping for these extensions
+RemoveHandler .php .phtml .phar .pl .py .jsp .asp .sh .cgi
+RemoveType    .php .phtml .phar .pl .py .jsp .asp .sh .cgi
+
+Options -Indexes -ExecCGI
