@@ -19,10 +19,13 @@ class RepairController {
         $where  = 'j.deleted_at IS NULL';
         $params = [];
 
+        // Use location_scope_sql() rather than building the IN list here: a user
+        // with no locations yet (a freshly installed system, before any location
+        // is created) would otherwise produce `location_id IN ()`, which is a SQL
+        // syntax error. The helper emits `1=0` for that case.
         $loc_ids = allowed_location_ids();
         if ($loc_ids !== null) {
-            $ph     = implode(',', array_fill(0, count($loc_ids), '?'));
-            $where .= " AND j.location_id IN ({$ph})";
+            $where .= ' AND ' . location_scope_sql('j');
             $params = array_merge($params, $loc_ids);
         }
 

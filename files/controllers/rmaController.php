@@ -20,11 +20,13 @@ class RmaController {
         $where  = 'r.deleted_at IS NULL';
         $params = [];
 
-        // Location scope for lite admins
+        // Location scope for lite admins. Uses location_scope_sql() rather than
+        // building the IN list here: a user with no locations yet (a freshly
+        // installed system) would otherwise produce `location_id IN ()`, a SQL
+        // syntax error. The helper emits `1=0` for that case.
         $loc_ids = allowed_location_ids();
         if ($loc_ids !== null) {
-            $ph     = implode(',', array_fill(0, count($loc_ids), '?'));
-            $where .= " AND r.location_id IN ({$ph})";
+            $where .= ' AND ' . location_scope_sql('r');
             $params = array_merge($params, $loc_ids);
         }
 
