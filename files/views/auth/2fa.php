@@ -42,9 +42,18 @@
                      margin-bottom: 8px; font-size: 14px; transition: border-color .15s; }
     .channel-label:hover { border-color: #1D9E75; }
     .channel-label input { width: auto; margin: 0; }
-    .trust-row { display: flex; align-items: center; gap: 8px; margin-top: 0.75rem;
-                 font-size: 13px; color: #5f5e5a; }
-    .trust-row input { width: auto; }
+    /* justify-content centres the box+label pair as a group; align-items keeps
+       the box on the text baseline rather than floating above it. */
+    .trust-row { display: flex; align-items: center; justify-content: center;
+                 gap: 8px; margin-top: 0.75rem; font-size: 13px; color: #5f5e5a; }
+    .trust-row input { width: auto; margin: 0; }
+    .trust-row label { margin-bottom: 0; line-height: 1; }
+
+    /* The code is the focus of this screen - centre the field and its label,
+       and space the digits out so a 6-digit code is easy to read back. */
+    .code-label { text-align: center; }
+    .code-input { text-align: center; font-size: 20px; letter-spacing: 6px;
+                  font-variant-numeric: tabular-nums; }
     .back { font-size: 13px; color: #5f5e5a; text-decoration: none;
             display: block; text-align: center; margin-top: 1rem; }
     .back:hover { color: #1D9E75; }
@@ -58,8 +67,6 @@
   <div class="logo">
     <img src="/assets/integra.svg" alt="Integra" style="height:40px;width:auto;display:block;margin:0 auto;">
   </div>
-  <p class="subtitle"><?= __('auth.2fa_title') ?></p>
-
   <?php if ($error ?? null): ?>
     <div class="error"><?= htmlspecialchars($error) ?></div>
   <?php endif; ?>
@@ -92,14 +99,6 @@
   <?php else: ?>
     <!-- Step 2: enter OTP -->
     <?php $channel = $_SESSION['2fa_channel'] ?? 'email'; ?>
-    <div class="success">
-      <?= __('auth.code_sent', ['channel' => match($channel) {
-        'whatsapp' => 'WhatsApp',
-        'sms'      => 'SMS',
-        default    => 'Email',
-      }]) ?>
-    </div>
-
     <?php $left = otp_seconds_left((int)($_SESSION['pending_user_id'] ?? 0)); ?>
     <p class="countdown" id="otp-countdown" data-left="<?= $left ?>">
       <?= __('auth.code_expires_in', ['time' => sprintf('%d:%02d', intdiv($left, 60), $left % 60)]) ?>
@@ -109,10 +108,10 @@
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="verify">
       <div class="field">
-        <label for="code"><?= __('auth.code_label') ?></label>
+        <label for="code" class="code-label"><?= __('auth.code_label') ?></label>
         <input type="text" id="code" name="code" maxlength="6" pattern="[0-9]{6}"
                inputmode="numeric" autocomplete="one-time-code" autofocus
-               placeholder="000000">
+               placeholder="000000" class="code-input">
       </div>
       <div class="trust-row">
         <input type="checkbox" id="trust_device" name="trust_device" value="1">
