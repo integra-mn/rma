@@ -40,7 +40,7 @@
         </div>
         <div class="field">
           <label><?= __('users.role') ?></label>
-          <select name="role" class="custom-select">
+          <select name="role" id="a-role" class="custom-select">
             <option value="technician"><?= __('users.role_technician') ?></option>
             <option value="reception"><?= __('users.role_reception') ?></option>
             <option value="partner"><?= __('users.role_partner') ?></option>
@@ -61,9 +61,9 @@
         </div>
         <div class="field">
           <label><?= __('users.access_scope') ?></label>
-          <select name="access_scope" class="custom-select">
-            <option value="any"><?= __('users.access_any') ?></option>
+          <select name="access_scope" id="a-scope" class="custom-select">
             <option value="lan"><?= __('users.access_lan') ?></option>
+            <option value="any"><?= __('users.access_any') ?></option>
           </select>
         </div>
       </div>
@@ -248,4 +248,18 @@ function deleteUserFromModal() {
 document.getElementById('edit-modal').addEventListener('click', function(e) {
   if (e.target === this) this.style.display = 'none';
 });
+
+// New accounts: staff default to LAN-only, partners to anywhere. Mirrors
+// default_access_scope() in helpers/auth.php — the admin sees the safe default
+// rather than having to remember it. Still freely changeable before saving.
+(function () {
+  var role  = document.getElementById('a-role');
+  var scope = document.getElementById('a-scope');
+  if (!role || !scope) return;
+
+  role.addEventListener('change', function () {
+    scope.value = (role.value === 'partner') ? 'any' : 'lan';
+    if (scope._customRebuild) scope._customRebuild();
+  });
+})();
 </script>

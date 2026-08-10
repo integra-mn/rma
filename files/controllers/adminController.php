@@ -238,7 +238,7 @@ class AdminController {
             'must_change_pw'=> 1,
             'require_2fa'   => ((string)($_POST['require_2fa'] ?? '0') === '1') ? 1 : 0,
             'access_scope'  => in_array($_POST['access_scope'] ?? '', ['any','lan'], true)
-                             ? $_POST['access_scope'] : 'any',
+                             ? $_POST['access_scope'] : default_access_scope($role),
         ]);
 
         audit('created', 'user', $id);

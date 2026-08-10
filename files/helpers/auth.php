@@ -347,6 +347,20 @@ function auth_policy_by_identifier(string $email): array {
 }
 
 /**
+ * What a new account of this role should start with.
+ *
+ * Staff work at the counter and the bench, so they have no reason to sign in
+ * from the internet — they start LAN-only. Partners submit RMAs remotely by
+ * definition, so they start unrestricted.
+ *
+ * This only seeds the form; the setting stays editable per user. The point is
+ * that the safe choice is what you get by not thinking about it.
+ */
+function default_access_scope(string $role): string {
+    return $role === 'partner' ? 'any' : 'lan';
+}
+
+/**
  * The client address as-is, private ranges included.
  *
  * client_ip() below deliberately discards private addresses because it feeds
