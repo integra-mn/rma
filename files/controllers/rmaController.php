@@ -683,6 +683,55 @@ class RmaController {
         return null;
     }
 
+    /**
+     * Claim the next RMA sequence number.
+     *
+     * Counting existing rows was wrong in three ways: two people saving at the
+     * same moment got the same number, permanently deleting an RMA made the
+     * count fall and reissue a number, and the count was per-location while the
+     * format may not include {LOC}. All three produced a unique-constraint error
+     * in front of whoever was at the counter.
+     *
+     * A row is locked FOR UPDATE instead: portable across Postgres and MySQL,
+     * and any second caller waits rather than reading a stale value.
+     *
+     * scope 'global' never resets; scope '<year>' restarts each January, chosen
+     * by the rma_number_reset_yearly setting.
+     */
+    private function next_rma_sequence(string $year): int {
+        $scope = setting('rma_number_reset_yearly', '0') === '1' ? $year : 'global';
+
+        $own = !db()->inTransaction();
+        if ($own) db()->beginTransaction();
+
+        try {
+            // Create the row if this scope is new (first RMA of a new year).
+            // Ignore a duplicate here: another request may have won the race,
+            // and the SELECT below reads whichever row ended up committed.
+            try {
+                db()->prepare('INSERT INTO rma_counters (scope, next_value) VALUES (?, 1)')
+                    ->execute([$scope]);
+            } catch (PDOException $e) {
+                // 23505 = Postgres unique_violation, 23000 = MySQL duplicate key
+                if (!in_array($e->getCode(), ['23505', '23000'], true)) throw $e;
+            }
+
+            $st = db()->prepare('SELECT next_value FROM rma_counters WHERE scope = ? FOR UPDATE');
+            $st->execute([$scope]);
+            $seq = (int) $st->fetchColumn();
+            if ($seq < 1) $seq = 1;
+
+            db()->prepare('UPDATE rma_counters SET next_value = ? WHERE scope = ?')
+                ->execute([$seq + 1, $scope]);
+
+            if ($own) db()->commit();
+            return $seq;
+        } catch (Throwable $e) {
+            if ($own && db()->inTransaction()) db()->rollBack();
+            throw $e;
+        }
+    }
+
     private function generate_rma_number(int $location_id): string {
         $loc  = db_row('SELECT code, name, city FROM locations WHERE id = ?', [$location_id]);
         $year = date('Y');
@@ -696,12 +745,10 @@ class RmaController {
             $prefix = 'RMA';
         }
 
-        // Next sequence for this location + year
-        $seq = (int) db_val(
-            "SELECT COUNT(*) FROM rma_requests
-             WHERE location_id = ? AND YEAR(created_at) = ?",
-            [$location_id, $year]
-        ) + 1;
+        // One global counter, independent of location. {LOC} and the year in the
+        // format are for humans reading the number - they say where and when it
+        // came from, but they do not split the sequence.
+        $seq = $this->next_rma_sequence($year);
 
         // Build from the admin-configured format (Settings → General → RMA
         // numbering). Tokens are replaced case-sensitively.

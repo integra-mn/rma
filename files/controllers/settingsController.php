@@ -89,6 +89,7 @@ class SettingsController {
             'default_lang'      => ['string', $_POST['default_lang'] ?? 'en'],
             'default_location'  => ['int',    (int)($_POST['default_location'] ?? 0)],
             'rma_number_format' => ['string', trim($_POST['rma_number_format'] ?? '{LOC}-{YEAR}-{SEQ5}')],
+            'rma_number_reset_yearly' => ['string', !empty($_POST['rma_number_reset_yearly']) ? '1' : '0'],
             'pdf_engine'        => ['string', in_array($_POST['pdf_engine']??'',['html','mpdf']) ? $_POST['pdf_engine'] : 'html'],
             'pdf_paper_size'    => ['string', in_array($_POST['pdf_paper_size']??'',['A4','A5','Letter']) ? $_POST['pdf_paper_size'] : 'A4'],
         ];

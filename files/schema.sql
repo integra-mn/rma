@@ -319,6 +319,14 @@ CREATE TABLE rma_requests (
   FOREIGN KEY (assigned_tech) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Hands out RMA numbers atomically. scope is 'global' (never resets) or the
+-- four-digit year (restarts each January), chosen by rma_number_reset_yearly.
+-- next_value is the number that will be issued next.
+CREATE TABLE rma_counters (
+  scope      VARCHAR(20) NOT NULL PRIMARY KEY,
+  next_value INT UNSIGNED NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE rma_status_history (
   id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   rma_id     INT UNSIGNED NOT NULL,

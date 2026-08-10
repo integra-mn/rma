@@ -799,6 +799,8 @@ return [
     'settings.location_none' => 'None',
     'settings.rma_numbering' => 'RMA numbering',
     'settings.rma_number_format' => 'RMA number format',
+    'settings.rma_reset_yearly'  => 'Restart numbering each year',
+    'settings.rma_reset_yearly_hint' => 'On: the sequence returns to 1 every 1 January — use with {YY} or {YEAR} in the format, otherwise numbers repeat. Off: it counts up continuously.',
     'settings.sidebar'       => 'Sidebar',
     'settings.sidebar_collapse' => 'Collapse sidebar by default (icon-only mode)',
     'settings.pdf_engine'    => 'PDF engine',

@@ -80,8 +80,19 @@
         <label><?= __('settings.rma_number_format') ?></label>
         <input type="text" name="rma_number_format" value="<?= htmlspecialchars(setting('rma_number_format','{LOC}-{YEAR}-{SEQ5}')) ?>">
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:1.5rem;">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:1rem;">
         Tokens: <code>{LOC}</code> = location code &nbsp;·&nbsp; <code>{YYYY}</code> / <code>{YEAR}</code> = 4-digit year &nbsp;·&nbsp; <code>{YY}</code> = 2-digit year &nbsp;·&nbsp; <code>{SEQ4}</code> / <code>{SEQ5}</code> / <code>{SEQ6}</code> = 4/5/6-digit sequence
+      </p>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <input type="checkbox" id="rma_number_reset_yearly" name="rma_number_reset_yearly" value="1"
+               <?= setting('rma_number_reset_yearly','0') === '1' ? 'checked' : '' ?>>
+        <label for="rma_number_reset_yearly" style="font-size:13px;font-weight:500;margin-bottom:0;">
+          <?= __('settings.rma_reset_yearly') ?>
+        </label>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:1.5rem;">
+        <?= __('settings.rma_reset_yearly_hint') ?>
       </p>
 
       <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;">PDF</h2>

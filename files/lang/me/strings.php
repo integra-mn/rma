@@ -799,6 +799,8 @@ return [
     'settings.location_none' => 'Nijedna',
     'settings.rma_numbering' => 'Numeracija',
     'settings.rma_number_format' => 'Format broja reklamacije',
+    'settings.rma_reset_yearly'  => 'Resetuj numeraciju svake godine',
+    'settings.rma_reset_yearly_hint' => 'Uključeno: brojač se vraća na 1 svakog 1. januara — koristite uz {YY} ili {YEAR} u formatu, inače se brojevi ponavljaju. Isključeno: broji kontinuirano.',
     'settings.sidebar'       => 'Bočna traka',
     'settings.sidebar_collapse' => 'Podrazumijevano skupi bočnu traku (samo ikone)',
     'settings.pdf_engine'    => 'PDF mehanizam',
