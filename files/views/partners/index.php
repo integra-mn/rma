@@ -1,6 +1,9 @@
 <?php defined('RMS') or die('Direct access not permitted'); ?>
 
-<div style="padding:1.5rem;">
+<!-- Same width tier as Administration (admin/index.php caps its tabs the
+     same way), so this page lines up with Korisnici rather than running
+     to the full window. -->
+<div style="padding:1.5rem;max-width:var(--w-content);">
 
   <?php if ($error ?? null): ?>
     <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
@@ -25,10 +28,7 @@
 
   <!-- Add form (hidden) -->
   <?php if (can('partners', 'edit')): ?>
-  <!-- max-width matches the Korisnici card: the admin page wraps its tabs in
-       var(--w-content), which this page does not, so the card would otherwise
-       stretch to the full window and look wider than its counterpart. -->
-  <div id="add-form" style="display:none;margin-bottom:1.25rem;max-width:var(--w-content);" class="card">
+  <div id="add-form" style="display:none;margin-bottom:1.25rem;" class="card">
     <h2 style="font-size:15px;font-weight:500;margin-bottom:1rem;"><?= __('partners.new') ?></h2>
     <form method="POST" action="/partners/store">
       <?= csrf_field() ?>
@@ -37,19 +37,25 @@
            width and the card never lined up with the others. -->
       <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="field"><label><?= __('partners.company') ?></label><input type="text" name="name" required></div>
-        <div class="field"><label><?= __('partners.tax_id') ?></label><input type="text" name="tax_id"></div>
         <div class="field"><label><?= __('partners.contact_person') ?></label><input type="text" name="contact_person"></div>
         <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="phone"></div>
+        <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email"></div>
       </div>
       <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
-        <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email"></div>
         <div class="field"><label><?= __('label.address') ?></label><input type="text" name="address"></div>
         <div class="field"><label><?= __('partners.zip_code') ?></label><input type="text" name="zip_code"></div>
         <div class="field"><label><?= __('label.city') ?></label><input type="text" name="city"></div>
+        <div class="field"><label><?= __('label.country') ?></label><input type="text" name="country"></div>
       </div>
       <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
-        <div class="field"><label><?= __('label.country') ?></label><input type="text" name="country"></div>
-        <div class="field" style="grid-column:span 3;"><label><?= __('label.notes') ?></label><textarea name="notes" rows="2"></textarea></div>
+        <div class="field"><label><?= __('partners.tax_id') ?></label><input type="text" name="tax_id"></div>
+        <!-- One line and not resizable, so the row keeps the same height as the
+             fields beside it; textareas are min-height 36px and resize:vertical
+             by default, which made this cell taller than its neighbours. -->
+        <div class="field" style="grid-column:span 3;">
+          <label><?= __('label.notes') ?></label>
+          <textarea name="notes" rows="1" style="height:36px;min-height:36px;resize:none;overflow:auto;"></textarea>
+        </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
         <button type="submit" class="btn btn-primary"><?= __('btn.save') ?></button>
