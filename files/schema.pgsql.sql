@@ -147,6 +147,7 @@ CREATE TABLE partners (
   email VARCHAR(150),
   phone VARCHAR(30),
   address VARCHAR(255),
+  zip_code VARCHAR(30),
   city VARCHAR(100),
   country VARCHAR(100),
   contact_person VARCHAR(150),

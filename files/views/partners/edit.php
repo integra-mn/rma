@@ -19,6 +19,7 @@
         <div class="field"><label><?= __('partners.contact_person') ?></label><input type="text" name="contact_person" value="<?= htmlspecialchars($partner['contact_person'] ?? '') ?>"></div>
         <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email" value="<?= htmlspecialchars($partner['email'] ?? '') ?>"></div>
         <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="phone" value="<?= htmlspecialchars($partner['phone'] ?? '') ?>"></div>
+        <div class="field"><label><?= __('partners.zip_code') ?></label><input type="text" name="zip_code" value="<?= htmlspecialchars($partner['zip_code'] ?? '') ?>"></div>
         <div class="field"><label><?= __('label.city') ?></label><input type="text" name="city" value="<?= htmlspecialchars($partner['city'] ?? '') ?>"></div>
         <div class="field"><label><?= __('ship.default_courier') ?></label>
           <select name="default_courier_id" class="custom-select">
