@@ -786,6 +786,7 @@ return [
     'users.search'           => 'Search by name or email',
     'users.must_change_pw'   => 'Must Change PW',
     'users.last_login'       => 'Last Login',
+    'users.reset_password'   => 'Reset Password',
     'users.new_password'     => 'New Password',
     'users.confirm_delete'   => 'Delete this user permanently? This cannot be undone.',
     'admin.statuses'         => 'Statuses',

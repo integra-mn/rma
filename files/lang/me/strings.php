@@ -786,6 +786,7 @@ return [
     'users.search'           => 'Pretraga po imenu ili email-u',
     'users.must_change_pw'   => 'Obavezna promjena lozinke',
     'users.last_login'       => 'Posljednja prijava',
+    'users.reset_password'   => 'Resetuj lozinku',
     'users.new_password'     => 'Nova lozinka',
     'users.confirm_delete'   => 'Trajno obrisati ovog korisnika? Ovo se ne može poništiti.',
     'admin.statuses'         => 'Statusi',

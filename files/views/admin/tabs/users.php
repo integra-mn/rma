@@ -146,26 +146,9 @@
     <form method="POST" action="/admin/user/update">
       <?= csrf_field() ?>
       <input type="hidden" name="id" id="e-id">
+      <!-- Field order set by Rajo: identity, then placement, then security. -->
       <div class="form-grid" style="">
         <div class="field"><label><?= __('users.full_name') ?></label><input type="text" name="name" id="e-name" required></div>
-        <div class="field"><label><?= __('label.phone') ?></label><input type="tel" name="phone" id="e-phone" required></div>
-        <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email" id="e-email" required></div>
-        <div class="field">
-          <label><?= __('nav.language') ?></label>
-          <select name="lang" id="e-lang" class="custom-select">
-            <option value="en"><?= __('users.lang_en') ?></option>
-            <option value="me"><?= __('users.lang_me') ?></option>
-          </select>
-        </div>
-        <div class="field">
-          <label><?= __('label.location') ?></label>
-          <select name="location_id" id="e-location" class="custom-select">
-            <option value=""><?= __('users.no_location') ?></option>
-            <?php foreach ($locations as $l): ?>
-              <option value="<?= (int)$l['id'] ?>"><?= htmlspecialchars($l['name']) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
         <div class="field">
           <label><?= __('users.role') ?></label>
           <select name="role" id="e-role" class="custom-select">
@@ -176,8 +159,26 @@
             <option value="super_admin"><?= __('users.role_super_admin') ?></option>
           </select>
         </div>
+        <div class="field"><label><?= __('label.phone') ?></label><input type="tel" name="phone" id="e-phone" required></div>
+        <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email" id="e-email" required></div>
         <div class="field">
-          <label><?= __('users.new_password') ?></label>
+          <label><?= __('label.location') ?></label>
+          <select name="location_id" id="e-location" class="custom-select">
+            <option value=""><?= __('users.no_location') ?></option>
+            <?php foreach ($locations as $l): ?>
+              <option value="<?= (int)$l['id'] ?>"><?= htmlspecialchars($l['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label><?= __('nav.language') ?></label>
+          <select name="lang" id="e-lang" class="custom-select">
+            <option value="en"><?= __('users.lang_en') ?></option>
+            <option value="me"><?= __('users.lang_me') ?></option>
+          </select>
+        </div>
+        <div class="field">
+          <label><?= __('users.reset_password') ?></label>
           <input type="password" name="password" autocomplete="new-password">
         </div>
         <div class="field">
@@ -194,10 +195,13 @@
             <option value="lan"><?= __('users.access_lan') ?></option>
           </select>
         </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
-        <input type="checkbox" name="is_active" id="e-active" value="1">
-        <label for="e-active" style="font-size:13px;margin-bottom:0;"><?= __('label.active') ?></label>
+        <div class="field">
+          <label><?= __('label.active') ?></label>
+          <select name="is_active" id="e-active" class="custom-select">
+            <option value="1"><?= __('label.yes') ?></option>
+            <option value="0"><?= __('label.no') ?></option>
+          </select>
+        </div>
       </div>
       <div class="modal-actions" style="display:flex;gap:8px;align-items:center;">
         <button type="submit" class="btn btn-primary"><?= __('btn.save') ?></button>
@@ -230,11 +234,11 @@ function editUser(u) {
   document.getElementById('e-role').value     = u.role || 'technician';
   document.getElementById('e-location').value = u.location_id || '';
   document.getElementById('e-lang').value     = u.lang || 'en';
-  document.getElementById('e-active').checked = u.is_active == 1;
+  document.getElementById('e-active').value   = (u.is_active == 1) ? '1' : '0';
   document.getElementById('e-2fa').value      = (u.require_2fa == 1) ? '1' : '0';
   document.getElementById('e-scope').value    = (u.access_scope === 'lan') ? 'lan' : 'any';
   // Refresh the custom-select buttons to reflect the values we just set.
-  ['e-lang','e-location','e-role','e-2fa','e-scope'].forEach(function(id){
+  ['e-lang','e-location','e-role','e-2fa','e-scope','e-active'].forEach(function(id){
     var s = document.getElementById(id);
     if (s && s._customRebuild) s._customRebuild();
   });

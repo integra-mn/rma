@@ -297,7 +297,9 @@ class AdminController {
             'role'        => $new_role,
             'location_id' => (int)($_POST['location_id'] ?? 0) ?: null,
             'lang'        => $_POST['lang'] ?? $user['lang'],
-            'is_active'   => isset($_POST['is_active']) ? 1 : 0,
+            // Dropdown, not a checkbox: it always submits, so test the VALUE.
+            // isset() here would pin every user to active forever.
+            'is_active'   => ((string)($_POST['is_active'] ?? '1') === '1') ? 1 : 0,
             'require_2fa' => ((string)($_POST['require_2fa'] ?? '0') === '1') ? 1 : 0,
             'access_scope'=> in_array($_POST['access_scope'] ?? '', ['any','lan'], true)
                            ? $_POST['access_scope'] : ($user['access_scope'] ?? 'any'),
