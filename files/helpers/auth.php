@@ -30,6 +30,27 @@ function require_login(): void {
         header('Location: /auth/login');
         exit;
     }
+
+    // Re-check the network on every request, not just at login: a LAN-only
+    // account must not stay usable by carrying the session cookie off-site.
+    // Read from the session so this costs nothing; it is refreshed on login,
+    // so a change of setting takes effect at the user's next sign-in.
+    if ((current_user()['access_scope'] ?? 'any') === 'lan' && !request_is_lan()) {
+        audit('session_wrong_network', current_user()['id'] ?? null, null, ['ip' => client_ip_raw()]);
+        auth_logout_silent();
+        $_SESSION['auth_error'] = __('auth.wrong_network');
+        header('Location: /auth/login');
+        exit;
+    }
+}
+
+/**
+ * Drop the session without the redirect auth_logout() performs — the caller
+ * decides where to send the user.
+ */
+function auth_logout_silent(): void {
+    $_SESSION = [];
+    session_regenerate_id(true);
 }
 
 function require_role(string ...$roles): void {
@@ -64,6 +85,14 @@ function auth_attempt(string $email, string $password): array {
 
     if (!$user['is_active']) {
         return ['status' => 'inactive'];
+    }
+
+    // Per-user network restriction. Checked after the password so an attacker
+    // learns nothing extra, but before any session exists.
+    if (($user['access_scope'] ?? 'any') === 'lan' && !request_is_lan()) {
+        record_attempt($email, $ip, false);
+        audit('login_wrong_network', $user['id'], null, ['ip' => client_ip_raw()]);
+        return ['status' => 'wrong_network'];
     }
 
     record_attempt($email, $ip, true);
@@ -205,6 +234,7 @@ function auth_grant_session(array $user): void {
         'location_ids' => $location_ids,
         'lang'         => $user['lang'],
         'theme'        => $user['theme'],
+        'access_scope' => $user['access_scope'] ?? 'any',
         '2fa_ok'       => true,
     ];
 
@@ -314,6 +344,52 @@ function auth_policy(string $role): array {
 function auth_policy_by_identifier(string $email): array {
     $user = db_row('SELECT role FROM users WHERE email = ? LIMIT 1', [$email]);
     return $user ? auth_policy($user['role']) : [];
+}
+
+/**
+ * The client address as-is, private ranges included.
+ *
+ * client_ip() below deliberately discards private addresses because it feeds
+ * rate-limiting and audit logs, where a LAN address is not a useful identity.
+ * Network-scope checks need the opposite: a private address is exactly the
+ * signal we are looking for.
+ *
+ * Takes the LAST entry of X-Forwarded-For. Caddy is configured to overwrite the
+ * header (`header_up X-Forwarded-For {remote_host}`), so there is normally only
+ * one — but if anything ever appends, the last hop is the one our proxy saw and
+ * the only one a client cannot forge.
+ */
+function client_ip_raw(): string {
+    $remote  = $_SERVER['REMOTE_ADDR'] ?? '';
+    $trusted = defined('TRUSTED_PROXIES') ? TRUSTED_PROXIES : [];
+
+    if (!empty($trusted) && in_array($remote, $trusted, true) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $xff = array_map('trim', explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
+        $ip  = end($xff);
+        if (filter_var($ip, FILTER_VALIDATE_IP)) return $ip;
+    }
+    return $remote;
+}
+
+/**
+ * Did this request come from inside the local network?
+ *
+ * True for RFC1918 / loopback / link-local addresses. Safe to trust because the
+ * proxy overwrites X-Forwarded-For with the real TCP peer, so a client on the
+ * internet cannot claim a private address.
+ *
+ * CLI (cron, console) has no address at all and counts as local — otherwise
+ * scheduled jobs running as a restricted user would break.
+ */
+function request_is_lan(): bool {
+    if (PHP_SAPI === 'cli') return true;
+
+    $ip = client_ip_raw();
+    if (!filter_var($ip, FILTER_VALIDATE_IP)) return false;
+
+    // No result from the "public addresses only" filter means it is private,
+    // reserved or loopback — i.e. local.
+    return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
 }
 
 function client_ip(): string {

@@ -45,6 +45,9 @@ CREATE TABLE users (
   password_changed_at DATETIME DEFAULT NULL,
   must_change_pw      TINYINT(1) DEFAULT 0,
   require_2fa         TINYINT(1) DEFAULT 0,
+  -- 'any' = reachable from anywhere, 'lan' = local network only. Enforced at
+  -- login and on every authenticated request (helpers/auth.php).
+  access_scope        VARCHAR(10) NOT NULL DEFAULT 'any',
   created_at          DATETIME DEFAULT NOW(),
   updated_at          DATETIME DEFAULT NOW() ON UPDATE NOW(),
   deleted_at          DATETIME DEFAULT NULL,

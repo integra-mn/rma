@@ -316,6 +316,7 @@ return [
     'auth.invalid'           => 'Pogrešan email ili lozinka.',
     'auth.locked'            => 'Previše neuspješnih pokušaja. Pokušajte ponovo kasnije.',
     'auth.inactive'          => 'Vaš nalog je deaktiviran.',
+    'auth.wrong_network'     => 'Ovaj nalog se može koristiti samo sa lokalne mreže.',
     'auth.otp_expired'       => 'Kod je istekao. Zatražite novi.',
 
     // Email sa verifikacionim kodom
@@ -716,6 +717,9 @@ return [
     'users.require_2fa'      => 'Obavezna 2FA (kod za prijavu putem email/SMS/WhatsApp)',
     'users.initial_password' => 'Početna lozinka',
     'users.pw_change_hint'   => 'Korisnik će morati promijeniti lozinku pri prvoj prijavi.',
+    'users.access_scope'     => 'Pristup',
+    'users.access_any'       => 'Svugdje',
+    'users.access_lan'       => 'Samo lokalna mreža',
     'users.search'           => 'Pretraga po imenu ili email-u',
     'users.must_change_pw'   => 'Obavezna promjena lozinke',
     'users.last_login'       => 'Posljednja prijava',

@@ -316,6 +316,7 @@ return [
     'auth.invalid'           => 'Invalid email or password.',
     'auth.locked'            => 'Too many failed attempts. Please try again later.',
     'auth.inactive'          => 'Your account has been deactivated.',
+    'auth.wrong_network'     => 'This account can only be used from the local network.',
     'auth.otp_expired'       => 'Code expired. Please request a new one.',
 
     // Verification-code email
@@ -716,6 +717,9 @@ return [
     'users.require_2fa'      => 'Require 2FA (login code by email/SMS/WhatsApp)',
     'users.initial_password' => 'Initial Password',
     'users.pw_change_hint'   => 'User will be required to change password on first login.',
+    'users.access_scope'     => 'Access',
+    'users.access_any'       => 'Anywhere',
+    'users.access_lan'       => 'Local network only',
     'users.search'           => 'Search by name or email',
     'users.must_change_pw'   => 'Must Change PW',
     'users.last_login'       => 'Last Login',

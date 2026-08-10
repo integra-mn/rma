@@ -54,6 +54,9 @@ class PortalController {
             case 'inactive':
                 $_SESSION['auth_error'] = __('auth.inactive');
                 break;
+            case 'wrong_network':
+                $_SESSION['auth_error'] = __('auth.wrong_network');
+                break;
             default:
                 $_SESSION['auth_error'] = __('auth.invalid');
         }

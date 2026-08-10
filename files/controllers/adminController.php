@@ -237,6 +237,8 @@ class AdminController {
             'is_active'     => 1,
             'must_change_pw'=> 1,
             'require_2fa'   => ((string)($_POST['require_2fa'] ?? '0') === '1') ? 1 : 0,
+            'access_scope'  => in_array($_POST['access_scope'] ?? '', ['any','lan'], true)
+                             ? $_POST['access_scope'] : 'any',
         ]);
 
         audit('created', 'user', $id);
@@ -297,6 +299,8 @@ class AdminController {
             'lang'        => $_POST['lang'] ?? $user['lang'],
             'is_active'   => isset($_POST['is_active']) ? 1 : 0,
             'require_2fa' => ((string)($_POST['require_2fa'] ?? '0') === '1') ? 1 : 0,
+            'access_scope'=> in_array($_POST['access_scope'] ?? '', ['any','lan'], true)
+                           ? $_POST['access_scope'] : ($user['access_scope'] ?? 'any'),
         ];
 
         // Only update password if provided

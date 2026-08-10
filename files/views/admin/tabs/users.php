@@ -59,6 +59,13 @@
             <option value="1"><?= __('label.yes') ?></option>
           </select>
         </div>
+        <div class="field">
+          <label><?= __('users.access_scope') ?></label>
+          <select name="access_scope" class="custom-select">
+            <option value="any"><?= __('users.access_any') ?></option>
+            <option value="lan"><?= __('users.access_lan') ?></option>
+          </select>
+        </div>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:1rem;"><?= __('users.pw_change_hint') ?></p>
       <div style="display:flex;gap:8px;">
@@ -171,6 +178,13 @@
             <option value="1"><?= __('label.yes') ?></option>
           </select>
         </div>
+        <div class="field">
+          <label><?= __('users.access_scope') ?></label>
+          <select name="access_scope" id="e-scope" class="custom-select">
+            <option value="any"><?= __('users.access_any') ?></option>
+            <option value="lan"><?= __('users.access_lan') ?></option>
+          </select>
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
         <input type="checkbox" name="is_active" id="e-active" value="1">
@@ -209,8 +223,9 @@ function editUser(u) {
   document.getElementById('e-lang').value     = u.lang || 'en';
   document.getElementById('e-active').checked = u.is_active == 1;
   document.getElementById('e-2fa').value      = (u.require_2fa == 1) ? '1' : '0';
+  document.getElementById('e-scope').value    = (u.access_scope === 'lan') ? 'lan' : 'any';
   // Refresh the custom-select buttons to reflect the values we just set.
-  ['e-lang','e-location','e-role','e-2fa'].forEach(function(id){
+  ['e-lang','e-location','e-role','e-2fa','e-scope'].forEach(function(id){
     var s = document.getElementById(id);
     if (s && s._customRebuild) s._customRebuild();
   });
