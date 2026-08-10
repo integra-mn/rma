@@ -302,7 +302,7 @@ return [
     'auth.email'             => 'Email',
     'auth.password'          => 'Password',
     'auth.2fa_title'         => 'Two-factor authentication',
-    'auth.choose_channel'    => 'Choose how you want to receive your verification code:',
+    'auth.choose_channel'    => 'Verification code delivery method',
     'auth.channel_email'     => 'Email',
     'auth.channel_whatsapp'  => 'WhatsApp',
     'auth.channel_sms'       => 'SMS',

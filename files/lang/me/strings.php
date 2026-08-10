@@ -302,7 +302,7 @@ return [
     'auth.email'             => 'Email',
     'auth.password'          => 'Lozinka',
     'auth.2fa_title'         => 'Dvofaktorska autentifikacija',
-    'auth.choose_channel'    => 'Odaberite kako želite primiti verifikacioni kod:',
+    'auth.choose_channel'    => 'Način dostave verifikacionog koda',
     'auth.channel_email'     => 'Email',
     'auth.channel_whatsapp'  => 'WhatsApp',
     'auth.channel_sms'       => 'SMS',
