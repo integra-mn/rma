@@ -117,7 +117,7 @@ class AuthController {
 
         switch ($result['status']) {
             case 'ok':
-                unset($_SESSION['pending_user_id'], $_SESSION['2fa_channel'],
+                unset($_SESSION['pending_user_id'], $_SESSION['2fa_channel'], $_SESSION['2fa_preferred'],
                       $_SESSION['2fa_sent'], $_SESSION['2fa_channels']);
                 header('Location: /');
                 exit;

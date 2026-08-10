@@ -101,10 +101,17 @@
     <form method="POST" action="/auth/2fa" id="send-form">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="send">
+      <?php
+        // Pre-select the channel chosen in Moj profil, provided the role still
+        // allows it and it is switched on app-wide; otherwise fall back to the
+        // first available rather than assuming email exists.
+        $preferred = $_SESSION['2fa_preferred'] ?? null;
+        $default   = in_array($preferred, $channels, true) ? $preferred : ($channels[0] ?? 'email');
+      ?>
       <?php foreach ($channels as $ch): ?>
         <label class="channel-label">
           <input type="radio" name="channel" value="<?= htmlspecialchars($ch) ?>"
-                 <?= $ch === 'email' ? 'checked' : '' ?>>
+                 <?= $ch === $default ? 'checked' : '' ?>>
           <?= match($ch) {
             'whatsapp' => 'WhatsApp',
             'sms'      => 'SMS',

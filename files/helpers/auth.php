@@ -112,6 +112,9 @@ function auth_attempt(string $email, string $password): array {
             ? order_channels(explode(',', $policy['allowed_2fa_channels']))
             : ['email'];
         $channels = available_2fa_channels($channels);
+        // Carry the user's choice from Moj profil so the 2FA screen can
+        // pre-select it instead of always defaulting to email.
+        $_SESSION['2fa_preferred'] = $user['preferred_2fa_channel'] ?? null;
         return ['status' => '2fa_required', 'channels' => $channels];
     }
 
