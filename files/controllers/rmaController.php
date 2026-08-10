@@ -706,15 +706,16 @@ class RmaController {
 
         try {
             // Create the row if this scope is new (first RMA of a new year).
-            // Ignore a duplicate here: another request may have won the race,
-            // and the SELECT below reads whichever row ended up committed.
-            try {
-                db()->prepare('INSERT INTO rma_counters (scope, next_value) VALUES (?, 1)')
-                    ->execute([$scope]);
-            } catch (PDOException $e) {
-                // 23505 = Postgres unique_violation, 23000 = MySQL duplicate key
-                if (!in_array($e->getCode(), ['23505', '23000'], true)) throw $e;
-            }
+            //
+            // Must not be "try INSERT, catch duplicate": in Postgres a
+            // unique-violation aborts the WHOLE transaction, and catching the
+            // exception does not recover it — every later statement then fails
+            // with "current transaction is aborted". Let the database swallow
+            // the conflict instead, so no error is ever raised.
+            $sql = db_is_pg()
+                ? 'INSERT INTO rma_counters (scope, next_value) VALUES (?, 1) ON CONFLICT (scope) DO NOTHING'
+                : 'INSERT IGNORE INTO rma_counters (scope, next_value) VALUES (?, 1)';
+            db()->prepare($sql)->execute([$scope]);
 
             $st = db()->prepare('SELECT next_value FROM rma_counters WHERE scope = ? FOR UPDATE');
             $st->execute([$scope]);
