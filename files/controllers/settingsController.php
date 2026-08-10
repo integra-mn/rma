@@ -21,6 +21,7 @@ class SettingsController {
             'smtp'       => $this->save_smtp(),
             'whatsapp'   => $this->save_whatsapp(),
             'sms'        => $this->save_sms(),
+            'twofa'      => $this->save_twofa(),
             'gsx'        => $this->save_gsx(),
             'tcl'        => $this->save_tcl(),
             'fiscal'     => $this->save_fiscal(),
@@ -33,7 +34,7 @@ class SettingsController {
         $stab = match($tab) {
             'general'    => 'general',
             'appearance' => 'appearance',
-            'smtp', 'whatsapp', 'sms' => 'smtp',
+            'smtp', 'whatsapp', 'sms', 'twofa' => 'smtp',
             'gsx', 'tcl' => 'integrations',
             'fiscal'     => 'fiscal',
             'image'      => 'image',
@@ -124,6 +125,27 @@ class SettingsController {
         // Only save password if provided (don't overwrite with empty)
         if (!empty($_POST['smtp_pass'])) {
             $this->set('smtp_pass', $_POST['smtp_pass'], 'string', 'email');
+        }
+    }
+
+    // ── 2FA delivery channels ─────────────────────────────────
+
+    // Which channels may be used to deliver a login code. The per-role policy
+    // (security_policies.allowed_2fa_channels) still applies on top of this;
+    // these switches say what is actually wired up on this installation.
+    //
+    // Email is forced on when everything is unticked: with no channel available,
+    // every user whose role requires 2FA would be locked out permanently.
+    private function save_twofa(): void {
+        $any = false;
+        foreach (['email', 'sms', 'whatsapp'] as $ch) {
+            $on = !empty($_POST["twofa_{$ch}_enabled"]);
+            $any = $any || $on;
+            $this->set("twofa_{$ch}_enabled", $on ? '1' : '0', 'string', 'security');
+        }
+        if (!$any) {
+            $this->set('twofa_email_enabled', '1', 'string', 'security');
+            $_SESSION['form_error'] = __('settings.twofa_none_selected');
         }
     }
 

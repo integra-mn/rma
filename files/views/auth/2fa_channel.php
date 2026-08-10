@@ -117,6 +117,15 @@
       <input type="hidden" name="channel" value="<?= htmlspecialchars($channel) ?>">
       <button type="submit" class="btn btn-secondary"><?= __('btn.resend') ?></button>
     </form>
+
+    <?php if (count($channels) > 1): ?>
+      <!-- Only worth offering when there is something else to switch to. -->
+      <form method="POST" action="/auth/2fa" style="margin-top:0.5rem;">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="change_channel">
+        <button type="submit" class="btn btn-secondary"><?= __('auth.change_channel') ?></button>
+      </form>
+    <?php endif; ?>
   <?php endif; ?>
 
   <a href="/auth/login" class="back"><?= __('auth.back_to_login') ?></a>

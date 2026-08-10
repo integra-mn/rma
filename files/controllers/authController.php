@@ -71,6 +71,16 @@ class AuthController {
 
         $action = $_POST['action'] ?? 'verify';
 
+        // Back to the channel chooser. Keeps the pending login alive - only the
+        // "a code was sent" state is cleared - so the user can switch from, say,
+        // email to SMS without starting the whole login again.
+        if ($action === 'change_channel') {
+            $_SESSION['2fa_sent'] = false;
+            unset($_SESSION['2fa_channel']);
+            header('Location: /auth/2fa');
+            exit;
+        }
+
         // Send OTP
         if ($action === 'send') {
             $channel = $_POST['channel'] ?? 'email';

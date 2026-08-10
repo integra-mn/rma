@@ -272,7 +272,7 @@
 
   <!-- ── COMMUNICATIONS (sub-tabbed) ── -->
   <?php elseif ($stab === 'smtp'): ?>
-  <?php $csub = $_GET['csub'] ?? 'smtp'; if (!in_array($csub, ['smtp','whatsapp','sms'], true)) $csub = 'smtp'; ?>
+  <?php $csub = $_GET['csub'] ?? 'smtp'; if (!in_array($csub, ['smtp','whatsapp','sms','twofa'], true)) $csub = 'smtp'; ?>
   <?php
   // Messaging providers shared by SMS and WhatsApp. Each provider stores its
   // config under "<channel>_<provider>_<field>" so the two channels never
@@ -339,7 +339,7 @@
   };
   ?>
   <div class="tab-bar">
-    <?php foreach (['smtp'=>'Email','sms'=>'SMS','whatsapp'=>'WhatsApp'] as $k => $l): ?>
+    <?php foreach (['smtp'=>'Email','sms'=>'SMS','whatsapp'=>'WhatsApp','twofa'=>__('settings.twofa')] as $k => $l): ?>
       <a href="/settings?stab=smtp&csub=<?= $k ?>" class="tab<?= $csub === $k ? ' active' : '' ?>"><?= $l ?></a>
     <?php endforeach; ?>
   </div>
@@ -430,6 +430,33 @@
         </div>
       </div>
       <p id="sms-result" style="font-size:13px;margin-top:10px;"></p>
+    </form>
+  </div>
+
+  <?php elseif ($csub === 'twofa'): ?>
+  <div class="card">
+    <form method="POST" action="/admin/settings/save">
+      <?= csrf_field() ?>
+      <input type="hidden" name="tab" value="twofa">
+
+      <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;">
+        <?= __('settings.twofa_hint') ?>
+      </p>
+
+      <?php foreach (['email' => 'Email', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp'] as $ch => $label): ?>
+        <?php $default = $ch === 'whatsapp' ? '0' : '1'; ?>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.75rem;">
+          <input type="checkbox" id="twofa_<?= $ch ?>_enabled" name="twofa_<?= $ch ?>_enabled" value="1"
+                 <?= setting("twofa_{$ch}_enabled", $default) === '1' ? 'checked' : '' ?>>
+          <label for="twofa_<?= $ch ?>_enabled" style="font-size:13px;font-weight:500;margin-bottom:0;"><?= $label ?></label>
+        </div>
+      <?php endforeach; ?>
+
+      <p style="font-size:12px;color:var(--muted);margin:1rem 0;">
+        <?= __('settings.twofa_note') ?>
+      </p>
+
+      <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
     </form>
   </div>
 

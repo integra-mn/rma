@@ -9,7 +9,10 @@ class ProfileController {
         $page_title = __('profile.my_profile');
         $user       = db_row('SELECT * FROM users WHERE id = ?', [current_user_id()]);
         $policy     = db_row('SELECT * FROM security_policies WHERE role = ?', [$user['role']]);
-        $allowed_channels = $policy ? order_channels(explode(',', $policy['allowed_2fa_channels'] ?? 'email')) : ['email'];
+        // Only offer channels the role allows AND that are switched on app-wide.
+        $allowed_channels = available_2fa_channels(
+            $policy ? order_channels(explode(',', $policy['allowed_2fa_channels'] ?? 'email')) : ['email']
+        );
 
         $success = $_SESSION['form_success'] ?? null;
         $error   = $_SESSION['form_error'] ?? null;
@@ -110,7 +113,9 @@ class ProfileController {
     private function save_preferences(): void {
         $user    = db_row('SELECT * FROM users WHERE id = ?', [current_user_id()]);
         $policy  = db_row('SELECT * FROM security_policies WHERE role = ?', [$user['role']]);
-        $allowed = $policy ? order_channels(explode(',', $policy['allowed_2fa_channels'] ?? 'email')) : ['email'];
+        $allowed = available_2fa_channels(
+            $policy ? order_channels(explode(',', $policy['allowed_2fa_channels'] ?? 'email')) : ['email']
+        );
 
         $phone   = trim($_POST['phone'] ?? '');
         $lang    = in_array($_POST['lang'] ?? '', ['en','me']) ? $_POST['lang'] : $user['lang'];

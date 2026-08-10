@@ -82,6 +82,7 @@ function auth_attempt(string $email, string $password): array {
         $channels = !empty($policy['allowed_2fa_channels'])
             ? order_channels(explode(',', $policy['allowed_2fa_channels']))
             : ['email'];
+        $channels = available_2fa_channels($channels);
         return ['status' => '2fa_required', 'channels' => $channels];
     }
 
@@ -98,6 +99,33 @@ function order_channels(array $channels): array {
     $rank = ['email' => 0, 'sms' => 1, 'whatsapp' => 2];
     usort($channels, fn($a, $b) => ($rank[$a] ?? 99) <=> ($rank[$b] ?? 99));
     return $channels;
+}
+
+/**
+ * Channels switched on app-wide in Administracija → Sistem.
+ *
+ * The per-role policy says what a role *may* use; this says what is actually
+ * wired up on this installation. WhatsApp ships off because it needs a Meta
+ * Cloud API account that most installs don't have.
+ */
+function enabled_2fa_channels(): array {
+    $on = [];
+    foreach (['email', 'sms', 'whatsapp'] as $c) {
+        $default = $c === 'whatsapp' ? '0' : '1';
+        if (setting("twofa_{$c}_enabled", $default) === '1') $on[] = $c;
+    }
+    return $on;
+}
+
+/**
+ * Narrow a role's allowed channels to those actually switched on.
+ *
+ * Falls back to email if the intersection is empty: an admin who turns
+ * everything off must not lock every 2FA user out of the system.
+ */
+function available_2fa_channels(array $allowed): array {
+    $channels = array_values(array_intersect($allowed, enabled_2fa_channels()));
+    return $channels ?: ['email'];
 }
 
 // ── 2FA ──────────────────────────────────────────────────────
