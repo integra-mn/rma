@@ -307,7 +307,7 @@ return [
     'profile.totp_intro'        => 'Koristite Authenticator aplikaciju za generisanje kodova za prijavu. Radi bez interneta.',
     'profile.totp_setup'        => 'Podesi aplikaciju',
     'profile.totp_scan_hint'    => 'Skenirajte kod aplikacijom za autentifikaciju, zatim unesite 6-cifreni kod iz aplikacije da potvrdite.',
-    'profile.totp_manual'       => 'Ne možete skenirati? Unesite ovaj ključ ručno:',
+    'profile.totp_manual'       => 'Ne možete skenirati? Unesite ključ ispod ručno:',
     'profile.totp_enter_code'   => 'Kod iz aplikacije',
     'profile.totp_enabled'      => 'Aplikacija za autentifikaciju je uključena.',
     'profile.totp_bad_code'     => 'Kod se ne poklapa. Provjerite vrijeme na telefonu i pokušajte ponovo.',

@@ -119,28 +119,35 @@
       <p style="font-size:13px;color:var(--text-secondary);margin-bottom:0.75rem;">
         <?= __('profile.totp_scan_hint') ?>
       </p>
-      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+      <div style="display:flex;gap:20px;align-items:stretch;flex-wrap:wrap;">
         <img src="<?= totp_qr_base64($pending, $me_totp['email'] ?? 'user', 200) ?>"
              alt="QR" width="200" height="200"
-             style="border:0.5px solid var(--border);border-radius:8px;">
-        <div style="flex:1;min-width:220px;">
-          <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><?= __('profile.totp_manual') ?></p>
-          <code style="font-size:13px;letter-spacing:1px;word-break:break-all;"><?= htmlspecialchars($pending) ?></code>
+             style="border:0.5px solid var(--border);border-radius:8px;flex-shrink:0;">
 
-          <form method="POST" action="/profile/totp-confirm" style="margin-top:1rem;">
+        <!-- Column is exactly as tall as the QR, with space-between pushing the
+             manual key to the top and the form to the bottom, so both edges
+             line up with the QR rather than floating in the middle. -->
+        <div style="flex:1;min-width:228px;min-height:200px;
+                    display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><?= __('profile.totp_manual') ?></p>
+            <code style="font-size:13px;letter-spacing:1px;word-break:break-all;"><?= htmlspecialchars($pending) ?></code>
+          </div>
+
+          <form method="POST" action="/profile/totp-confirm">
             <?= csrf_field() ?>
             <!-- Field and the two buttons share one width so the block lines
                  up: 2 x 110px + the 8px gap = 228px. Buttons flex to fill it,
                  so a longer translation cannot break the alignment. -->
-            <div class="field" style="width:228px;max-width:100%;">
+            <div class="field" style="width:228px;max-width:100%;margin-bottom:8px;">
               <label><?= __('profile.totp_enter_code') ?></label>
               <input type="text" name="code" maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
                      autocomplete="one-time-code" required
                      style="text-align:center;font-size:18px;letter-spacing:5px;">
             </div>
             <div style="display:flex;gap:8px;width:228px;max-width:100%;">
-              <button type="submit" class="btn btn-primary" style="flex:1;"><?= __('btn.confirm') ?></button>
-              <a href="/profile/totp-cancel" class="btn" style="flex:1;text-align:center;"><?= __('btn.cancel') ?></a>
+              <button type="submit" class="btn btn-primary" style="flex:1;margin-top:0;"><?= __('btn.confirm') ?></button>
+              <a href="/profile/totp-cancel" class="btn" style="flex:1;text-align:center;margin-top:0;"><?= __('btn.cancel') ?></a>
             </div>
           </form>
         </div>
