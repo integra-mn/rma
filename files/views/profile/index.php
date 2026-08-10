@@ -47,7 +47,7 @@
             <?php foreach ($allowed_channels as $ch): ?>
               <option value="<?= htmlspecialchars($ch) ?>"
                 <?= ($user['preferred_2fa_channel'] ?? $allowed_channels[0]) === $ch ? 'selected' : '' ?>>
-                <?= match($ch) { 'whatsapp' => 'WhatsApp', 'sms' => 'SMS', default => 'Email' } ?>
+                <?= match($ch) { 'totp' => __('auth.channel_totp'), 'whatsapp' => 'WhatsApp', 'sms' => 'SMS', default => 'Email' } ?>
               </option>
             <?php endforeach; ?>
           </select>
@@ -56,7 +56,7 @@
           <div class="field">
             <label><?= __('profile.2fa_channel') ?></label>
             <p style="font-size:13px;padding:8px 0;color:var(--text-secondary);">
-              <?= match($allowed_channels[0]) { 'whatsapp' => 'WhatsApp', 'sms' => 'SMS', default => 'Email' } ?>
+              <?= match($allowed_channels[0]) { 'totp' => __('auth.channel_totp'), 'whatsapp' => 'WhatsApp', 'sms' => 'SMS', default => 'Email' } ?>
               <span style="font-size:12px;color:var(--text-muted);"> — <?= __('profile.set_by_admin') ?></span>
             </p>
           </div>
@@ -109,7 +109,7 @@
       <form method="POST" action="/profile/totp-disable"
             onsubmit="return false;" id="totp-disable-form">
         <?= csrf_field() ?>
-        <button type="button" class="btn" style="min-width:120px;"
+        <button type="button" class="btn" style="min-width:100px;"
                 onclick="appConfirm(<?= htmlspecialchars(json_encode(__('profile.totp_disable_confirm')), ENT_QUOTES) ?>, function(){ document.getElementById('totp-disable-form').onsubmit=null; document.getElementById('totp-disable-form').submit(); })">
           <?= __('profile.totp_disable') ?>
         </button>
@@ -128,7 +128,7 @@
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><?= __('profile.totp_manual') ?></p>
           <code style="font-size:13px;letter-spacing:1px;word-break:break-all;"><?= htmlspecialchars($pending) ?></code>
 
-          <form method="POST" action="/profile/totp-confirm" style="margin-top:10px;">
+          <form method="POST" action="/profile/totp-confirm" style="margin-top:20px;">
             <?= csrf_field() ?>
             <!-- Field and the two buttons share one width so the block lines
                  up: 2 x 110px + the 8px gap = 228px. Buttons flex to fill it,
@@ -153,7 +153,7 @@
       </p>
       <form method="POST" action="/profile/totp-start">
         <?= csrf_field() ?>
-        <button type="submit" class="btn btn-primary" style="min-width:140px;"><?= __('profile.totp_setup') ?></button>
+        <button type="submit" class="btn btn-primary" style="min-width:100px;"><?= __('profile.totp_setup') ?></button>
       </form>
     <?php endif; ?>
   </div>

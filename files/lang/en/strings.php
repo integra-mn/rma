@@ -305,7 +305,7 @@ return [
     // Authenticator app (TOTP)
     'profile.totp'              => 'Authenticator app',
     'profile.totp_intro'        => 'Use Authenticator App to generate login codes. Works without internet.',
-    'profile.totp_setup'        => 'Set up app',
+    'profile.totp_setup'        => 'Setup',
     'profile.totp_scan_hint'    => 'Scan code with authenticator app, then type the 6-digit code from app to confirm.',
     'profile.totp_manual'       => 'Cannot scan? Enter below key manually:',
     'profile.totp_enter_code'   => 'Code from the app',

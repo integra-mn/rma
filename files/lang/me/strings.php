@@ -305,7 +305,7 @@ return [
     // Aplikacija za autentifikaciju (TOTP)
     'profile.totp'              => 'Aplikacija za autentifikaciju',
     'profile.totp_intro'        => 'Koristite Authenticator aplikaciju za generisanje kodova za prijavu. Radi bez interneta.',
-    'profile.totp_setup'        => 'Podesi aplikaciju',
+    'profile.totp_setup'        => 'Podesi',
     'profile.totp_scan_hint'    => 'Skenirajte kod aplikacijom za autentifikaciju, zatim unesite 6-cifreni kod iz aplikacije da potvrdite.',
     'profile.totp_manual'       => 'Ne možete skenirati? Unesite ključ ispod ručno:',
     'profile.totp_enter_code'   => 'Kod iz aplikacije',
