@@ -129,14 +129,19 @@
 
           <form method="POST" action="/profile/totp-confirm" style="margin-top:1rem;">
             <?= csrf_field() ?>
-            <div class="field" style="max-width:180px;">
+            <!-- Field and the two buttons share one width so the block lines
+                 up: 2 x 110px + the 8px gap = 228px. Buttons flex to fill it,
+                 so a longer translation cannot break the alignment. -->
+            <div class="field" style="width:228px;max-width:100%;">
               <label><?= __('profile.totp_enter_code') ?></label>
               <input type="text" name="code" maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
                      autocomplete="one-time-code" required
                      style="text-align:center;font-size:18px;letter-spacing:5px;">
             </div>
-            <button type="submit" class="btn btn-primary" style="min-width:120px;"><?= __('btn.confirm') ?></button>
-            <a href="/profile/totp-cancel" class="btn" style="min-width:100px;"><?= __('btn.cancel') ?></a>
+            <div style="display:flex;gap:8px;width:228px;max-width:100%;">
+              <button type="submit" class="btn btn-primary" style="flex:1;"><?= __('btn.confirm') ?></button>
+              <a href="/profile/totp-cancel" class="btn" style="flex:1;text-align:center;"><?= __('btn.cancel') ?></a>
+            </div>
           </form>
         </div>
       </div>
