@@ -281,7 +281,11 @@ class ReportsController {
             $sections[] = ['title'=>__('reports.by_status'), 'columns'=>[__('label.status'), __('reports.count')], 'rows'=>array_map(fn($r)=>[$r['label'], (int)$r['cnt']], $rows)];
             $rows = db_rows("SELECT COALESCE(db2.name,'Unknown') brand, COUNT(*) cnt FROM rma_requests r {$join} WHERE {$rma_where} GROUP BY db2.id ORDER BY cnt DESC", $rma_params);
             $sections[] = ['title'=>__('reports.by_brand'), 'columns'=>$count, 'rows'=>array_map(fn($r)=>[$r['brand'], (int)$r['cnt']], $rows)];
-            $rows = db_rows("SELECT l.name, COUNT(*) cnt FROM rma_requests r {$join} LEFT JOIN locations l ON l.id=r.location_id WHERE {$rma_where} GROUP BY r.location_id ORDER BY cnt DESC", $rma_params);
+            // l.name must be in GROUP BY: Postgres only lets you select a column
+            // you didn't group by when it's functionally dependent on the
+            // grouping key, and r.location_id is a column of a different table.
+            // MySQL accepted it, which is why this survived the port.
+            $rows = db_rows("SELECT l.name, COUNT(*) cnt FROM rma_requests r {$join} LEFT JOIN locations l ON l.id=r.location_id WHERE {$rma_where} GROUP BY r.location_id, l.name ORDER BY cnt DESC", $rma_params);
             $sections[] = ['title'=>__('reports.by_location'), 'columns'=>[__('label.location'), __('reports.count')], 'rows'=>array_map(fn($r)=>[$r['name'] ?? '—', (int)$r['cnt']], $rows)];
             $rows = db_rows("SELECT MIN(DATE_FORMAT(r.created_at,'%b %Y')) label, COUNT(*) cnt FROM rma_requests r {$join} WHERE {$rma_where} GROUP BY DATE_FORMAT(r.created_at,'%Y-%m') ORDER BY MIN(r.created_at)", $rma_params);
             $sections[] = ['title'=>__('reports.monthly_trend'), 'columns'=>[__('reports.month'), __('reports.rmas')], 'rows'=>array_map(fn($r)=>[$r['label'], (int)$r['cnt']], $rows)];

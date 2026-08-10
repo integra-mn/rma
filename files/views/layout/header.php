@@ -20,6 +20,7 @@ function nav_active(string $prefix): string {
 <html lang="<?= htmlspecialchars($user['lang'] ?? 'en') ?>">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/img/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <?= csrf_meta() ?>
   <title><?= isset($page_title) ? htmlspecialchars($page_title) . ' — ' : '' ?>Integra RMA</title>
