@@ -136,3 +136,14 @@ function company_name(): string {
     $name = trim((string) setting('company_name', ''));
     return $name !== '' ? $name : 'Integra Service';
 }
+
+/**
+ * Normalise a customer's language for anything they receive.
+ *
+ * Deliberately independent of the logged-in employee: staff pick their own UI
+ * language in Moj profil, and that must not change what a customer reads.
+ * Montenegro is the default; EN exists for the occasional foreign walk-in.
+ */
+function customer_lang(?string $lang): string {
+    return in_array($lang, ['me', 'en'], true) ? $lang : 'me';
+}

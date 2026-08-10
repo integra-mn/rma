@@ -132,6 +132,9 @@ CREATE TABLE customers (
   zip_code    VARCHAR(30),
   country     VARCHAR(100),
   notes       TEXT,
+  -- Language for the receipt email and printed receipt. Separate from staff
+  -- language: an employee working in EN must not change what a customer reads.
+  lang        VARCHAR(2) NOT NULL DEFAULT 'me',
   created_at  DATETIME DEFAULT NOW(),
   updated_at  DATETIME DEFAULT NOW() ON UPDATE NOW(),
   deleted_at  DATETIME DEFAULT NULL,

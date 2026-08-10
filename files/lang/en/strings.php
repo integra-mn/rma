@@ -322,6 +322,33 @@ return [
     'auth.otp_expired'       => 'Code expired. Please request a new one.',
 
     // Verification-code email
+    'lang.me'                => 'Crnogorski',
+    'lang.en'                => 'English',
+    'customers.lang'         => 'Language',
+    'customers.lang_hint'    => 'Used for the receipt email and printed receipt.',
+    // Printed RMA receipt (PDF)
+    'pdf.receipt_title'      => 'Receipt',
+    'pdf.customer'           => 'Customer',
+    'pdf.name'               => 'Name',
+    'pdf.phone'              => 'Phone',
+    'pdf.email'              => 'Email',
+    'pdf.address'            => 'Address',
+    'pdf.device'             => 'Device',
+    'pdf.model'              => 'Model',
+    'pdf.serial'             => 'Serial',
+    'pdf.status'             => 'Status',
+    'pdf.reported_issue'     => 'Reported issue',
+    'pdf.accessories'        => 'Accessories received',
+    'pdf.repair_time'        => 'Repair time',
+    'pdf.track_title'        => 'Track your repair',
+    'pdf.scan_any_device'    => 'Scan with any device',
+    'pdf.signature_date'     => 'Customer signature & date',
+    'pdf.signature_consent'  => 'Customer signature — I confirm the device has been received for repair as described above.',
+    'pdf.waiting_customer'   => 'Waiting for customer',
+    'pdf.btn_print'          => 'Print',
+    'pdf.btn_save'           => 'Save PDF',
+    'pdf.btn_close'          => 'Close',
+
     // RMA receipt email (sent to the customer)
     'receipt.subject'        => 'Receipt — :number',
     'receipt.title'          => 'Receipt',

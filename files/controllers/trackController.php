@@ -140,7 +140,7 @@ class TrackController {
     private function rma_by_token(string $token): ?array {
         return db_row("SELECT r.*,
                               s.label as status_label, s.color as status_color,
-                              c.name as customer_name, c.email as customer_email, c.phone as customer_phone,
+                              c.name as customer_name, c.email as customer_email, c.phone as customer_phone, c.lang as customer_lang,
                               dm.name as model_name, db2.name as brand_name,
                               d.serial_number, d.imei
                        FROM rma_tracking_tokens t

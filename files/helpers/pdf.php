@@ -7,7 +7,7 @@ defined('RMS') or die('Direct access not permitted');
 function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?string $engine_override = null): void {
     $rma = db_row("SELECT r.*,
                           c.name as customer_name, c.email as customer_email,
-                          c.phone as customer_phone,
+                          c.phone as customer_phone, c.lang as customer_lang,
                           c.address as customer_address,
                           c.zip_code as customer_zip,
                           c.city as customer_city,
@@ -49,16 +49,18 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
  * comma-separated human-readable string. Returns null if the customer
  * brought nothing (so the caller can skip the section entirely).
  */
-function format_rma_accessories(array $rma): ?string {
-    static $labels = [
-        'battery'          => 'Battery',
-        'charger'          => 'Charger',
-        'sim_card'         => 'SIM Card',
-        'headphones'       => 'Headphones',
-        'packaging'        => 'Packaging',
-        'memory_card'      => 'Memory Card',
-        'protective_case'  => 'Protective Case',
-        'purchase_receipt' => 'Purchase Receipt',
+function format_rma_accessories(array $rma, ?string $lang = null): ?string {
+    // Reuse the same keys the RMA form uses, so the receipt says exactly what
+    // the person ticked - in the customer's language, not the employee's.
+    $keys_map = [
+        'battery'          => 'rma.acc_battery',
+        'charger'          => 'rma.acc_charger',
+        'sim_card'         => 'rma.acc_sim_card',
+        'headphones'       => 'rma.acc_headphones',
+        'packaging'        => 'rma.acc_packaging',
+        'memory_card'      => 'rma.acc_memory_card',
+        'protective_case'  => 'rma.acc_protective_case',
+        'purchase_receipt' => 'rma.acc_purchase_receipt',
     ];
 
     $parts = [];
@@ -66,7 +68,9 @@ function format_rma_accessories(array $rma): ?string {
         $keys = json_decode((string) $rma['accessories'], true);
         if (is_array($keys)) {
             foreach ($keys as $k) {
-                $parts[] = $labels[$k] ?? ucwords(str_replace('_', ' ', (string) $k));
+                $parts[] = isset($keys_map[$k])
+                    ? ($lang === null ? __($keys_map[$k]) : __in($lang, $keys_map[$k]))
+                    : ucwords(str_replace('_', ' ', (string) $k));
             }
         }
     }
@@ -77,10 +81,14 @@ function format_rma_accessories(array $rma): ?string {
 }
 
 function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base64): void {
+    // Printed for the customer, so it follows THEIR language, not the
+    // language of the employee at the counter.
+    $t = fn(string $k): string => __in(customer_lang($rma['customer_lang'] ?? null), $k);
+
     $device = trim(($rma['brand_name'] ?? '') . ' ' . ($rma['model_name'] ?? ''));
     $date   = format_date($rma['created_at']);
     $app_name = setting('app_name', 'Integra RMA');
-    $accessories = format_rma_accessories($rma);
+    $accessories = format_rma_accessories($rma, customer_lang($rma['customer_lang'] ?? null));
 
     // Most recent captured signature for this RMA, if any.
     $signature = db_row(
@@ -170,9 +178,9 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
 
 <div class="no-print" style="width:1080px;max-width:100%;height:72px;margin:0 auto;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;gap:10px;font-family:Montserrat,system-ui,sans-serif;">
   <a href="/rma/' . (int)$rma['id'] . '/receipt?engine=mpdf&mode=download"
-     style="background:#1D9E75;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;text-decoration:none;">Save PDF</a>
-  <button onclick="window.print()" style="background:#2563EB;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;">Print</button>
-  <button onclick="window.close()" style="background:#DC2626;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;">Close</button>
+     style="background:#1D9E75;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;text-decoration:none;">' . $t('pdf.btn_save') . '</a>
+  <button onclick="window.print()" style="background:#2563EB;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;">' . $t('pdf.btn_print') . '</button>
+  <button onclick="window.close()" style="background:#DC2626;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;">' . $t('pdf.btn_close') . '</button>
 </div>
 
 <div class="page">
@@ -184,7 +192,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
       ' . ($rma['location_phone'] ? '<p>' . htmlspecialchars($rma['location_phone']) . '</p>' : '') . '
     </div>
     <div class="doc-title">
-      <h2>RMA Receipt</h2>
+      <h2>' . $t('pdf.receipt_title') . '</h2>
       <div class="rma-num">' . htmlspecialchars($rma['rma_number']) . '</div>
       <div class="date">' . $date . '</div>
     </div>
@@ -192,11 +200,11 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
 
   <div class="two-col">
     <div class="col">
-      <p class="section-title">Customer</p>
+      <p class="section-title">' . $t('pdf.customer') . '</p>
       <table class="info">
-        <tr><td>Name</td><td><strong>' . htmlspecialchars($rma['customer_name'] ?? '—') . '</strong></td></tr>
-        ' . ($rma['customer_phone'] ? '<tr><td>Phone</td><td>' . htmlspecialchars(format_phone($rma['customer_phone'])) . '</td></tr>' : '') . '
-        ' . ($rma['customer_email'] ? '<tr><td>Email</td><td>' . htmlspecialchars($rma['customer_email']) . '</td></tr>' : '') . '
+        <tr><td>' . $t('pdf.name') . '</td><td><strong>' . htmlspecialchars($rma['customer_name'] ?? '—') . '</strong></td></tr>
+        ' . ($rma['customer_phone'] ? '<tr><td>' . $t('pdf.phone') . '</td><td>' . htmlspecialchars(format_phone($rma['customer_phone'])) . '</td></tr>' : '') . '
+        ' . ($rma['customer_email'] ? '<tr><td>' . $t('pdf.email') . '</td><td>' . htmlspecialchars($rma['customer_email']) . '</td></tr>' : '') . '
         ' . (function() use ($rma) {
               // "Street, ZIP City" — zip + city share a space, the street
               // gets its own comma-separated segment.
@@ -206,26 +214,26 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
               $locality = trim(($zip !== '' ? $zip . ' ' : '') . $city);
               $parts = array_filter([$addr, $locality], fn($s) => $s !== '');
               return $parts
-                  ? '<tr><td>Address</td><td>' . htmlspecialchars(implode(', ', $parts)) . '</td></tr>'
+                  ? '<tr><td>' . $t('pdf.address') . '</td><td>' . htmlspecialchars(implode(', ', $parts)) . '</td></tr>'
                   : '';
           })() . '
       </table>
     </div>
     <div class="col">
-      <p class="section-title">Device</p>
+      <p class="section-title">' . $t('pdf.device') . '</p>
       <table class="info">
-        ' . ($device ? '<tr><td>Model</td><td><strong>' . htmlspecialchars($device) . '</strong></td></tr>' : '') . '
+        ' . ($device ? '<tr><td>' . $t('pdf.model') . '</td><td><strong>' . htmlspecialchars($device) . '</strong></td></tr>' : '') . '
         ' . (!empty($rma['imei'])
               ? '<tr><td>IMEI</td><td style="font-family:monospace;">' . htmlspecialchars($rma['imei']) . '</td></tr>'
               : (!empty($rma['serial_number'])
-                  ? '<tr><td>Serial</td><td style="font-family:monospace;">' . htmlspecialchars($rma['serial_number']) . '</td></tr>'
+                  ? '<tr><td>' . $t('pdf.serial') . '</td><td style="font-family:monospace;">' . htmlspecialchars($rma['serial_number']) . '</td></tr>'
                   : '')) . '
-        <tr><td>Status</td><td>Received' . (
+        <tr><td>' . $t('pdf.status') . '</td><td>Received' . (
               !empty($rma['is_warranty']) ? ' · In Warranty'
             : (!empty($rma['warranty_refusal']) ? ' · Warranty Refused' : '')
         ) . '</td></tr>
         ' . ($rma['estimated_completion']
-              ? '<tr><td>Repair time</td><td>' . (
+              ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . (
                     ($d = max(0, (int) round((strtotime($rma['estimated_completion']) - strtotime($rma['created_at'])) / 86400))) === 1
                     ? '1 day' : $d . ' days'
                 ) . '</td></tr>'
@@ -235,12 +243,12 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   </div>
 
   ' . ($accessories ? '
-  <p class="section-title">Accessories Received</p>
+  <p class="section-title">' . $t('pdf.accessories') . '</p>
   <div class="complaint-box">' . htmlspecialchars($accessories) . '</div>
   ' : '') . '
 
   ' . ($rma['complaint'] ? '
-  <p class="section-title">Reported Issue</p>
+  <p class="section-title">' . $t('pdf.reported_issue') . '</p>
   <div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>
   ' : '') . '
 
@@ -248,7 +256,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   <div class="qr-section">
     ' . ($qr_base64 ? '<img src="' . $qr_base64 . '" alt="QR Code">' : '') . '
     <div class="qr-text">
-      <h3>Track Your Repair</h3>
+      <h3>' . $t('pdf.track_title') . '</h3>
       <p>Scan the QR code or visit the link below to check the status of your repair at any time.</p>
       <a href="' . htmlspecialchars($tracking_url) . '">' . htmlspecialchars($tracking_url) . '</a>
     </div>
@@ -256,7 +264,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   ' : '') . '
 
   <div class="signature-box">
-    <p>Customer signature — I confirm the device has been received for repair as described above.</p>
+    <p>' . $t('pdf.signature_consent') . '</p>
     ' . ($signature
         ? '<div style="height:90px;display:flex;align-items:flex-end;margin:8px 0 4px;">
              <img src="/storage/' . htmlspecialchars($signature['filename']) . '" alt="Customer signature"
@@ -273,8 +281,8 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
            <div id="sig-qr-wrap" class="no-print" style="display:none;align-items:center;gap:16px;padding:14px;background:#f4f4f0;border-radius:8px;margin:6px 0;">
              <div id="sig-qr" style="background:#fff;padding:8px;border-radius:6px;"></div>
              <div style="flex:1;font-size:12px;color:#5f5e5a;line-height:1.5;">
-               <div style="font-weight:600;color:#2c2c2a;margin-bottom:4px;">Scan with any device</div>
-               <div id="sig-status">Waiting for customer' . '&hellip;</div>
+               <div style="font-weight:600;color:#2c2c2a;margin-bottom:4px;">' . $t('pdf.scan_any_device') . '</div>
+               <div id="sig-status">' . $t('pdf.waiting_customer') . '&hellip;</div>
                <div style="color:#888780;margin-top:4px;font-size:11px;">If a signing tablet is active at this location, it will open automatically.</div>
                <div style="margin-top:6px;word-break:break-all;" id="sig-url"></div>
              </div>
@@ -350,6 +358,10 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
  * mPDF version — true PDF download
  */
 function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base64, string $mode): void {
+    // Printed for the customer, so it follows THEIR language, not the
+    // language of the employee at the counter.
+    $t = fn(string $k): string => __in(customer_lang($rma['customer_lang'] ?? null), $k);
+
     require_once ROOT . '/vendor/autoload.php';
 
     $device   = trim(($rma['brand_name'] ?? '') . ' ' . ($rma['model_name'] ?? ''));
@@ -424,6 +436,10 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
 }
 
 function generate_rma_pdf_html_string(array $rma, string $device, string $date, string $app_name, string $tracking_url, string $qr_base64, ?array $signature = null): string {
+    // Printed for the customer, so it follows THEIR language, not the
+    // language of the employee at the counter.
+    $t = fn(string $k): string => __in(customer_lang($rma['customer_lang'] ?? null), $k);
+
     // mPDF accepts local file paths in <img src>. Using absolute path so
     // relative URL resolution (which mPDF does poorly) doesn't bite us.
     $logo_path = ROOT . '/assets/integra.svg';
@@ -452,7 +468,7 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
         <tr>
           <td>' . $logo_tag . '</td>
           <td style="text-align:right;">
-            <span style="font-size:10px;color:#888780;">RMA Receipt</span><br>
+            <span style="font-size:10px;color:#888780;">' . $t('pdf.receipt_title') . '</span><br>
             <span class="rma-num">' . htmlspecialchars($rma['rma_number']) . '</span><br>
             <span style="font-size:10px;color:#888780;">' . $date . '</span>
           </td>
@@ -463,11 +479,11 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
     <table width="100%" style="margin-bottom:14px;" cellspacing="0" cellpadding="0">
       <tr>
         <td width="50%" style="vertical-align:top;padding-right:10px;">
-          <p class="section-title">Customer</p>
+          <p class="section-title">' . $t('pdf.customer') . '</p>
           <table class="info" width="100%">
-            <tr><td>Name</td><td><strong>' . htmlspecialchars($rma['customer_name'] ?? '—') . '</strong></td></tr>
-            ' . ($rma['customer_phone'] ? '<tr><td>Phone</td><td>' . htmlspecialchars(format_phone($rma['customer_phone'])) . '</td></tr>' : '') . '
-            ' . ($rma['customer_email'] ? '<tr><td>Email</td><td>' . htmlspecialchars($rma['customer_email']) . '</td></tr>' : '') . '
+            <tr><td>' . $t('pdf.name') . '</td><td><strong>' . htmlspecialchars($rma['customer_name'] ?? '—') . '</strong></td></tr>
+            ' . ($rma['customer_phone'] ? '<tr><td>' . $t('pdf.phone') . '</td><td>' . htmlspecialchars(format_phone($rma['customer_phone'])) . '</td></tr>' : '') . '
+            ' . ($rma['customer_email'] ? '<tr><td>' . $t('pdf.email') . '</td><td>' . htmlspecialchars($rma['customer_email']) . '</td></tr>' : '') . '
             ' . (function() use ($rma) {
                   $parts = array_filter([
                       trim((string)($rma['customer_address'] ?? '')),
@@ -475,26 +491,26 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
                       trim((string)($rma['customer_city'] ?? '')),
                   ], fn($s) => $s !== '');
                   return $parts
-                      ? '<tr><td>Address</td><td>' . htmlspecialchars(implode(', ', $parts)) . '</td></tr>'
+                      ? '<tr><td>' . $t('pdf.address') . '</td><td>' . htmlspecialchars(implode(', ', $parts)) . '</td></tr>'
                       : '';
               })() . '
           </table>
         </td>
         <td width="50%" style="vertical-align:top;padding-left:10px;">
-          <p class="section-title">Device</p>
+          <p class="section-title">' . $t('pdf.device') . '</p>
           <table class="info" width="100%">
-            ' . ($device ? '<tr><td>Model</td><td><strong>' . htmlspecialchars($device) . '</strong></td></tr>' : '') . '
+            ' . ($device ? '<tr><td>' . $t('pdf.model') . '</td><td><strong>' . htmlspecialchars($device) . '</strong></td></tr>' : '') . '
             ' . (!empty($rma['imei'])
                   ? '<tr><td>IMEI</td><td>' . htmlspecialchars($rma['imei']) . '</td></tr>'
                   : (!empty($rma['serial_number'])
-                      ? '<tr><td>Serial</td><td>' . htmlspecialchars($rma['serial_number']) . '</td></tr>'
+                      ? '<tr><td>' . $t('pdf.serial') . '</td><td>' . htmlspecialchars($rma['serial_number']) . '</td></tr>'
                       : '')) . '
-            <tr><td>Status</td><td>Received' . (
+            <tr><td>' . $t('pdf.status') . '</td><td>Received' . (
                   !empty($rma['is_warranty']) ? ' · In Warranty'
                 : (!empty($rma['warranty_refusal']) ? ' · Warranty Refused' : '')
             ) . '</td></tr>
             ' . ($rma['estimated_completion']
-              ? '<tr><td>Repair time</td><td>' . (
+              ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . (
                     ($d = max(0, (int) round((strtotime($rma['estimated_completion']) - strtotime($rma['created_at'])) / 86400))) === 1
                     ? '1 day' : $d . ' days'
                 ) . '</td></tr>'
@@ -504,23 +520,23 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
       </tr>
     </table>
 
-    ' . (($acc = format_rma_accessories($rma)) ? '<p class="section-title">Accessories Received</p><div class="complaint-box">' . htmlspecialchars($acc) . '</div>' : '') . '
+    ' . (($acc = format_rma_accessories($rma, customer_lang($rma['customer_lang'] ?? null))) ? '<p class="section-title">' . $t('pdf.accessories') . '</p><div class="complaint-box">' . htmlspecialchars($acc) . '</div>' : '') . '
 
-    ' . ($rma['complaint'] ? '<p class="section-title">Reported Issue</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>' : '') . '
+    ' . ($rma['complaint'] ? '<p class="section-title">' . $t('pdf.reported_issue') . '</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>' : '') . '
 
     ' . ($qr_base64 ? '<table width="100%" style="margin-top:12px;"><tr>
       <td style="vertical-align:top;padding-right:12px;width:100px;"><img src="' . $qr_base64 . '" width="90" height="90"></td>
       <td style="vertical-align:top;">
-        <strong style="font-size:11px;">Track Your Repair</strong><br>
+        <strong style="font-size:11px;">' . $t('pdf.track_title') . '</strong><br>
         <span style="font-size:10px;color:#5f5e5a;">Scan QR code or visit:<br>' . htmlspecialchars($tracking_url) . '</span>
       </td>
     </tr></table>' : '') . '
 
     <div class="signature-box">
-      <span style="font-size:10px;color:#888780;">Customer signature — I confirm the device has been received for repair as described above.</span>
+      <span style="font-size:10px;color:#888780;">' . $t('pdf.signature_consent') . '</span>
       ' . ($signature
           ? '<div style="margin:6px 0 2px;"><img src="' . ROOT . '/storage/' . htmlspecialchars($signature['filename']) . '" style="height:60px;"></div>
              <div class="signature-line">Signed ' . format_datetime($signature['signed_at']) . '</div>'
-          : '<div class="signature-line" style="margin-top:36px;">Customer signature &amp; date</div>') . '
+          : '<div class="signature-line" style="margin-top:36px;">' . $t('pdf.signature_date') . '</div>') . '
     </div>';
 }

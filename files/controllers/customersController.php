@@ -57,6 +57,9 @@ class CustomersController {
             'zip_code' => trim($_POST['zip_code'] ?? ''),
             'country'  => trim($_POST['country'] ?? ''),
             'notes'    => trim($_POST['notes'] ?? ''),
+            // Drives the receipt email and printed receipt. ME unless told
+            // otherwise — walk-in customers are local by default.
+            'lang'     => in_array($_POST['lang'] ?? '', ['me','en'], true) ? $_POST['lang'] : 'me',
         ]);
         audit('created', 'customer', $id);
         $_SESSION['form_success'] = __('customers.added');
@@ -105,6 +108,7 @@ class CustomersController {
             'city'    => trim($_POST['city'] ?? ''),
             'country' => trim($_POST['country'] ?? ''),
             'notes'   => trim($_POST['notes'] ?? ''),
+            'lang'    => in_array($_POST['lang'] ?? '', ['me','en'], true) ? $_POST['lang'] : 'me',
         ];
 
         audit_change('customer', (int)$id, $customer, $new);

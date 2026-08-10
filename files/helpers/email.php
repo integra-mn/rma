@@ -6,7 +6,7 @@ defined('RMS') or die('Direct access not permitted');
  */
 function send_rma_receipt(int $rma_id): bool {
     $rma = db_row("SELECT r.*,
-                          c.name as customer_name, c.email as customer_email,
+                          c.name as customer_name, c.email as customer_email, c.lang as customer_lang,
                           s.label as status_label,
                           dm.name as model_name, db2.name as brand_name,
                           d.serial_number,
@@ -29,9 +29,9 @@ function send_rma_receipt(int $rma_id): bool {
     $tracking_url = $token ? 'https://' . ($_SERVER['HTTP_HOST'] ?? 'rma.integra.mn') . '/track/' . $token : '';
     $qr_base64    = $tracking_url ? generate_qr_base64($tracking_url, 180) : '';
 
-    // Customer-facing: use the shop's default language, not the language of
-    // whichever staff member happens to be logged in.
-    $lang    = (string) setting('default_lang', 'me');
+    // The customer's own language — never the staff member's. Falls back to ME
+    // for records created before the field existed.
+    $lang    = customer_lang($rma['customer_lang'] ?? null);
     $subject = __in($lang, 'receipt.subject', ['number' => $rma['rma_number']]);
     $body    = build_receipt_html($rma, $tracking_url, $qr_base64, $lang);
 

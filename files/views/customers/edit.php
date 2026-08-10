@@ -20,6 +20,15 @@
       </div>
       <div class="field"><label><?= __('label.address') ?></label><input type="text" name="address" value="<?= htmlspecialchars($customer['address'] ?? '') ?>"></div>
       <div class="field"><label><?= __('label.country') ?></label><input type="text" name="country" value="<?= htmlspecialchars($customer['country'] ?? 'Montenegro') ?>"></div>
+      <div class="field">
+        <label><?= __('customers.lang') ?></label>
+        <?php $clang = $customer['lang'] ?? 'me'; ?>
+        <select name="lang">
+          <option value="me" <?= $clang === 'me' ? 'selected' : '' ?>><?= __('lang.me') ?></option>
+          <option value="en" <?= $clang === 'en' ? 'selected' : '' ?>><?= __('lang.en') ?></option>
+        </select>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('customers.lang_hint') ?></p>
+      </div>
       <div class="field"><label><?= __('label.notes') ?></label><textarea name="notes" rows="3"><?= htmlspecialchars($customer['notes'] ?? '') ?></textarea></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
         <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>

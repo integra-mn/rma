@@ -290,7 +290,7 @@
 
   <!-- ── ROW: Accessories | Reported issue (complaint) ── -->
   <?php
-  $acc_text = format_rma_accessories($rma);
+  $acc_text = format_rma_accessories($rma, customer_lang($rma['customer_lang'] ?? null));
   $complaint = trim((string)($rma['complaint'] ?? ''));
   ?>
   <?php if ($acc_text || $complaint !== ''): ?>
