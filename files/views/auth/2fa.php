@@ -111,7 +111,7 @@
         <label for="code" class="code-label"><?= __('auth.code_label') ?></label>
         <input type="text" id="code" name="code" maxlength="6" pattern="[0-9]{6}"
                inputmode="numeric" autocomplete="one-time-code" autofocus
-               placeholder="000000" class="code-input">
+               class="code-input">
       </div>
       <div class="trust-row">
         <input type="checkbox" id="trust_device" name="trust_device" value="1">
