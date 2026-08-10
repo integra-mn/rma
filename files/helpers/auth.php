@@ -369,27 +369,54 @@ function otp_send_email(array $user, string $code): bool {
     $font = "'Montserrat',-apple-system,'Segoe UI',Arial,sans-serif";
     $logo = dirname(__DIR__) . '/assets/integra-email.png';
 
-    // text-align on the container AND on each <p>: Outlook ignores inherited
-    // alignment on block elements, so it has to be repeated to centre reliably.
-    $html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head>"
-          . "<body style=\"margin:0;padding:24px;background:#f4f4f0;font-family:{$font};\">"
-          . "<div style=\"max-width:480px;margin:0 auto;background:#fff;border:0.5px solid #d3d1c7;"
-          . "border-radius:12px;padding:32px;text-align:center;\">"
-          . "<div style=\"text-align:center;margin-bottom:28px;\">"
-          . "<img src=\"cid:integralogo\" alt=\"Integra\" height=\"40\" "
-          . "style=\"height:40px;width:auto;display:inline-block;border:0;\">"
-          . "</div>"
-          . "<p style=\"font-size:15px;color:#5f5e5a;margin:0 0 16px;text-align:center;font-family:{$font};\">"
-          . __('email.otp_greeting', ['name' => $name ?: '']) . "</p>"
-          . "<p style=\"font-size:15px;color:#1a1a18;margin:0 0 8px;text-align:center;font-family:{$font};\">"
-          . __('email.otp_intro') . "</p>"
-          . "<p style=\"font-size:32px;font-weight:700;letter-spacing:6px;color:#1D9E75;"
-          . "margin:16px 0;text-align:center;font-family:{$font};\">{$safe}</p>"
-          . "<p style=\"font-size:13px;color:#888780;margin:16px 0 0;text-align:center;font-family:{$font};\">"
-          . __('email.otp_expiry') . "</p>"
-          . "<p style=\"font-size:13px;color:#888780;margin:4px 0 0;text-align:center;font-family:{$font};\">"
-          . __('email.otp_ignore') . "</p>"
-          . "</div></body></html>";
+    $greeting = __('email.otp_greeting', ['name' => $name ?: '']);
+    $intro    = __('email.otp_intro');
+    $expiry   = __('email.otp_expiry');
+    $ignore   = __('email.otp_ignore');
+
+    // Table layout, not divs. Vertical centring in email only works through a
+    // full-height table cell with valign="middle" — flexbox and margin:auto are
+    // not supported, and Outlook renders through Word, which ignores most CSS
+    // positioning. text-align is repeated on every cell and <p> because Outlook
+    // also ignores alignment inherited from a parent block.
+    //
+    // Where a client sizes the message to its content rather than a full pane
+    // (most webmail), this degrades to balanced padding, which is what you want
+    // there anyway.
+    $html = <<<HTML
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f0;">
+  <table role="presentation" width="100%" height="100%" cellpadding="0" cellspacing="0" border="0"
+         style="background:#f4f4f0;height:100%;min-height:100%;">
+    <tr>
+      <td align="center" valign="middle" style="padding:40px 24px;">
+
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="480"
+               style="width:100%;max-width:480px;background:#ffffff;border:1px solid #d3d1c7;border-radius:12px;">
+          <tr>
+            <td align="center" style="padding:40px 32px;text-align:center;font-family:{$font};">
+
+              <img src="cid:integralogo" alt="Integra" height="40"
+                   style="height:40px;width:auto;display:block;margin:0 auto 40px;border:0;">
+
+              <p style="font-size:15px;color:#5f5e5a;margin:0 0 16px;text-align:center;font-family:{$font};">{$greeting}</p>
+              <p style="font-size:15px;color:#1a1a18;margin:0 0 8px;text-align:center;font-family:{$font};">{$intro}</p>
+              <p style="font-size:32px;font-weight:700;letter-spacing:6px;color:#1D9E75;margin:16px 0;text-align:center;font-family:{$font};">{$safe}</p>
+              <p style="font-size:13px;color:#888780;margin:16px 0 0;text-align:center;font-family:{$font};">{$expiry}</p>
+              <p style="font-size:13px;color:#888780;margin:4px 0 0;text-align:center;font-family:{$font};">{$ignore}</p>
+
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+HTML;
 
     $attachments = is_readable($logo)
         ? [['path' => $logo, 'cid' => 'integralogo', 'name' => 'integra.png']]
