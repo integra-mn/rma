@@ -1008,7 +1008,7 @@ return [
     'reports.all_locations'    => 'All locations',
     'reports.all_brands'       => 'All brands',
     'reports.apply'            => 'Generate',
-    'reports.export_xls'       => 'Export XLS',
+    'reports.export_xls'       => 'Export Excel',
     'reports.export_pdf'       => 'Export PDF',
     'reports.summary'          => 'Summary',
     'reports.metric'           => 'Metric',

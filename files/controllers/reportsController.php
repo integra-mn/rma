@@ -335,24 +335,88 @@ class ReportsController {
         }
     }
 
+    /**
+     * Real .xlsx via PhpSpreadsheet.
+     *
+     * This used to emit an HTML table named ".xls" with an Excel MIME type — an
+     * old trick that Excel now greets with "the file format and extension don't
+     * match… could be corrupted or unsafe", which is alarming on a file the user
+     * just asked for. It also gave every cell a text type, so numbers would not
+     * sum. PhpSpreadsheet is already a dependency (goods-receipt import/export).
+     */
     private function export_xls(string $fname, string $title, string $meta, array $sections): void {
-        header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="' . $fname . '.xls"');
-        $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
-        echo '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body>';
-        echo '<h2>' . $h($title) . '</h2><p>' . $h($meta) . '</p>';
+        require_once ROOT . '/vendor/autoload.php';
+
+        $ss = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sh = $ss->getActiveSheet();
+        $sh->setTitle(mb_substr($title, 0, 31) ?: 'Report');   // Excel caps sheet names at 31 chars
+
+        $row = 1;
+        $sh->setCellValue("A{$row}", $title);
+        $sh->getStyle("A{$row}")->getFont()->setBold(true)->setSize(14);
+        $row++;
+        $sh->setCellValue("A{$row}", $meta);
+        $sh->getStyle("A{$row}")->getFont()->getColor()->setRGB('888780');
+        $row += 2;
+
+        $widest = 1;
         foreach ($sections as $sec) {
-            echo '<table border="1" cellspacing="0" cellpadding="4"><tr><td colspan="' . count($sec['columns']) . '" style="background:#e8e8e8;font-weight:bold;">' . $h($sec['title']) . '</td></tr><tr>';
-            foreach ($sec['columns'] as $c) echo '<th style="background:#f5f5f5;">' . $h($c) . '</th>';
-            echo '</tr>';
-            foreach ($sec['rows'] as $row) {
-                echo '<tr>';
-                foreach ($row as $cell) echo '<td>' . $h($cell) . '</td>';
-                echo '</tr>';
+            $ncols  = max(1, count($sec['columns']));
+            $widest = max($widest, $ncols);
+            $last   = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($ncols);
+
+            // Section title across the section's width
+            $sh->setCellValue("A{$row}", $sec['title']);
+            $sh->mergeCells("A{$row}:{$last}{$row}");
+            $sh->getStyle("A{$row}")->getFont()->setBold(true);
+            $sh->getStyle("A{$row}:{$last}{$row}")->getFill()
+               ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+               ->getStartColor()->setRGB('EEECE5');
+            $row++;
+
+            // Column headers
+            $col = 1;
+            foreach ($sec['columns'] as $c) {
+                $letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                $sh->setCellValue("{$letter}{$row}", $c);
+                $sh->getStyle("{$letter}{$row}")->getFont()->setBold(true);
+                $col++;
             }
-            echo '</table><br>';
+            $sh->getStyle("A{$row}:{$last}{$row}")->getBorders()->getBottom()
+               ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $row++;
+
+            foreach ($sec['rows'] as $r) {
+                $col = 1;
+                foreach ($r as $cell) {
+                    $letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                    // Let numbers be numbers so they can be summed and sorted;
+                    // anything else is written explicitly as text so values like
+                    // "01" or an RMA number are not mangled.
+                    if (is_int($cell) || is_float($cell) || (is_string($cell) && is_numeric($cell) && !preg_match('/^0\d/', $cell))) {
+                        $sh->setCellValue("{$letter}{$row}", $cell + 0);
+                    } else {
+                        $sh->setCellValueExplicit("{$letter}{$row}", (string) $cell,
+                            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    }
+                    $col++;
+                }
+                $row++;
+            }
+            $row++;   // blank line between sections
         }
-        echo '</body></html>';
+
+        for ($c = 1; $c <= $widest; $c++) {
+            $sh->getColumnDimension(
+                \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c)
+            )->setAutoSize(true);
+        }
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fname . '.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($ss))->save('php://output');
         exit;
     }
 

@@ -1008,7 +1008,7 @@ return [
     'reports.all_locations'    => 'Sve lokacije',
     'reports.all_brands'       => 'Svi brendovi',
     'reports.apply'            => 'Generiši',
-    'reports.export_xls'       => 'Izvezi XLS',
+    'reports.export_xls'       => 'Izvezi Excel',
     'reports.export_pdf'       => 'Izvezi PDF',
     'reports.summary'          => 'Rezime',
     'reports.metric'           => 'Pokazatelj',
