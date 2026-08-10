@@ -49,17 +49,18 @@
       </div>
       <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="field"><label><?= __('partners.tax_id') ?></label><input type="text" name="tax_id"></div>
-        <!-- One line and not resizable, so the row keeps the same height as the
-             fields beside it; textareas are min-height 36px and resize:vertical
-             by default, which made this cell taller than its neighbours. -->
+        <!-- One line, not resizable, and 40px to match the inputs beside it:
+             app.css gives inputs height 40px but textareas min-height 36px,
+             so the default left this cell visibly shorter. -->
         <div class="field" style="grid-column:span 3;">
           <label><?= __('label.notes') ?></label>
-          <textarea name="notes" rows="1" style="height:36px;min-height:36px;resize:none;overflow:auto;"></textarea>
+          <textarea name="notes" rows="1"
+                    style="height:40px;min-height:40px;padding:10px;line-height:18px;resize:none;overflow:auto;"></textarea>
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
-        <button type="submit" class="btn btn-primary"><?= __('btn.save') ?></button>
-        <button type="button" class="btn" onclick="document.getElementById('add-form').style.display='none'"><?= __('btn.cancel') ?></button>
+        <button type="submit" class="btn btn-primary" style="min-width:100px;"><?= __('btn.save') ?></button>
+        <button type="button" class="btn" style="min-width:100px;" onclick="document.getElementById('add-form').style.display='none'"><?= __('btn.cancel') ?></button>
       </div>
     </form>
   </div>
