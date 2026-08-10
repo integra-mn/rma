@@ -304,7 +304,7 @@ return [
     'auth.2fa_title'         => 'Dvofaktorska autentifikacija',
     // Aplikacija za autentifikaciju (TOTP)
     'profile.totp'              => 'Aplikacija za autentifikaciju',
-    'profile.totp_intro'        => 'Koristite aplikaciju kao što je Google Authenticator, Authy ili Microsoft Authenticator za generisanje kodova. Radi bez signala i interneta.',
+    'profile.totp_intro'        => 'Koristite Authenticator aplikaciju za generisanje kodova za prijavu. Radi bez interneta.',
     'profile.totp_setup'        => 'Podesi aplikaciju',
     'profile.totp_scan_hint'    => 'Skenirajte ovaj kod aplikacijom, zatim unesite 6-cifreni kod koji prikaže da potvrdite.',
     'profile.totp_manual'       => 'Ne možete skenirati? Unesite ovaj ključ ručno:',

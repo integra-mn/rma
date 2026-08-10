@@ -304,7 +304,7 @@ return [
     'auth.2fa_title'         => 'Two-factor authentication',
     // Authenticator app (TOTP)
     'profile.totp'              => 'Authenticator app',
-    'profile.totp_intro'        => 'Use an app such as Google Authenticator, Authy or Microsoft Authenticator to generate login codes. Works without signal or internet.',
+    'profile.totp_intro'        => 'Use Authenticator App to generate login codes. Works without internet.',
     'profile.totp_setup'        => 'Set up app',
     'profile.totp_scan_hint'    => 'Scan this code with your authenticator app, then type the 6-digit code it shows to confirm.',
     'profile.totp_manual'       => 'Cannot scan? Enter this key manually:',
