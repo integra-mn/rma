@@ -337,6 +337,21 @@ function client_ip(): string {
 
 // ── OTP delivery ─────────────────────────────────────────────
 
+/**
+ * Seconds left on the user's current unused code, 0 if there isn't one.
+ *
+ * Read from the stored expiry rather than assuming ten minutes from page load:
+ * the user may have sat on the code screen, refreshed, or come back to it, and
+ * a countdown that disagrees with the server is worse than none at all.
+ */
+function otp_seconds_left(int $user_id): int {
+    $exp = db_val(
+        'SELECT expires_at FROM otp_codes WHERE user_id = ? AND used = 0 ORDER BY id DESC LIMIT 1',
+        [$user_id]
+    );
+    return $exp ? max(0, strtotime($exp) - time()) : 0;
+}
+
 function otp_send_email(array $user, string $code): bool {
     $subject = __('email.otp_subject');
     $name    = htmlspecialchars($user['name'] ?? '', ENT_QUOTES, 'UTF-8');

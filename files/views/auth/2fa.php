@@ -12,10 +12,9 @@
     /* Card and logo deliberately match auth/login.php so the two screens feel
        like one flow - same size, same vertical position. Change both together. */
     .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px;
-            padding: 2rem; width: 100%; max-width: 380px; min-height: 400px;
-            display: flex; flex-direction: column; justify-content: center; }
-    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a;
-            margin-top: -20px; margin-bottom: 1.75rem; }
+            padding: 40px 2rem 2rem; width: 100%; max-width: 380px; min-height: 400px;
+            display: flex; flex-direction: column; justify-content: flex-start; }
+    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a; margin: 0 0 40px; }
     .logo span { color: #1D9E75; }
     .subtitle { font-size: 13px; color: #5f5e5a; text-align: center; margin-bottom: 1.75rem; }
     label { display: block; font-size: 13px; color: #5f5e5a; margin-bottom: 5px; }
@@ -49,6 +48,9 @@
     .back { font-size: 13px; color: #5f5e5a; text-decoration: none;
             display: block; text-align: center; margin-top: 1rem; }
     .back:hover { color: #1D9E75; }
+    .countdown { font-size: 13px; color: #5f5e5a; text-align: center; margin-bottom: 1rem; }
+    .countdown.expired { color: #791f1f; }
+    .countdown strong { font-variant-numeric: tabular-nums; }  /* digits don't jitter */
   </style>
 </head>
 <body>
@@ -98,6 +100,11 @@
       }]) ?>
     </div>
 
+    <?php $left = otp_seconds_left((int)($_SESSION['pending_user_id'] ?? 0)); ?>
+    <p class="countdown" id="otp-countdown" data-left="<?= $left ?>">
+      <?= __('auth.code_expires_in', ['time' => sprintf('%d:%02d', intdiv($left, 60), $left % 60)]) ?>
+    </p>
+
     <form method="POST" action="/auth/2fa">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="verify">
@@ -134,5 +141,37 @@
 
   <a href="/auth/login" class="back"><?= __('auth.back_to_login') ?></a>
 </div>
+
+<script>
+// Live countdown for the code. Seeded from the server's stored expiry (rendered
+// into data-left) so a refresh or a slow page load can't make it disagree.
+(function () {
+  var el = document.getElementById('otp-countdown');
+  if (!el) return;
+
+  var left     = parseInt(el.dataset.left, 10) || 0;
+  var tplLeft  = <?= json_encode(__('auth.code_expires_in', ['time' => '%TIME%'])) ?>;
+  var tplGone  = <?= json_encode(__('auth.code_expired_hint')) ?>;
+
+  function render() {
+    if (left <= 0) {
+      el.textContent = tplGone;
+      el.classList.add('expired');
+      return;
+    }
+    var m = Math.floor(left / 60), s = left % 60;
+    el.innerHTML = tplLeft.replace('%TIME%', '<strong>' + m + ':' + (s < 10 ? '0' : '') + s + '</strong>');
+  }
+
+  render();
+  if (left > 0) {
+    var t = setInterval(function () {
+      left--;
+      render();
+      if (left <= 0) clearInterval(t);
+    }, 1000);
+  }
+})();
+</script>
 </body>
 </html>

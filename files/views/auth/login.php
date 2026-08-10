@@ -10,13 +10,13 @@
     body { font-family: <?= app_font_stack() ?>;
            background: #f4f4f0; min-height: 100vh;
            display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    /* Top-aligned rather than vertically centred: the 40px above the logo has
+       to be exact, and with centring it would drift as content height changes.
+       Mirrored in auth/2fa.php — change both together. */
     .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px;
-            padding: 2rem; width: 100%; max-width: 380px; min-height: 400px;
-            display: flex; flex-direction: column; justify-content: center; }
-    /* Card and logo are mirrored in auth/2fa.php so login and the code screen
-       line up exactly. Change both together. */
-    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a;
-            margin-top: -20px; margin-bottom: 1.75rem; }
+            padding: 40px 2rem 2rem; width: 100%; max-width: 380px; min-height: 400px;
+            display: flex; flex-direction: column; justify-content: flex-start; }
+    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a; margin: 0 0 40px; }
     .logo span { color: #1D9E75; }
     label { display: block; font-size: 13px; color: #5f5e5a; margin-bottom: 5px; }
     input[type=email], input[type=password] {
