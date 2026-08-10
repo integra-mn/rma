@@ -45,6 +45,8 @@ CREATE TABLE users (
   password_changed_at DATETIME DEFAULT NULL,
   must_change_pw      TINYINT(1) DEFAULT 0,
   require_2fa         TINYINT(1) DEFAULT 0,
+  -- Which channel to offer first for a login code. NULL = no preference.
+  preferred_2fa_channel VARCHAR(10) DEFAULT NULL,
   -- 'any' = reachable from anywhere, 'lan' = local network only. Enforced at
   -- login and on every authenticated request (helpers/auth.php).
   access_scope        VARCHAR(10) NOT NULL DEFAULT 'any',
