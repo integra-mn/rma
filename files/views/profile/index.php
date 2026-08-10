@@ -119,22 +119,16 @@
       <p style="font-size:13px;color:var(--text-secondary);margin-bottom:0.75rem;">
         <?= __('profile.totp_scan_hint') ?>
       </p>
-      <div style="display:flex;gap:20px;align-items:stretch;flex-wrap:wrap;">
+      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
         <img src="<?= totp_qr_base64($pending, $me_totp['email'] ?? 'user', 200) ?>"
              alt="QR" width="200" height="200"
              style="border:0.5px solid var(--border);border-radius:8px;flex-shrink:0;">
 
-        <!-- Column is exactly as tall as the QR, with space-between pushing the
-             manual key to the top and the form to the bottom, so both edges
-             line up with the QR rather than floating in the middle. -->
-        <div style="flex:1;min-width:228px;min-height:200px;
-                    display:flex;flex-direction:column;justify-content:space-between;">
-          <div>
-            <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><?= __('profile.totp_manual') ?></p>
-            <code style="font-size:13px;letter-spacing:1px;word-break:break-all;"><?= htmlspecialchars($pending) ?></code>
-          </div>
+        <div style="flex:1;min-width:228px;">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><?= __('profile.totp_manual') ?></p>
+          <code style="font-size:13px;letter-spacing:1px;word-break:break-all;"><?= htmlspecialchars($pending) ?></code>
 
-          <form method="POST" action="/profile/totp-confirm">
+          <form method="POST" action="/profile/totp-confirm" style="margin-top:10px;">
             <?= csrf_field() ?>
             <!-- Field and the two buttons share one width so the block lines
                  up: 2 x 110px + the 8px gap = 228px. Buttons flex to fill it,
