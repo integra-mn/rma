@@ -303,6 +303,8 @@ return [
     'auth.password'          => 'Lozinka',
     'auth.2fa_title'         => 'Dvofaktorska autentifikacija',
     'auth.choose_channel'    => 'Način dostave verifikacionog koda',
+    'auth.sending_code'      => 'Slanje koda…',
+    'auth.sending_wait'      => 'Potrebno je nekoliko sekundi. Nemojte zatvarati ili se vraćati nazad.',
     'auth.channel_email'     => 'Email',
     'auth.channel_whatsapp'  => 'WhatsApp',
     'auth.channel_sms'       => 'SMS',

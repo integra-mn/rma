@@ -60,6 +60,13 @@
     .countdown { font-size: 13px; color: #5f5e5a; text-align: center; margin-bottom: 1rem; }
     .countdown.expired { color: #791f1f; }
     .countdown strong { font-variant-numeric: tabular-nums; }  /* digits don't jitter */
+    .spinner { width: 28px; height: 28px; margin: 0 auto; border-radius: 50%;
+               border: 2px solid #e8e6e0; border-top-color: #1D9E75;
+               animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Respect users who ask for reduced motion; the text still says what is
+       happening, so the spin is decoration rather than information. */
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
   </style>
 </head>
 <body>
@@ -75,11 +82,22 @@
   <?php $channels = $_SESSION['2fa_channels'] ?? ['email']; ?>
 
   <?php if (!$sent): ?>
+    <!-- Sending takes a second or two (SMTP handshake, or the SMS API call).
+         Swap to this panel the instant the form is submitted, so the screen
+         visibly moves on instead of appearing frozen. Hidden without JS, where
+         the plain form post still works exactly as before. -->
+    <div id="sending-panel" style="display:none;text-align:center;padding:1rem 0;">
+      <div class="spinner" aria-hidden="true"></div>
+      <p style="font-size:14px;color:#5f5e5a;margin-top:14px;"><?= __('auth.sending_code') ?></p>
+      <p style="font-size:12px;color:#888780;margin-top:6px;"><?= __('auth.sending_wait') ?></p>
+    </div>
+
+    <div id="choose-panel">
     <!-- Step 1: choose channel and send OTP -->
     <p style="font-size:13px;color:#5f5e5a;margin-bottom:1rem;">
       <?= __('auth.choose_channel') ?>
     </p>
-    <form method="POST" action="/auth/2fa">
+    <form method="POST" action="/auth/2fa" id="send-form">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="send">
       <?php foreach ($channels as $ch): ?>
@@ -95,6 +113,7 @@
       <?php endforeach; ?>
       <button type="submit" class="btn"><?= __('btn.send_code') ?></button>
     </form>
+    </div><!-- /choose-panel -->
 
   <?php else: ?>
     <!-- Step 2: enter OTP -->
@@ -120,7 +139,7 @@
       <button type="submit" class="btn"><?= __('btn.verify') ?></button>
     </form>
 
-    <form method="POST" action="/auth/2fa" style="margin-top:0.5rem;">
+    <form method="POST" action="/auth/2fa" style="margin-top:0.5rem;" data-waiting="1">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="send">
       <input type="hidden" name="channel" value="<?= htmlspecialchars($channel) ?>">
@@ -142,6 +161,32 @@
 </div>
 
 <script>
+// Sending the code blocks for a second or two while the mail server or SMS API
+// answers. Show that immediately: swap the channel chooser for a waiting panel,
+// and stop a second submit — an impatient double-click would otherwise send two
+// codes, and only the newer one would work.
+(function () {
+  var form   = document.getElementById('send-form');
+  var choose = document.getElementById('choose-panel');
+  var wait   = document.getElementById('sending-panel');
+
+  if (form && choose && wait) {
+    form.addEventListener('submit', function () {
+      choose.style.display = 'none';
+      wait.style.display   = 'block';
+    });
+  }
+
+  // Resend sits on the code screen, where there is no panel to swap - just
+  // disable the button so the click clearly registered.
+  document.querySelectorAll('form[data-waiting] button[type=submit]').forEach(function (btn) {
+    btn.form.addEventListener('submit', function () {
+      btn.disabled = true;
+      btn.textContent = <?= json_encode(__('auth.sending_code')) ?>;
+    });
+  });
+})();
+
 // Live countdown for the code. Seeded from the server's stored expiry (rendered
 // into data-left) so a refresh or a slow page load can't make it disagree.
 (function () {

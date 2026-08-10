@@ -303,6 +303,8 @@ return [
     'auth.password'          => 'Password',
     'auth.2fa_title'         => 'Two-factor authentication',
     'auth.choose_channel'    => 'Verification code delivery method',
+    'auth.sending_code'      => 'Sending code…',
+    'auth.sending_wait'      => 'This takes a few seconds. Please do not close or go back.',
     'auth.channel_email'     => 'Email',
     'auth.channel_whatsapp'  => 'WhatsApp',
     'auth.channel_sms'       => 'SMS',
