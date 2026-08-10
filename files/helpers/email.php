@@ -41,6 +41,9 @@ function send_rma_receipt(int $rma_id): bool {
 function build_receipt_html(array $rma, string $tracking_url, string $qr_base64): string {
     $device = trim(($rma['brand_name'] ?? '') . ' ' . ($rma['model_name'] ?? ''));
     $date   = format_date($rma['created_at']);
+    // Customers know the business by this name, not by the app's internal one.
+    // Settings → General → Naziv firme.
+    $company = htmlspecialchars(company_name(), ENT_QUOTES, 'UTF-8');
 
     return "<!DOCTYPE html>
 <html>
@@ -67,7 +70,7 @@ function build_receipt_html(array $rma, string $tracking_url, string $qr_base64)
 <body>
 <div class='wrap'>
   <div class='header'>
-    <span style='color:#fff;font-size:18px;font-weight:600;letter-spacing:0.02em;'>Integra</span>
+    <span style='color:#fff;font-size:18px;font-weight:600;letter-spacing:0.02em;'>{$company}</span>
   </div>
   <div class='body'>
     <p style='font-size:13px;color:#888780;margin:0 0 8px;'>RMA Receipt</p>
@@ -96,7 +99,7 @@ function build_receipt_html(array $rma, string $tracking_url, string $qr_base64)
     </p>
   </div>
   <div class='footer'>
-    &copy; " . date('Y') . " Integra d.o.o. &nbsp;·&nbsp; This is an automated message.
+    &copy; " . date('Y') . " {$company} &nbsp;·&nbsp; This is an automated message.
   </div>
 </div>
 </body>

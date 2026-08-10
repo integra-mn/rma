@@ -38,6 +38,12 @@
         <div class="field">
           <label><?= __('settings.app_name') ?></label>
           <input type="text" name="app_name" value="<?= htmlspecialchars(setting('app_name', 'Integra RMA')) ?>">
+          <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('settings.app_name_hint') ?></p>
+        </div>
+        <div class="field">
+          <label><?= __('settings.company_name') ?></label>
+          <input type="text" name="company_name" value="<?= htmlspecialchars(setting('company_name', 'Integra Service')) ?>">
+          <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('settings.company_name_hint') ?></p>
         </div>
         <div class="field">
           <label><?= __('settings.logo') ?></label>

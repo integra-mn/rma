@@ -348,29 +348,29 @@ return [
     'track.invoice'          => 'Račun',
     'track.tech_notes'       => 'Napomene tehničara',
     'track.timeline'         => 'Istorija statusa',
-    'track.powered_by'       => 'Integra RMA sistem',
+    'track.powered_by'       => 'Integra Service',
 
     // ── Notifications / email templates ───────────────────────
     'notif.rma_created.subject'       => 'RMA nalog :number je kreiran',
-    'notif.rma_created.body'          => "Poštovani :customer,\n\nVaš RMA zahtjev je primljen.\n\nBroj RMA: :number\nUredjaj: :device\nOpis reklamacije: :complaint\n\nStatus vašeg servisa možete pratiti na:\n:tracking_url\n\nHvala,\nIntegra RMA tim",
+    'notif.rma_created.body'          => "Poštovani :customer,\n\nVaš RMA zahtjev je primljen.\n\nBroj RMA: :number\nUredjaj: :device\nOpis reklamacije: :complaint\n\nStatus vašeg servisa možete pratiti na:\n:tracking_url\n\nHvala,\nIntegra Service tim",
 
     'notif.status_changed.subject'    => 'RMA :number — ažuriranje statusa',
-    'notif.status_changed.body'       => "Poštovani :customer,\n\nStatus vašeg RMA naloga :number je ažuriran na: :status\n\n:note\n\nPratite servis: :tracking_url\n\nIntegra RMA tim",
+    'notif.status_changed.body'       => "Poštovani :customer,\n\nStatus vašeg RMA naloga :number je ažuriran na: :status\n\n:note\n\nPratite servis: :tracking_url\n\nIntegra Service tim",
 
     'notif.device_received.subject'   => 'RMA :number — uredjaj primljen',
-    'notif.device_received.body'      => "Poštovani :customer,\n\nPrimili smo vaš uredjaj (:device) u naš servisni centar.\n\nBroj RMA: :number\nPredvidjeni završetak: :est_completion\n\nPratite servis: :tracking_url\n\nIntegra RMA tim",
+    'notif.device_received.body'      => "Poštovani :customer,\n\nPrimili smo vaš uredjaj (:device) u naš servisni centar.\n\nBroj RMA: :number\nPredvidjeni završetak: :est_completion\n\nPratite servis: :tracking_url\n\nIntegra Service tim",
 
     'notif.repair_complete.subject'   => 'RMA :number — servis završen',
-    'notif.repair_complete.body'      => "Poštovani :customer,\n\nVaš uredjaj je popravljen i spreman za preuzimanje.\n\nBroj RMA: :number\nUredjaj: :device\n\nPratite servis: :tracking_url\n\nIntegra RMA tim",
+    'notif.repair_complete.body'      => "Poštovani :customer,\n\nVaš uredjaj je popravljen i spreman za preuzimanje.\n\nBroj RMA: :number\nUredjaj: :device\n\nPratite servis: :tracking_url\n\nIntegra Service tim",
 
     'notif.csat.subject'              => 'Kako ste zadovoljni servisom?',
-    'notif.csat.body'                 => "Poštovani :customer,\n\nServis je završen. Željeli bismo čuti vaše mišljenje.\n\nOcjenite naš servis (1–5): :survey_url\n\nHvala,\nIntegra RMA tim",
+    'notif.csat.body'                 => "Poštovani :customer,\n\nServis je završen. Željeli bismo čuti vaše mišljenje.\n\nOcjenite naš servis (1–5): :survey_url\n\nHvala,\nIntegra Service tim",
 
     'notif.sla_breach.subject'        => 'Upozorenje o prekoračenju SLA — RMA :number',
     'notif.sla_breach.body'           => "RMA nalog :number je prekoračio SLA rok.\n\nKupac: :customer\nUredjaj: :device\nRok: :due_at\n\nMolimo preduzeti hitne mjere.",
 
     'notif.otp.subject'               => 'Vaš verifikacioni kod',
-    'notif.otp.body'                  => "Vaš Integra RMA verifikacioni kod je: :code\n\nKod ističe za 10 minuta.\n\nAko niste zahtijevali ovaj kod, zanemarite ovu poruku.",
+    'notif.otp.body'                  => "Vaš verifikacioni kod je: :code\n\nKod ističe za 10 minuta.\n\nAko niste zahtijevali ovaj kod, zanemarite ovu poruku.",
 
     // ── Full translation sweep (added) ──────────────────────
     'rma.customer_details' => 'Podaci o kupcu',
@@ -792,6 +792,9 @@ return [
     'settings.templates'     => 'Šabloni',
     'settings.application'   => 'Aplikacija',
     'settings.app_name'      => 'Naziv aplikacije',
+    'settings.app_name_hint' => 'Prikazuje se zaposlenima unutar aplikacije.',
+    'settings.company_name'  => 'Naziv firme',
+    'settings.company_name_hint' => 'Prikazuje se kupcima — email, stranica za praćenje i štampani dokumenti.',
     'settings.logo'          => 'Logo (PNG ili SVG)',
     'settings.current_label' => 'Trenutno:',
     'settings.defaults_new_users' => 'Podrazumijevane postavke',

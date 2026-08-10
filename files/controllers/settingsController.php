@@ -86,6 +86,9 @@ class SettingsController {
     private function save_general(): void {
         $fields = [
             'app_name'          => ['string', trim($_POST['app_name'] ?? 'Integra RMA')],
+            // Shown to customers (emails, tracking page, printed documents) as
+            // opposed to app_name, which is what staff see inside the app.
+            'company_name'      => ['string', trim($_POST['company_name'] ?? '') ?: 'Integra Service'],
             'default_lang'      => ['string', $_POST['default_lang'] ?? 'en'],
             'default_location'  => ['int',    (int)($_POST['default_location'] ?? 0)],
             'rma_number_format' => ['string', $rma_format = trim($_POST['rma_number_format'] ?? '{LOC}-{YEAR}-{SEQ5}')],

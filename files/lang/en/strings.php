@@ -348,29 +348,29 @@ return [
     'track.invoice'          => 'Invoice',
     'track.tech_notes'       => 'Technician notes',
     'track.timeline'         => 'Status timeline',
-    'track.powered_by'       => 'Powered by Integra RMA',
+    'track.powered_by'       => 'Integra Service',
 
     // ── Notifications / email templates ───────────────────────
     'notif.rma_created.subject'       => 'RMA :number has been created',
-    'notif.rma_created.body'          => "Dear :customer,\n\nYour RMA request has been received.\n\nRMA number: :number\nDevice: :device\nComplaint: :complaint\n\nYou can track the status of your repair at:\n:tracking_url\n\nThank you,\nIntegra RMA team",
+    'notif.rma_created.body'          => "Dear :customer,\n\nYour RMA request has been received.\n\nRMA number: :number\nDevice: :device\nComplaint: :complaint\n\nYou can track the status of your repair at:\n:tracking_url\n\nThank you,\nIntegra Service team",
 
     'notif.status_changed.subject'    => 'RMA :number — status update',
-    'notif.status_changed.body'       => "Dear :customer,\n\nThe status of your RMA :number has been updated to: :status\n\n:note\n\nTrack your repair: :tracking_url\n\nIntegra RMA team",
+    'notif.status_changed.body'       => "Dear :customer,\n\nThe status of your RMA :number has been updated to: :status\n\n:note\n\nTrack your repair: :tracking_url\n\nIntegra Service team",
 
     'notif.device_received.subject'   => 'RMA :number — device received',
-    'notif.device_received.body'      => "Dear :customer,\n\nWe have received your device (:device) at our repair facility.\n\nRMA number: :number\nEstimated completion: :est_completion\n\nTrack your repair: :tracking_url\n\nIntegra RMA team",
+    'notif.device_received.body'      => "Dear :customer,\n\nWe have received your device (:device) at our repair facility.\n\nRMA number: :number\nEstimated completion: :est_completion\n\nTrack your repair: :tracking_url\n\nIntegra Service team",
 
     'notif.repair_complete.subject'   => 'RMA :number — repair completed',
-    'notif.repair_complete.body'      => "Dear :customer,\n\nGood news! Your device has been repaired and is ready.\n\nRMA number: :number\nDevice: :device\n\nTrack your repair: :tracking_url\n\nIntegra RMA team",
+    'notif.repair_complete.body'      => "Dear :customer,\n\nGood news! Your device has been repaired and is ready.\n\nRMA number: :number\nDevice: :device\n\nTrack your repair: :tracking_url\n\nIntegra Service team",
 
     'notif.csat.subject'              => 'How was your repair experience?',
-    'notif.csat.body'                 => "Dear :customer,\n\nYour repair is complete. We would love to hear about your experience.\n\nPlease rate our service (1–5): :survey_url\n\nThank you,\nIntegra RMA team",
+    'notif.csat.body'                 => "Dear :customer,\n\nYour repair is complete. We would love to hear about your experience.\n\nPlease rate our service (1–5): :survey_url\n\nThank you,\nIntegra Service team",
 
     'notif.sla_breach.subject'        => 'SLA breach alert — RMA :number',
     'notif.sla_breach.body'           => "RMA :number has breached its SLA deadline.\n\nCustomer: :customer\nDevice: :device\nDue: :due_at\n\nPlease take immediate action.",
 
     'notif.otp.subject'               => 'Your verification code',
-    'notif.otp.body'                  => "Your Integra RMA verification code is: :code\n\nThis code expires in 10 minutes.\n\nIf you did not request this, please ignore this message.",
+    'notif.otp.body'                  => "Your verification code is: :code\n\nThis code expires in 10 minutes.\n\nIf you did not request this, please ignore this message.",
 
     // ── Full translation sweep (added) ──────────────────────
     'rma.customer_details' => 'Customer Details',
@@ -792,6 +792,9 @@ return [
     'settings.templates'     => 'Templates',
     'settings.application'   => 'Application',
     'settings.app_name'      => 'App name',
+    'settings.app_name_hint' => 'Shown to staff inside the app.',
+    'settings.company_name'  => 'Company name',
+    'settings.company_name_hint' => 'Shown to customers — emails, tracking page and printed documents.',
     'settings.logo'          => 'Logo (PNG or SVG)',
     'settings.current_label' => 'Current:',
     'settings.defaults_new_users' => 'Defaults for new users',

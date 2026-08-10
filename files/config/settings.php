@@ -124,3 +124,15 @@ function setting_set(string $key, mixed $value, string $type = 'string', ?int $l
     static $cache = [];
     unset($cache[($location_id ?? 'global') . ':' . $key]);
 }
+
+/**
+ * The business name customers see — emails, tracking page, printed documents.
+ *
+ * Deliberately separate from app_name, which is what staff see inside the app:
+ * "Integra RMA" is the tool, "Integra Service" is who the customer dealt with.
+ * Settings → General.
+ */
+function company_name(): string {
+    $name = trim((string) setting('company_name', ''));
+    return $name !== '' ? $name : 'Integra Service';
+}
