@@ -29,8 +29,11 @@ function send_rma_receipt(int $rma_id): bool {
     $tracking_url = $token ? 'https://' . ($_SERVER['HTTP_HOST'] ?? 'rma.integra.mn') . '/track/' . $token : '';
     $qr_base64    = $tracking_url ? generate_qr_base64($tracking_url, 180) : '';
 
-    $subject = 'RMA Receipt — ' . $rma['rma_number'];
-    $body    = build_receipt_html($rma, $tracking_url, $qr_base64);
+    // Customer-facing: use the shop's default language, not the language of
+    // whichever staff member happens to be logged in.
+    $lang    = (string) setting('default_lang', 'me');
+    $subject = __in($lang, 'receipt.subject', ['number' => $rma['rma_number']]);
+    $body    = build_receipt_html($rma, $tracking_url, $qr_base64, $lang);
 
     return send_email($rma['customer_email'], $rma['customer_name'], $subject, $body);
 }
@@ -38,12 +41,15 @@ function send_rma_receipt(int $rma_id): bool {
 /**
  * Build HTML receipt email body
  */
-function build_receipt_html(array $rma, string $tracking_url, string $qr_base64): string {
+function build_receipt_html(array $rma, string $tracking_url, string $qr_base64, string $lang = 'me'): string {
     $device = trim(($rma['brand_name'] ?? '') . ' ' . ($rma['model_name'] ?? ''));
     $date   = format_date($rma['created_at']);
     // Customers know the business by this name, not by the app's internal one.
     // Settings → General → Naziv firme.
     $company = htmlspecialchars(company_name(), ENT_QUOTES, 'UTF-8');
+
+    // Short alias — this template calls it a dozen times.
+    $t = fn(string $key, array $r = []): string => __in($lang, $key, $r);
 
     return "<!DOCTYPE html>
 <html>
@@ -73,33 +79,33 @@ function build_receipt_html(array $rma, string $tracking_url, string $qr_base64)
     <span style='color:#fff;font-size:18px;font-weight:600;letter-spacing:0.02em;'>{$company}</span>
   </div>
   <div class='body'>
-    <p style='font-size:13px;color:#888780;margin:0 0 8px;'>RMA Receipt</p>
+    <p style='font-size:13px;color:#888780;margin:0 0 8px;'>" . $t('receipt.title') . "</p>
     <p class='rma-number'>{$rma['rma_number']}</p>
-    <p class='meta'>Submitted on {$date} · {$rma['location_name']}</p>
+    <p class='meta'>" . $t('receipt.submitted', ['date' => $date, 'location' => $rma['location_name'] ?? '']) . "</p>
 
     <table>
-      <tr><td>Customer</td><td><strong>" . htmlspecialchars($rma['customer_name'] ?? '—') . "</strong></td></tr>
-      " . ($device ? "<tr><td>Device</td><td>" . htmlspecialchars($device) . "</td></tr>" : '') . "
-      " . ($rma['serial_number'] ? "<tr><td>Serial</td><td style='font-family:monospace;'>" . htmlspecialchars($rma['serial_number']) . "</td></tr>" : '') . "
-      <tr><td>Status</td><td>" . htmlspecialchars($rma['status_label']) . "</td></tr>
-      " . ($rma['is_warranty'] ? "<tr><td>Warranty</td><td>Yes</td></tr>" : '') . "
-      " . ($rma['estimated_completion'] ? "<tr><td>Est. completion</td><td>" . format_date($rma['estimated_completion']) . "</td></tr>" : '') . "
+      <tr><td>" . $t('receipt.customer') . "</td><td><strong>" . htmlspecialchars($rma['customer_name'] ?? '—') . "</strong></td></tr>
+      " . ($device ? "<tr><td>" . $t('receipt.device') . "</td><td>" . htmlspecialchars($device) . "</td></tr>" : '') . "
+      " . ($rma['serial_number'] ? "<tr><td>" . $t('receipt.serial') . "</td><td style='font-family:monospace;'>" . htmlspecialchars($rma['serial_number']) . "</td></tr>" : '') . "
+      <tr><td>" . $t('receipt.status') . "</td><td>" . htmlspecialchars($rma['status_label']) . "</td></tr>
+      " . ($rma['is_warranty'] ? "<tr><td>" . $t('receipt.warranty') . "</td><td>" . $t('receipt.yes') . "</td></tr>" : '') . "
+      " . ($rma['estimated_completion'] ? "<tr><td>" . $t('receipt.est_completion') . "</td><td>" . format_date($rma['estimated_completion']) . "</td></tr>" : '') . "
     </table>
 
     <div class='qr-section'>
       " . ($qr_base64 ? "<img src='{$qr_base64}' width='150' height='150' alt='QR Code'>" : '') . "
-      <p>Scan to track your repair</p>
+      <p>" . $t('receipt.scan') . "</p>
       <a href='" . htmlspecialchars($tracking_url) . "'>" . htmlspecialchars($tracking_url) . "</a>
     </div>
 
     <p style='font-size:13px;color:#5f5e5a;'>
-      If you have any questions, please contact us at
+      " . $t('receipt.questions') . "
       " . htmlspecialchars($rma['location_phone'] ?? '') . "
-      " . ($rma['location_email'] ? "or <a href='mailto:" . htmlspecialchars($rma['location_email']) . "'>" . htmlspecialchars($rma['location_email']) . "</a>" : '') . "
+      " . ($rma['location_email'] ? "" . $t('receipt.or') . " <a href='mailto:" . htmlspecialchars($rma['location_email']) . "'>" . htmlspecialchars($rma['location_email']) . "</a>" : '') . "
     </p>
   </div>
   <div class='footer'>
-    &copy; " . date('Y') . " {$company} &nbsp;·&nbsp; This is an automated message.
+    &copy; " . date('Y') . " {$company} &nbsp;·&nbsp; " . $t('receipt.automated') . "
   </div>
 </div>
 </body>

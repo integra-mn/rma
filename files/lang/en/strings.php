@@ -322,6 +322,22 @@ return [
     'auth.otp_expired'       => 'Code expired. Please request a new one.',
 
     // Verification-code email
+    // RMA receipt email (sent to the customer)
+    'receipt.subject'        => 'Receipt — :number',
+    'receipt.title'          => 'Receipt',
+    'receipt.submitted'      => 'Received on :date · :location',
+    'receipt.customer'       => 'Customer',
+    'receipt.device'         => 'Device',
+    'receipt.serial'         => 'Serial number',
+    'receipt.status'         => 'Status',
+    'receipt.warranty'       => 'Warranty',
+    'receipt.yes'            => 'Yes',
+    'receipt.est_completion' => 'Est. completion',
+    'receipt.scan'           => 'Scan to track your repair',
+    'receipt.questions'      => 'If you have any questions, please contact us at',
+    'receipt.or'             => 'or',
+    'receipt.automated'      => 'This is an automated message.',
+
     'email.otp_subject'      => ':sender — verification code',
     'email.otp_greeting'     => 'Hello :name,',
     'email.otp_intro'        => 'Your verification code is:',

@@ -322,6 +322,22 @@ return [
     'auth.otp_expired'       => 'Kod je istekao. Zatražite novi.',
 
     // Email sa verifikacionim kodom
+    // Email potvrde o prijemu (šalje se kupcu)
+    'receipt.subject'        => 'Potvrda o prijemu — :number',
+    'receipt.title'          => 'Potvrda o prijemu',
+    'receipt.submitted'      => 'Primljeno :date · :location',
+    'receipt.customer'       => 'Kupac',
+    'receipt.device'         => 'Uredjaj',
+    'receipt.serial'         => 'Serijski broj',
+    'receipt.status'         => 'Status',
+    'receipt.warranty'       => 'Garancija',
+    'receipt.yes'            => 'Da',
+    'receipt.est_completion' => 'Predvidjeni završetak',
+    'receipt.scan'           => 'Skenirajte da pratite servis',
+    'receipt.questions'      => 'Za sva pitanja kontaktirajte nas na',
+    'receipt.or'             => 'ili',
+    'receipt.automated'      => 'Ovo je automatska poruka.',
+
     'email.otp_subject'      => ':sender — verifikacioni kod',
     'email.otp_greeting'     => 'Poštovani :name,',
     'email.otp_intro'        => 'Vaš verifikacioni kod je:',

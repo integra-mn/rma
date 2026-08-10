@@ -22,6 +22,37 @@ function load_lang(): array {
     return $strings;
 }
 
+/**
+ * Translate into an explicitly chosen language, ignoring who is logged in.
+ *
+ * __() follows the current user's UI language, which is right for the app and
+ * wrong for anything addressed to a customer: a technician working in English
+ * would otherwise send English email to a Montenegrin customer. Customer-facing
+ * text should use the shop's default language instead.
+ */
+function __in(string $lang, string $key, array $replace = []): string {
+    static $cache = [];
+
+    if (!preg_match('/^[a-z]{2}$/', $lang)) $lang = 'en';
+
+    if (!isset($cache[$lang])) {
+        $root    = dirname(__DIR__);
+        $file    = "{$root}/lang/{$lang}/strings.php";
+        $strings = file_exists($file) ? include $file : [];
+        if ($lang !== 'en') {                       // fall back per key, as __() does
+            $en      = "{$root}/lang/en/strings.php";
+            $strings = array_merge(file_exists($en) ? include $en : [], $strings);
+        }
+        $cache[$lang] = $strings;
+    }
+
+    $text = $cache[$lang][$key] ?? $key;
+    foreach ($replace as $k => $v) {
+        $text = str_replace(':' . $k, (string) $v, $text);
+    }
+    return $text;
+}
+
 function __(string $key, array $replace = []): string {
     $strings = load_lang();
     $text    = $strings[$key] ?? $key;
