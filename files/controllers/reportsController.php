@@ -348,7 +348,7 @@ class ReportsController {
      * Real .xlsx via PhpSpreadsheet, laid out to match the sample Rajo adjusted
      * by hand (2026-08-10):
      *
-     *   - Segoe UI 11 throughout, 22pt row height on used rows
+     *   - Segoe UI 11, 25pt row height, vertically centred, no gridlines
      *   - column A is a narrow left margin; the table lives in B..E
      *   - a section's first column stretches across the spare columns so the
      *     figures always line up in the same right-hand columns, whatever the
@@ -370,8 +370,11 @@ class ReportsController {
 
         $ss = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $ss->getDefaultStyle()->getFont()->setName('Segoe UI')->setSize(11);
+        $ss->getDefaultStyle()->getAlignment()
+           ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         $sh = $ss->getActiveSheet();
+        $sh->setShowGridlines(false);   // the table draws its own rules
         // Sheet named after the report, without the date range — as in the
         // sample. Excel caps sheet names at 31 characters.
         $sheet_name = preg_replace('/-\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}$/', '', $fname);
@@ -405,12 +408,12 @@ class ReportsController {
         };
 
         $row = 2;                                   // the sample starts on row 2
-        $sh->getRowDimension($row)->setRowHeight(22);
+        $sh->getRowDimension($row)->setRowHeight(25);
         $sh->setCellValue('B' . $row, $title);
         $sh->getStyle('B' . $row)->getFont()->setBold(true);
         $row++;
 
-        $sh->getRowDimension($row)->setRowHeight(22);
+        $sh->getRowDimension($row)->setRowHeight(25);
         $sh->setCellValue('B' . $row, $meta);
         $row += 2;                                  // blank spacer row
 
@@ -422,7 +425,7 @@ class ReportsController {
             $endL  = $L($right);
 
             // Section title, spanning the table width.
-            $sh->getRowDimension($row)->setRowHeight(22);
+            $sh->getRowDimension($row)->setRowHeight(25);
             $sh->setCellValue('B' . $row, $sec['title']);
             $sh->mergeCells("B{$row}:{$endL}{$row}");
             $sh->getStyle("B{$row}:{$endL}{$row}")->getFont()->setBold(true);
@@ -433,7 +436,7 @@ class ReportsController {
             $row++;
 
             // Column headers.
-            $sh->getRowDimension($row)->setRowHeight(22);
+            $sh->getRowDimension($row)->setRowHeight(25);
             foreach ($cols as $i => $label) {
                 [$a, $b] = $map[$i];
                 $ref = $L($a) . $row;
@@ -450,7 +453,7 @@ class ReportsController {
 
             // Data rows.
             foreach ($sec['rows'] as $r) {
-                $sh->getRowDimension($row)->setRowHeight(22);
+                $sh->getRowDimension($row)->setRowHeight(25);
                 foreach (array_values($r) as $i => $cell) {
                     if (!isset($map[$i])) continue;
                     [$a, $b] = $map[$i];
