@@ -315,6 +315,12 @@ return [
     'auth.locked'            => 'Too many failed attempts. Please try again later.',
     'auth.inactive'          => 'Your account has been deactivated.',
     'auth.otp_expired'       => 'Code expired. Please request a new one.',
+
+    // Verification-code email
+    'email.otp_subject'      => 'Integra RMA — verification code',
+    'email.otp_greeting'     => 'Hello :name,',
+    'email.otp_intro'        => 'Your Integra RMA verification code is:',
+    'email.otp_expiry'       => 'This code expires in 10 minutes. If you did not request it, please ignore this email.',
     'auth.otp_exhausted'     => 'Too many attempts. Please request a new code.',
     'auth.otp_invalid'       => 'Invalid code. :count attempt(s) remaining.',
     'auth.enter_credentials' => 'Please enter your email and password.',

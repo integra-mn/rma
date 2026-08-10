@@ -9,11 +9,15 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: <?= app_font_stack() ?>; background: #f4f4f0; min-height: 100vh;
            display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    /* Card and logo deliberately match auth/login.php so the two screens feel
+       like one flow - same size, same vertical position. Change both together. */
     .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px;
-            padding: 2rem; width: 100%; max-width: 380px; }
-    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a; margin-bottom: 0.5rem; }
+            padding: 2rem; width: 100%; max-width: 380px; min-height: 400px;
+            display: flex; flex-direction: column; justify-content: center; }
+    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a;
+            margin-top: -20px; margin-bottom: 1.75rem; }
     .logo span { color: #1D9E75; }
-    .subtitle { font-size: 13px; color: #5f5e5a; margin-bottom: 1.75rem; }
+    .subtitle { font-size: 13px; color: #5f5e5a; text-align: center; margin-bottom: 1.75rem; }
     label { display: block; font-size: 13px; color: #5f5e5a; margin-bottom: 5px; }
     input[type=text], select {
       width: 100%; padding: 9px 12px; font-size: 14px; border: 0.5px solid #d3d1c7;
@@ -50,8 +54,7 @@
 <body>
 <div class="card">
   <div class="logo">
-    <img src="/assets/integra.svg" alt="Integra" style="width:100px;height:auto;display:block;margin-bottom:6px;">
-    <span style="font-size:12px;font-weight:400;color:#888780;letter-spacing:0.04em;"><?= __('nav.rma_system') ?></span>
+    <img src="/assets/integra.svg" alt="Integra" style="height:40px;width:auto;display:block;margin:0 auto;">
   </div>
   <p class="subtitle"><?= __('auth.2fa_title') ?></p>
 
@@ -117,6 +120,16 @@
       <input type="hidden" name="channel" value="<?= htmlspecialchars($channel) ?>">
       <button type="submit" class="btn btn-secondary"><?= __('btn.resend') ?></button>
     </form>
+
+    <?php if (count($channels) > 1): ?>
+      <!-- Back to the channel list without discarding the pending login.
+           Only worth showing when there is something else to switch to. -->
+      <form method="POST" action="/auth/2fa" style="margin-top:0.5rem;">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="change_channel">
+        <button type="submit" class="btn btn-secondary"><?= __('auth.change_channel') ?></button>
+      </form>
+    <?php endif; ?>
   <?php endif; ?>
 
   <a href="/auth/login" class="back"><?= __('auth.back_to_login') ?></a>

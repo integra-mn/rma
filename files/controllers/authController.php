@@ -38,7 +38,9 @@ class AuthController {
 
             case '2fa_required':
                 $_SESSION['2fa_channels'] = $result['channels'];
-                include views_path('auth/2fa_channel.php');
+                // Same view handles both steps (choose channel / enter code);
+                // it branches on $_SESSION['2fa_sent'].
+                include views_path('auth/2fa.php');
                 exit;
 
             case 'locked':

@@ -338,19 +338,45 @@ function client_ip(): string {
 // ── OTP delivery ─────────────────────────────────────────────
 
 function otp_send_email(array $user, string $code): bool {
-    $subject = 'Integra RMA — verification code';
+    $subject = __('email.otp_subject');
     $name    = htmlspecialchars($user['name'] ?? '', ENT_QUOTES, 'UTF-8');
     $safe    = htmlspecialchars($code, ENT_QUOTES, 'UTF-8');
-    $html    = "<!DOCTYPE html><html><body style=\"font-family:Arial,sans-serif;background:#f4f4f0;padding:24px;\">"
-             . "<div style=\"max-width:480px;margin:0 auto;background:#fff;border-radius:12px;padding:32px;\">"
-             . "<p style=\"font-size:15px;color:#5f5e5a;margin:0 0 16px;\">Hello " . ($name ?: 'there') . ",</p>"
-             . "<p style=\"font-size:15px;color:#1a1a18;margin:0 0 8px;\">Your Integra RMA verification code is:</p>"
-             . "<p style=\"font-size:32px;font-weight:700;letter-spacing:6px;color:#1D9E75;margin:16px 0;text-align:center;\">{$safe}</p>"
-             . "<p style=\"font-size:13px;color:#888780;margin:16px 0 0;\">This code expires in 10 minutes. "
-             . "If you did not request it, please ignore this email.</p>"
-             . "</div></body></html>";
 
-    return send_email($user['email'], $user['name'] ?? '', $subject, $html);
+    // Styled to match the login screen: same logo, same 40px height, centred.
+    //
+    // The logo is EMBEDDED (cid:), not linked. Mail clients block remote images
+    // by default and none of them render SVG, and this app is not reachable
+    // from the internet anyway, so a URL would show a broken image.
+    //
+    // Montserrat is named first with web-safe fallbacks. Mail clients cannot
+    // load web fonts, so recipients who don't have it installed fall back
+    // gracefully rather than getting a serif default.
+    $font = "'Montserrat',-apple-system,'Segoe UI',Arial,sans-serif";
+    $logo = dirname(__DIR__) . '/assets/integra-email.png';
+
+    $html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head>"
+          . "<body style=\"margin:0;padding:24px;background:#f4f4f0;font-family:{$font};\">"
+          . "<div style=\"max-width:480px;margin:0 auto;background:#fff;border:0.5px solid #d3d1c7;"
+          . "border-radius:12px;padding:32px;\">"
+          . "<div style=\"text-align:center;margin-bottom:28px;\">"
+          . "<img src=\"cid:integralogo\" alt=\"Integra\" height=\"40\" "
+          . "style=\"height:40px;width:auto;display:inline-block;border:0;\">"
+          . "</div>"
+          . "<p style=\"font-size:15px;color:#5f5e5a;margin:0 0 16px;font-family:{$font};\">"
+          . __('email.otp_greeting', ['name' => $name ?: '']) . "</p>"
+          . "<p style=\"font-size:15px;color:#1a1a18;margin:0 0 8px;font-family:{$font};\">"
+          . __('email.otp_intro') . "</p>"
+          . "<p style=\"font-size:32px;font-weight:700;letter-spacing:6px;color:#1D9E75;"
+          . "margin:16px 0;text-align:center;font-family:{$font};\">{$safe}</p>"
+          . "<p style=\"font-size:13px;color:#888780;margin:16px 0 0;font-family:{$font};\">"
+          . __('email.otp_expiry') . "</p>"
+          . "</div></body></html>";
+
+    $attachments = is_readable($logo)
+        ? [['path' => $logo, 'cid' => 'integralogo', 'name' => 'integra.png']]
+        : [];   // still send the code if the logo is ever missing
+
+    return send_email($user['email'], $user['name'] ?? '', $subject, $html, $attachments);
 }
 
 function otp_send_whatsapp(array $user, string $code): bool {

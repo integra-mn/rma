@@ -315,6 +315,12 @@ return [
     'auth.locked'            => 'Previše neuspješnih pokušaja. Pokušajte ponovo kasnije.',
     'auth.inactive'          => 'Vaš nalog je deaktiviran.',
     'auth.otp_expired'       => 'Kod je istekao. Zatražite novi.',
+
+    // Email sa verifikacionim kodom
+    'email.otp_subject'      => 'Integra RMA — verifikacioni kod',
+    'email.otp_greeting'     => 'Poštovani :name,',
+    'email.otp_intro'        => 'Vaš Integra RMA verifikacioni kod je:',
+    'email.otp_expiry'       => 'Kod važi 10 minuta. Ako ga niste tražili, zanemarite ovaj email.',
     'auth.otp_exhausted'     => 'Previše pokušaja. Zatražite novi kod.',
     'auth.otp_invalid'       => 'Pogrešan kod. Ostalo pokušaja: :count.',
     'auth.enter_credentials' => 'Unesite email i lozinku.',

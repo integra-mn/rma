@@ -13,7 +13,10 @@
     .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px;
             padding: 2rem; width: 100%; max-width: 380px; min-height: 400px;
             display: flex; flex-direction: column; justify-content: center; }
-    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a; margin-bottom: 1.75rem; }
+    /* Card and logo are mirrored in auth/2fa.php so login and the code screen
+       line up exactly. Change both together. */
+    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a;
+            margin-top: -20px; margin-bottom: 1.75rem; }
     .logo span { color: #1D9E75; }
     label { display: block; font-size: 13px; color: #5f5e5a; margin-bottom: 5px; }
     input[type=email], input[type=password] {

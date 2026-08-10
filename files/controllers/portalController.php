@@ -44,7 +44,8 @@ class PortalController {
 
             case '2fa_required':
                 $_SESSION['2fa_channels'] = $result['channels'];
-                include views_path('auth/2fa_channel.php');
+                // Shared with staff login; the view branches on 2fa_sent.
+                include views_path('auth/2fa.php');
                 exit;
 
             case 'locked':

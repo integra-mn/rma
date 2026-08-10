@@ -119,6 +119,10 @@ function send_email(string $to, string $to_name, string $subject, string $html_b
  * customer-supplied names.
  *
  * $attachments: list of ['path' => …, 'name' => …] or ['data' => …, 'name' => …].
+ * Add 'cid' => 'some-id' to embed the image in the message body instead of
+ * attaching it — reference it as <img src="cid:some-id">. Needed for logos:
+ * mail clients block remote images and do not render SVG, and this app is not
+ * publicly reachable, so a normal URL would show a broken image.
  */
 function send_email_result(string $to, string $to_name, string $subject, string $html_body, array $attachments = []): array {
     require_once dirname(__DIR__) . '/vendor/autoload.php';
@@ -175,10 +179,14 @@ function send_email_result(string $to, string $to_name, string $subject, string 
         $mail->AltBody = trim(html_entity_decode(strip_tags($html_body), ENT_QUOTES, 'UTF-8'));
 
         foreach ($attachments as $a) {
-            if (!empty($a['path']) && is_readable($a['path'])) {
-                $mail->addAttachment($a['path'], $clean($a['name'] ?? basename($a['path'])));
+            $name = $clean($a['name'] ?? (!empty($a['path']) ? basename($a['path']) : 'attachment'));
+            if (!empty($a['cid']) && !empty($a['path']) && is_readable($a['path'])) {
+                // Shown inside the message body, not listed as an attachment.
+                $mail->addEmbeddedImage($a['path'], $a['cid'], $name);
+            } elseif (!empty($a['path']) && is_readable($a['path'])) {
+                $mail->addAttachment($a['path'], $name);
             } elseif (isset($a['data'])) {
-                $mail->addStringAttachment($a['data'], $clean($a['name'] ?? 'attachment'));
+                $mail->addStringAttachment($a['data'], $name);
             }
         }
 
