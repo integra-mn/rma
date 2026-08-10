@@ -84,16 +84,49 @@
         Tokens: <code>{LOC}</code> = location code &nbsp;·&nbsp; <code>{YYYY}</code> / <code>{YEAR}</code> = 4-digit year &nbsp;·&nbsp; <code>{YY}</code> = 2-digit year &nbsp;·&nbsp; <code>{SEQ4}</code> / <code>{SEQ5}</code> / <code>{SEQ6}</code> = 4/5/6-digit sequence
       </p>
 
+      <?php
+        // Restarting the sequence only makes sense when the number contains a
+        // year — otherwise the same numbers would come round again. Without one
+        // the option is disabled, not merely discouraged.
+        $rma_fmt      = setting('rma_number_format','{LOC}-{YEAR}-{SEQ5}');
+        $rma_has_year = (bool) preg_match('/\{(YY|YYYY|YEAR)\}/', $rma_fmt);
+      ?>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
         <input type="checkbox" id="rma_number_reset_yearly" name="rma_number_reset_yearly" value="1"
-               <?= setting('rma_number_reset_yearly','0') === '1' ? 'checked' : '' ?>>
-        <label for="rma_number_reset_yearly" style="font-size:13px;font-weight:500;margin-bottom:0;">
+               <?= setting('rma_number_reset_yearly','0') === '1' && $rma_has_year ? 'checked' : '' ?>
+               <?= $rma_has_year ? '' : 'disabled' ?>>
+        <label for="rma_number_reset_yearly" id="rma-reset-label"
+               style="font-size:13px;font-weight:500;margin-bottom:0;<?= $rma_has_year ? '' : 'color:var(--text-muted);' ?>">
           <?= __('settings.rma_reset_yearly') ?>
         </label>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:1.5rem;">
-        <?= __('settings.rma_reset_yearly_hint') ?>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:1.5rem;" id="rma-reset-hint">
+        <?= $rma_has_year ? __('settings.rma_reset_yearly_hint') : __('settings.rma_reset_needs_year') ?>
       </p>
+
+      <script>
+      // Keep the checkbox in step with the format field as it is typed, so the
+      // rule is visible immediately rather than only after saving.
+      (function () {
+        var fmt  = document.querySelector('input[name="rma_number_format"]');
+        var box  = document.getElementById('rma_number_reset_yearly');
+        var lbl  = document.getElementById('rma-reset-label');
+        var hint = document.getElementById('rma-reset-hint');
+        if (!fmt || !box) return;
+
+        var WITH_YEAR = <?= json_encode(__('settings.rma_reset_yearly_hint')) ?>;
+        var NO_YEAR   = <?= json_encode(__('settings.rma_reset_needs_year')) ?>;
+
+        function sync() {
+          var hasYear = /\{(YY|YYYY|YEAR)\}/.test(fmt.value);
+          box.disabled = !hasYear;
+          if (!hasYear) box.checked = false;
+          lbl.style.color = hasYear ? '' : 'var(--text-muted)';
+          hint.textContent = hasYear ? WITH_YEAR : NO_YEAR;
+        }
+        fmt.addEventListener('input', sync);
+      })();
+      </script>
 
       <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;">PDF</h2>
       <div class="form-grid" style="">

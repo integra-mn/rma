@@ -88,8 +88,15 @@ class SettingsController {
             'app_name'          => ['string', trim($_POST['app_name'] ?? 'Integra RMA')],
             'default_lang'      => ['string', $_POST['default_lang'] ?? 'en'],
             'default_location'  => ['int',    (int)($_POST['default_location'] ?? 0)],
-            'rma_number_format' => ['string', trim($_POST['rma_number_format'] ?? '{LOC}-{YEAR}-{SEQ5}')],
-            'rma_number_reset_yearly' => ['string', !empty($_POST['rma_number_reset_yearly']) ? '1' : '0'],
+            'rma_number_format' => ['string', $rma_format = trim($_POST['rma_number_format'] ?? '{LOC}-{YEAR}-{SEQ5}')],
+            // Yearly reset is only meaningful when the number carries a year.
+            // Without one, restarting the sequence would reissue numbers that
+            // already exist, so the option is forced off rather than trusted
+            // from the form — the checkbox is disabled in the UI, and a disabled
+            // checkbox simply is not submitted.
+            'rma_number_reset_yearly' => ['string',
+                (!empty($_POST['rma_number_reset_yearly']) && preg_match('/\{(YY|YYYY|YEAR)\}/', $rma_format))
+                    ? '1' : '0'],
             'pdf_engine'        => ['string', in_array($_POST['pdf_engine']??'',['html','mpdf']) ? $_POST['pdf_engine'] : 'html'],
             'pdf_paper_size'    => ['string', in_array($_POST['pdf_paper_size']??'',['A4','A5','Letter']) ? $_POST['pdf_paper_size'] : 'A4'],
         ];
