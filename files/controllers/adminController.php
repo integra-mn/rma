@@ -436,11 +436,15 @@ class AdminController {
         $page_title = __('nav.administration');
 
         if ($tab === 'users') {
+            // Super Admin pinned to the top, then the usual active-first,
+            // alphabetical order. CASE rather than a role sort so adding roles
+            // later doesn't silently reshuffle the list.
             $users     = db_rows("SELECT u.*, l.name as location_name
                                   FROM users u
                                   LEFT JOIN locations l ON l.id = u.location_id
                                   WHERE u.deleted_at IS NULL
-                                  ORDER BY u.is_active DESC, u.name");
+                                  ORDER BY CASE WHEN u.role = 'super_admin' THEN 0 ELSE 1 END,
+                                           u.is_active DESC, u.name");
             $locations = db_rows('SELECT * FROM locations WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
         } elseif ($tab === 'locations') {
             $locations = db_rows('SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY name');

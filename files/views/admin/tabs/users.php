@@ -119,6 +119,12 @@
             <?php if (!empty($u['require_2fa'])): ?>
               <span class="badge" title="<?= __('users.require_2fa') ?>" style="background:var(--bg-subtle);color:var(--text-secondary);margin-left:4px;">2FA</span>
             <?php endif; ?>
+            <?php if (($u['access_scope'] ?? 'any') === 'lan'): ?>
+              <!-- Only the restriction is badged; "anywhere" is the default and
+                   badging every row would just add noise. No badge = can sign in
+                   from outside. -->
+              <span class="badge" title="<?= __('users.access_lan') ?>" style="background:var(--bg-subtle);color:#0a6b7a;margin-left:4px;">LAN</span>
+            <?php endif; ?>
           </td>
           <td style="color:var(--text-muted);font-size:12px;">
             <?= format_datetime($u['last_login'], 'Never') ?>
