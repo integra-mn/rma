@@ -344,72 +344,136 @@ class ReportsController {
      * just asked for. It also gave every cell a text type, so numbers would not
      * sum. PhpSpreadsheet is already a dependency (goods-receipt import/export).
      */
+    /**
+     * Real .xlsx via PhpSpreadsheet, laid out to match the sample Rajo adjusted
+     * by hand (2026-08-10):
+     *
+     *   - Segoe UI 11 throughout, 22pt row height on used rows
+     *   - column A is a narrow left margin; the table lives in B..E
+     *   - a section's first column stretches across the spare columns so the
+     *     figures always line up in the same right-hand columns, whatever the
+     *     section's shape (2, 3 or 4 columns)
+     *   - horizontal rules and an outline, but no vertical lines inside: the
+     *     sample's borders read as a list rather than a grid
+     *
+     * It used to emit an HTML table named ".xls", which modern Excel rejects
+     * with "the file format and extension don't match", and which made every
+     * value text so nothing could be summed.
+     */
     private function export_xls(string $fname, string $title, string $meta, array $sections): void {
         require_once ROOT . '/vendor/autoload.php';
 
+        $Coord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::class;
+        $Fill  = \PhpOffice\PhpSpreadsheet\Style\Fill::class;
+        $Align = \PhpOffice\PhpSpreadsheet\Style\Alignment::class;
+        $Type  = \PhpOffice\PhpSpreadsheet\Cell\DataType::class;
+
         $ss = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $ss->getDefaultStyle()->getFont()->setName('Segoe UI')->setSize(11);
+
         $sh = $ss->getActiveSheet();
-        $sh->setTitle(mb_substr($title, 0, 31) ?: 'Report');   // Excel caps sheet names at 31 chars
+        // Sheet named after the report, without the date range — as in the
+        // sample. Excel caps sheet names at 31 characters.
+        $sheet_name = preg_replace('/-\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}$/', '', $fname);
+        $sh->setTitle(mb_substr($sheet_name, 0, 31) ?: 'Report');
 
-        $row = 1;
-        $sh->setCellValue("A{$row}", $title);
-        $sh->getStyle("A{$row}")->getFont()->setBold(true)->setSize(14);
-        $row++;
-        $sh->setCellValue("A{$row}", $meta);
-        $sh->getStyle("A{$row}")->getFont()->getColor()->setRGB('888780');
-        $row += 2;
-
-        $widest = 1;
-        foreach ($sections as $sec) {
-            $ncols  = max(1, count($sec['columns']));
-            $widest = max($widest, $ncols);
-            $last   = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($ncols);
-
-            // Section title across the section's width
-            $sh->setCellValue("A{$row}", $sec['title']);
-            $sh->mergeCells("A{$row}:{$last}{$row}");
-            $sh->getStyle("A{$row}")->getFont()->setBold(true);
-            $sh->getStyle("A{$row}:{$last}{$row}")->getFill()
-               ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-               ->getStartColor()->setRGB('EEECE5');
-            $row++;
-
-            // Column headers
-            $col = 1;
-            foreach ($sec['columns'] as $c) {
-                $letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
-                $sh->setCellValue("{$letter}{$row}", $c);
-                $sh->getStyle("{$letter}{$row}")->getFont()->setBold(true);
-                $col++;
-            }
-            $sh->getStyle("A{$row}:{$last}{$row}")->getBorders()->getBottom()
-               ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-            $row++;
-
-            foreach ($sec['rows'] as $r) {
-                $col = 1;
-                foreach ($r as $cell) {
-                    $letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
-                    // Let numbers be numbers so they can be summed and sorted;
-                    // anything else is written explicitly as text so values like
-                    // "01" or an RMA number are not mangled.
-                    if (is_int($cell) || is_float($cell) || (is_string($cell) && is_numeric($cell) && !preg_match('/^0\d/', $cell))) {
-                        $sh->setCellValue("{$letter}{$row}", $cell + 0);
-                    } else {
-                        $sh->setCellValueExplicit("{$letter}{$row}", (string) $cell,
-                            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                    }
-                    $col++;
-                }
-                $row++;
-            }
-            $row++;   // blank line between sections
+        // The table spans B..E; A is a narrow left margin and F trails it.
+        $FIRST = 2;   // B
+        $LAST  = 5;   // E
+        foreach (['A' => 5.63, 'B' => 30.63, 'C' => 20.63, 'D' => 20.63, 'E' => 20.63, 'F' => 8.73] as $c => $w) {
+            $sh->getColumnDimension($c)->setWidth($w);
         }
 
-        for ($c = 1; $c <= $widest; $c++) {
-            $sh->getColumnDimension(
-                \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c)
-            )->setAutoSize(true);
+        $L = fn(int $i): string => $Coord::stringFromColumnIndex($i);
+
+        // Which cells a row of $n values occupies: [[startIdx, endIdx], ...].
+        // The first entry absorbs the spare width, so the figures stay in the
+        // same columns no matter how many the section has.
+        $slots = function (int $n) use ($FIRST, $LAST): array {
+            $width = $LAST - $FIRST + 1;
+            if ($n >= $width) {
+                $out = [];
+                for ($i = 0; $i < $n; $i++) $out[] = [$FIRST + $i, $FIRST + $i];
+                return $out;
+            }
+            $out = [[$FIRST, $LAST - ($n - 1)]];
+            for ($i = $n - 1; $i >= 1; $i--) {
+                $col   = $LAST - $i + 1;
+                $out[] = [$col, $col];
+            }
+            return $out;
+        };
+
+        $row = 2;                                   // the sample starts on row 2
+        $sh->getRowDimension($row)->setRowHeight(22);
+        $sh->setCellValue('B' . $row, $title);
+        $sh->getStyle('B' . $row)->getFont()->setBold(true);
+        $row++;
+
+        $sh->getRowDimension($row)->setRowHeight(22);
+        $sh->setCellValue('B' . $row, $meta);
+        $row += 2;                                  // blank spacer row
+
+        foreach ($sections as $sec) {
+            $cols  = $sec['columns'] ?? [];
+            $n     = max(1, count($cols));
+            $map   = $slots($n);
+            $right = max($LAST, $FIRST + $n - 1);
+            $endL  = $L($right);
+
+            // Section title, spanning the table width.
+            $sh->getRowDimension($row)->setRowHeight(22);
+            $sh->setCellValue('B' . $row, $sec['title']);
+            $sh->mergeCells("B{$row}:{$endL}{$row}");
+            $sh->getStyle("B{$row}:{$endL}{$row}")->getFont()->setBold(true);
+            $sh->getStyle("B{$row}:{$endL}{$row}")->getFill()
+               ->setFillType($Fill::FILL_SOLID)->getStartColor()->setRGB('E8E8E8');
+            $sh->getStyle('B' . $row)->getAlignment()->setHorizontal($Align::HORIZONTAL_LEFT);
+            $this->xls_rule($sh, $row, $FIRST, $right);
+            $row++;
+
+            // Column headers.
+            $sh->getRowDimension($row)->setRowHeight(22);
+            foreach ($cols as $i => $label) {
+                [$a, $b] = $map[$i];
+                $ref = $L($a) . $row;
+                $sh->setCellValue($ref, $label);
+                if ($b > $a) $sh->mergeCells($L($a) . $row . ':' . $L($b) . $row);
+                $sh->getStyle($ref)->getFont()->setBold(true);
+                $sh->getStyle($L($a) . $row . ':' . $L($b) . $row)->getFill()
+                   ->setFillType($Fill::FILL_SOLID)->getStartColor()->setRGB('F5F5F5');
+                $sh->getStyle($ref)->getAlignment()
+                   ->setHorizontal($i === 0 ? $Align::HORIZONTAL_LEFT : $Align::HORIZONTAL_CENTER);
+            }
+            $this->xls_rule($sh, $row, $FIRST, $right);
+            $row++;
+
+            // Data rows.
+            foreach ($sec['rows'] as $r) {
+                $sh->getRowDimension($row)->setRowHeight(22);
+                foreach (array_values($r) as $i => $cell) {
+                    if (!isset($map[$i])) continue;
+                    [$a, $b] = $map[$i];
+                    $ref = $L($a) . $row;
+
+                    // Numbers stay numeric so Excel can sum them; anything else
+                    // is written as text so "01" or an RMA number survives.
+                    if (is_int($cell) || is_float($cell)
+                        || (is_string($cell) && is_numeric($cell) && !preg_match('/^0\d/', $cell))) {
+                        $sh->setCellValue($ref, $cell + 0);
+                    } else {
+                        $sh->setCellValueExplicit($ref, (string) $cell, $Type::TYPE_STRING);
+                    }
+
+                    if ($b > $a) $sh->mergeCells($L($a) . $row . ':' . $L($b) . $row);
+                    $sh->getStyle($ref)->getAlignment()
+                       ->setHorizontal($i === 0 ? $Align::HORIZONTAL_LEFT : $Align::HORIZONTAL_CENTER);
+                }
+                $this->xls_rule($sh, $row, $FIRST, $right);
+                $row++;
+            }
+
+            $row++;   // blank row between sections
         }
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -418,6 +482,25 @@ class ReportsController {
 
         (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($ss))->save('php://output');
         exit;
+    }
+
+    /**
+     * Rule above and below a row plus the table's outer edges. No vertical
+     * lines inside, matching the sample.
+     */
+    private function xls_rule(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sh,
+                              int $row, int $first, int $last): void {
+        $Border = \PhpOffice\PhpSpreadsheet\Style\Border::class;
+        $Coord  = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::class;
+
+        $a = $Coord::stringFromColumnIndex($first) . $row;
+        $b = $Coord::stringFromColumnIndex($last) . $row;
+
+        $borders = $sh->getStyle("{$a}:{$b}")->getBorders();
+        $borders->getTop()->setBorderStyle($Border::BORDER_THIN);
+        $borders->getBottom()->setBorderStyle($Border::BORDER_THIN);
+        $borders->getLeft()->setBorderStyle($Border::BORDER_THIN);
+        $borders->getRight()->setBorderStyle($Border::BORDER_THIN);
     }
 
     private function export_pdf(string $fname, string $title, string $meta, array $sections): void {
