@@ -443,7 +443,10 @@ function otp_seconds_left(int $user_id): int {
 }
 
 function otp_send_email(array $user, string $code): bool {
-    $subject = __('email.otp_subject');
+    // Subject carries the same name recipients see in the From line, so the two
+    // cannot drift apart — change it once, in Administracija → Sistem → Email.
+    $sender  = trim((string) setting('smtp_from_name', 'Integra')) ?: 'Integra';
+    $subject = __('email.otp_subject', ['sender' => $sender]);
     $name    = htmlspecialchars($user['name'] ?? '', ENT_QUOTES, 'UTF-8');
     $safe    = htmlspecialchars($code, ENT_QUOTES, 'UTF-8');
 

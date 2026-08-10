@@ -322,9 +322,9 @@ return [
     'auth.otp_expired'       => 'Code expired. Please request a new one.',
 
     // Verification-code email
-    'email.otp_subject'      => 'Integra RMA — verification code',
+    'email.otp_subject'      => ':sender — verification code',
     'email.otp_greeting'     => 'Hello :name,',
-    'email.otp_intro'        => 'Your Integra RMA verification code is:',
+    'email.otp_intro'        => 'Your verification code is:',
     'email.otp_expiry'       => 'This code expires in 10 minutes',
     'email.otp_ignore'       => 'If you did not request code, please ignore this email',
     'auth.otp_exhausted'     => 'Too many attempts. Please request a new code.',

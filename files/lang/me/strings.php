@@ -322,9 +322,9 @@ return [
     'auth.otp_expired'       => 'Kod je istekao. Zatražite novi.',
 
     // Email sa verifikacionim kodom
-    'email.otp_subject'      => 'Integra RMA — verifikacioni kod',
+    'email.otp_subject'      => ':sender — verifikacioni kod',
     'email.otp_greeting'     => 'Poštovani :name,',
-    'email.otp_intro'        => 'Vaš Integra RMA verifikacioni kod je:',
+    'email.otp_intro'        => 'Vaš verifikacioni kod je:',
     'email.otp_expiry'       => 'Kod ističe za 10 minuta',
     'email.otp_ignore'       => 'Ako niste tražili kod, zanemarite ovaj email',
     'auth.otp_exhausted'     => 'Previše pokušaja. Zatražite novi kod.',
