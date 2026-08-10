@@ -25,7 +25,10 @@
 
   <!-- Add form (hidden) -->
   <?php if (can('partners', 'edit')): ?>
-  <div id="add-form" style="display:none;margin-bottom:1.25rem;" class="card">
+  <!-- max-width matches the Korisnici card: the admin page wraps its tabs in
+       var(--w-content), which this page does not, so the card would otherwise
+       stretch to the full window and look wider than its counterpart. -->
+  <div id="add-form" style="display:none;margin-bottom:1.25rem;max-width:var(--w-content);" class="card">
     <h2 style="font-size:15px;font-weight:500;margin-bottom:1rem;"><?= __('partners.new') ?></h2>
     <form method="POST" action="/partners/store">
       <?= csrf_field() ?>
