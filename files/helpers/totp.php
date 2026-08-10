@@ -16,16 +16,24 @@ defined('RMS') or die('Direct access not permitted');
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use OTPHP\TOTP;
+use ParagonIE\ConstantTime\Base32;
 
-/** Codes are valid for this many steps either side of now (30s each). */
-const TOTP_WINDOW = 1;   // ±30s, absorbs ordinary phone/server clock drift
+/**
+ * Accepted clock drift, in SECONDS — otphp's leeway is seconds, not steps, and
+ * it must stay below the 30s period. 29 gives close to a full step either side,
+ * which absorbs ordinary phone/server clock skew. Verified by test: without
+ * this, a code 30s old is rejected and users see "wrong code" intermittently.
+ */
+const TOTP_LEEWAY = 29;
 
 /**
  * Create a fresh secret. Not stored as confirmed until the user proves the app
  * produces matching codes — see totp_confirm().
  */
 function totp_create_secret(): string {
-    return TOTP::generate()->getSecret();
+    // 160 bits, as RFC 4226 recommends — 32 base32 characters. The library's
+    // own default is far longer, which some authenticator apps refuse to scan.
+    return Base32::encodeUpperUnpadded(random_bytes(20));
 }
 
 /**
@@ -58,7 +66,7 @@ function totp_verify(string $secret, string $code): bool {
     if ($secret === '' || strlen($code) !== 6) return false;
 
     try {
-        return TOTP::createFromSecret($secret)->verify($code, null, TOTP_WINDOW);
+        return TOTP::createFromSecret($secret)->verify($code, null, TOTP_LEEWAY);
     } catch (Throwable $e) {
         error_log('TOTP verify failed: ' . $e->getMessage());
         return false;
