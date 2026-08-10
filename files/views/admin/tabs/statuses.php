@@ -47,7 +47,7 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
           <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars($s['code']) ?></td>
           <td style="text-align:center;color:var(--text-muted);"><?= (int)$s['sort_order'] ?></td>
           <td style="text-align:right;">
-            <button type="button" class="btn btn-sm"
+            <button type="button" class="btn-link"
               onclick="editStatus('<?= $type ?>', <?= htmlspecialchars(json_encode($s)) ?>)"><?= __('btn.edit') ?></button>
           </td>
         </tr>

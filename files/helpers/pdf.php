@@ -279,7 +279,9 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
                <div style="margin-top:6px;word-break:break-all;" id="sig-url"></div>
              </div>
            </div>
-           <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+           <!-- Served locally on purpose: a CDN would send every visitor IP to
+                a third party on page load, which GDPR does not allow here. -->
+           <script src="/assets/js/qrcode.min.js"></script>
            <script>
            (function () {
              var rmaId  = ' . (int)$rma['id'] . ';
