@@ -119,6 +119,9 @@
             <?php if (!empty($u['require_2fa'])): ?>
               <span class="badge" title="<?= __('users.require_2fa') ?>" style="background:var(--bg-subtle);color:var(--text-secondary);margin-left:4px;">2FA</span>
             <?php endif; ?>
+            <?php if (!empty($u['totp_confirmed_at'])): ?>
+              <span class="badge" title="<?= __('profile.totp') ?>" style="background:var(--bg-subtle);color:#1D9E75;margin-left:4px;">APP</span>
+            <?php endif; ?>
             <?php if (($u['access_scope'] ?? 'any') === 'lan'): ?>
               <!-- Only the restriction is badged; "anywhere" is the default and
                    badging every row would just add noise. No badge = can sign in

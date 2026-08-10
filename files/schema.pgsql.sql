@@ -49,6 +49,8 @@ CREATE TABLE users (
   must_change_pw SMALLINT DEFAULT 0,
   require_2fa SMALLINT DEFAULT 0,
   preferred_2fa_channel VARCHAR(10) DEFAULT NULL,
+  totp_secret VARCHAR(64) DEFAULT NULL,
+  totp_confirmed_at TIMESTAMP DEFAULT NULL,
   access_scope VARCHAR(10) NOT NULL DEFAULT 'any',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

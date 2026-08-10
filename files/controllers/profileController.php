@@ -139,4 +139,61 @@ class ProfileController {
         audit('profile_updated', 'user', current_user_id());
         $_SESSION['form_success'] = __('profile.preferences_saved');
     }
+
+    // ── Authenticator app (TOTP) ──────────────────────────────
+
+    /**
+     * Begin enrolment: mint a secret and hold it in the session.
+     *
+     * Kept out of the database until confirmed — a secret written straight to
+     * users.totp_secret would make the app an offered channel before the user
+     * has proved their phone produces matching codes, stranding them at login.
+     */
+    public function totp_start(): void {
+        require_login();
+        csrf_verify();
+        $_SESSION['totp_pending'] = totp_create_secret();
+        header('Location: /profile');
+        exit;
+    }
+
+    /** Verify a code from the app, then store the secret. */
+    public function totp_confirm(): void {
+        require_login();
+        csrf_verify();
+
+        $secret = $_SESSION['totp_pending'] ?? '';
+        $code   = trim($_POST['code'] ?? '');
+
+        if ($secret === '') {
+            $_SESSION['form_error'] = __('profile.totp_expired_setup');
+        } elseif (totp_confirm(current_user_id(), $secret, $code)) {
+            unset($_SESSION['totp_pending']);
+            $_SESSION['form_success'] = __('profile.totp_enabled');
+        } else {
+            // Keep the pending secret so they can retry without rescanning.
+            $_SESSION['form_error'] = __('profile.totp_bad_code');
+        }
+
+        header('Location: /profile');
+        exit;
+    }
+
+    /** Abandon a half-finished enrolment. */
+    public function totp_cancel(): void {
+        require_login();
+        unset($_SESSION['totp_pending']);
+        header('Location: /profile');
+        exit;
+    }
+
+    /** Turn the authenticator app off; other channels take over. */
+    public function totp_disable(): void {
+        require_login();
+        csrf_verify();
+        totp_reset(current_user_id());
+        $_SESSION['form_success'] = __('profile.totp_disabled');
+        header('Location: /profile');
+        exit;
+    }
 }

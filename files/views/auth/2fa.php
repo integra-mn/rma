@@ -113,6 +113,7 @@
           <input type="radio" name="channel" value="<?= htmlspecialchars($ch) ?>"
                  <?= $ch === $default ? 'checked' : '' ?>>
           <?= match($ch) {
+            'totp'     => __('auth.channel_totp'),
             'whatsapp' => 'WhatsApp',
             'sms'      => 'SMS',
             default    => 'Email',
@@ -126,10 +127,16 @@
   <?php else: ?>
     <!-- Step 2: enter OTP -->
     <?php $channel = $_SESSION['2fa_channel'] ?? 'email'; ?>
-    <?php $left = otp_seconds_left((int)($_SESSION['pending_user_id'] ?? 0)); ?>
-    <p class="countdown" id="otp-countdown" data-left="<?= $left ?>">
-      <?= __('auth.code_expires_in', ['time' => sprintf('%d:%02d', intdiv($left, 60), $left % 60)]) ?>
-    </p>
+    <?php if ($channel === 'totp'): ?>
+      <!-- Nothing was sent and the app rotates its own code every 30s, so a
+           server-side countdown would be misleading here. -->
+      <p class="countdown"><?= __('auth.totp_hint') ?></p>
+    <?php else: ?>
+      <?php $left = otp_seconds_left((int)($_SESSION['pending_user_id'] ?? 0)); ?>
+      <p class="countdown" id="otp-countdown" data-left="<?= $left ?>">
+        <?= __('auth.code_expires_in', ['time' => sprintf('%d:%02d', intdiv($left, 60), $left % 60)]) ?>
+      </p>
+    <?php endif; ?>
 
     <form method="POST" action="/auth/2fa">
       <?= csrf_field() ?>
@@ -147,12 +154,14 @@
       <button type="submit" class="btn"><?= __('btn.verify') ?></button>
     </form>
 
-    <form method="POST" action="/auth/2fa" style="margin-top:0.5rem;" data-waiting="1">
-      <?= csrf_field() ?>
-      <input type="hidden" name="action" value="send">
-      <input type="hidden" name="channel" value="<?= htmlspecialchars($channel) ?>">
-      <button type="submit" class="btn btn-secondary"><?= __('btn.resend') ?></button>
-    </form>
+    <?php if ($channel !== 'totp'): ?>
+      <form method="POST" action="/auth/2fa" style="margin-top:0.5rem;" data-waiting="1">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="send">
+        <input type="hidden" name="channel" value="<?= htmlspecialchars($channel) ?>">
+        <button type="submit" class="btn btn-secondary"><?= __('btn.resend') ?></button>
+      </form>
+    <?php endif; ?>
 
     <?php if (count($channels) > 1): ?>
       <!-- Back to the channel list without discarding the pending login.

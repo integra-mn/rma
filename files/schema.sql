@@ -47,6 +47,11 @@ CREATE TABLE users (
   require_2fa         TINYINT(1) DEFAULT 0,
   -- Which channel to offer first for a login code. NULL = no preference.
   preferred_2fa_channel VARCHAR(10) DEFAULT NULL,
+  -- Authenticator app (TOTP). The secret is password-equivalent; confirmed_at
+  -- is set only after the user proves the app works, so a half-finished
+  -- enrolment cannot lock anyone out.
+  totp_secret         VARCHAR(64) DEFAULT NULL,
+  totp_confirmed_at   DATETIME DEFAULT NULL,
   -- 'any' = reachable from anywhere, 'lan' = local network only. Enforced at
   -- login and on every authenticated request (helpers/auth.php).
   access_scope        VARCHAR(10) NOT NULL DEFAULT 'any',

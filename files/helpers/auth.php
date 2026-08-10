@@ -112,6 +112,15 @@ function auth_attempt(string $email, string $password): array {
             ? order_channels(explode(',', $policy['allowed_2fa_channels']))
             : ['email'];
         $channels = available_2fa_channels($channels);
+
+        // The authenticator app is only an option for people who have finished
+        // enrolling — offering it otherwise would strand them on a screen
+        // asking for a code no app can produce.
+        if (!totp_is_enrolled($user)) {
+            $channels = array_values(array_diff($channels, ['totp']));
+        }
+        if (!$channels) $channels = ['email'];
+
         // Carry the user's choice from Moj profil so the 2FA screen can
         // pre-select it instead of always defaulting to email.
         $_SESSION['2fa_preferred'] = $user['preferred_2fa_channel'] ?? null;
@@ -128,7 +137,8 @@ function auth_attempt(string $email, string $password): array {
  * (the DB SET column returns them in its own definition order otherwise).
  */
 function order_channels(array $channels): array {
-    $rank = ['email' => 0, 'sms' => 1, 'whatsapp' => 2];
+    // Authenticator app first: strongest, instant, no send cost.
+    $rank = ['totp' => 0, 'email' => 1, 'sms' => 2, 'whatsapp' => 3];
     usort($channels, fn($a, $b) => ($rank[$a] ?? 99) <=> ($rank[$b] ?? 99));
     return $channels;
 }
@@ -141,7 +151,9 @@ function order_channels(array $channels): array {
  * Cloud API account that most installs don't have.
  */
 function enabled_2fa_channels(): array {
-    $on = [];
+    // TOTP needs no provider or credit, so it is not part of the on/off
+    // switches — enrolment alone decides whether a user sees it.
+    $on = ['totp'];
     foreach (['email', 'sms', 'whatsapp'] as $c) {
         $default = $c === 'whatsapp' ? '0' : '1';
         if (setting("twofa_{$c}_enabled", $default) === '1') $on[] = $c;

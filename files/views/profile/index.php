@@ -89,6 +89,69 @@
     </form>
   </div>
 
+  <!-- Authenticator app (TOTP) -->
+  <?php
+    $me_totp   = db_row('SELECT email, totp_secret, totp_confirmed_at FROM users WHERE id = ?', [current_user_id()]);
+    $enrolled  = totp_is_enrolled($me_totp ?? []);
+    // A secret generated but not yet confirmed lives in the session, so a
+    // refresh doesn't hand out a different one mid-enrolment.
+    $pending   = $_SESSION['totp_pending'] ?? null;
+  ?>
+  <div class="card" style="margin-top:1rem;">
+    <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:0.75rem;">
+      <?= __('profile.totp') ?>
+    </h2>
+
+    <?php if ($enrolled): ?>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:0.75rem;">
+        ✅ <?= __('profile.totp_active', ['date' => format_date($me_totp['totp_confirmed_at'])]) ?>
+      </p>
+      <form method="POST" action="/profile/totp-disable"
+            onsubmit="return false;" id="totp-disable-form">
+        <?= csrf_field() ?>
+        <button type="button" class="btn" style="min-width:120px;"
+                onclick="appConfirm(<?= htmlspecialchars(json_encode(__('profile.totp_disable_confirm')), ENT_QUOTES) ?>, function(){ document.getElementById('totp-disable-form').onsubmit=null; document.getElementById('totp-disable-form').submit(); })">
+          <?= __('profile.totp_disable') ?>
+        </button>
+      </form>
+
+    <?php elseif ($pending): ?>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:0.75rem;">
+        <?= __('profile.totp_scan_hint') ?>
+      </p>
+      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+        <img src="<?= totp_qr_base64($pending, $me_totp['email'] ?? 'user', 200) ?>"
+             alt="QR" width="200" height="200"
+             style="border:0.5px solid var(--border);border-radius:8px;">
+        <div style="flex:1;min-width:220px;">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><?= __('profile.totp_manual') ?></p>
+          <code style="font-size:13px;letter-spacing:1px;word-break:break-all;"><?= htmlspecialchars($pending) ?></code>
+
+          <form method="POST" action="/profile/totp-confirm" style="margin-top:1rem;">
+            <?= csrf_field() ?>
+            <div class="field" style="max-width:180px;">
+              <label><?= __('profile.totp_enter_code') ?></label>
+              <input type="text" name="code" maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
+                     autocomplete="one-time-code" required
+                     style="text-align:center;font-size:18px;letter-spacing:5px;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="min-width:120px;"><?= __('btn.confirm') ?></button>
+            <a href="/profile/totp-cancel" class="btn" style="min-width:100px;"><?= __('btn.cancel') ?></a>
+          </form>
+        </div>
+      </div>
+
+    <?php else: ?>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:0.75rem;">
+        <?= __('profile.totp_intro') ?>
+      </p>
+      <form method="POST" action="/profile/totp-start">
+        <?= csrf_field() ?>
+        <button type="submit" class="btn btn-primary" style="min-width:140px;"><?= __('profile.totp_setup') ?></button>
+      </form>
+    <?php endif; ?>
+  </div>
+
   <!-- Account info (read only).
        $user here comes from layout/header.php's current_user(), which only
        exposes session fields. Re-fetch the full row for admin-visible columns

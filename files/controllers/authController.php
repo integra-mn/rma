@@ -97,7 +97,12 @@ class AuthController {
                 exit;
             }
             $_SESSION['2fa_channel'] = $channel;
-            otp_send((int) $user_id, $channel);
+            // The authenticator app already has the code — there is nothing to
+            // send, so go straight to the entry screen. Sending an email as
+            // well would defeat the point of using the app.
+            if ($channel !== 'totp') {
+                otp_send((int) $user_id, $channel);
+            }
             $_SESSION['2fa_sent'] = true;
             header('Location: /auth/2fa');
             exit;
@@ -113,7 +118,22 @@ class AuthController {
             exit;
         }
 
-        $result = otp_verify((int) $user_id, $code, $trust_device);
+        // The app's code is computed from the shared secret, not stored in
+        // otp_codes, so it takes a different verification path.
+        if (($_SESSION['2fa_channel'] ?? '') === 'totp') {
+            $u = db_row('SELECT * FROM users WHERE id = ?', [$user_id]);
+            if ($u && totp_verify((string) ($u['totp_secret'] ?? ''), $code)) {
+                // otp_verify() grants the session itself; this path has to do
+                // the same, or a correct code would bounce back to the login.
+                auth_grant_session($u);
+                if ($trust_device) trust_device((int) $user_id);
+                $result = ['status' => 'ok'];
+            } else {
+                $result = ['status' => 'invalid', 'attempts_left' => null];
+            }
+        } else {
+            $result = otp_verify((int) $user_id, $code, $trust_device);
+        }
 
         switch ($result['status']) {
             case 'ok':

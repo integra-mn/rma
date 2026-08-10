@@ -14,6 +14,7 @@ require_once ROOT . '/helpers/image.php';
 require_once ROOT . '/helpers/sku.php';
 require_once ROOT . '/helpers/phone.php';
 require_once ROOT . '/helpers/qr.php';
+require_once ROOT . '/helpers/totp.php';   // needs qr.php for the enrolment QR
 require_once ROOT . '/helpers/shipping.php';
 require_once ROOT . '/helpers/email.php';
 require_once ROOT . '/helpers/sms.php';
@@ -48,6 +49,7 @@ $routes = [
         '/auth/logout'                 => 'auth/logout',
         '/auth/2fa'                    => 'auth/twofa',
         '/profile'                     => 'profile/index',
+        '/profile/totp-cancel'         => 'profile/totp_cancel',
         '/rma'                         => 'rma/index',
         '/rma/create'                  => 'rma/create',
         '/rma/device-search'           => 'rma/device_search',
@@ -109,6 +111,9 @@ $routes = [
         '/portal/rma/([0-9]+)/received'        => 'portal/rma_received',
         '/auth/2fa'                            => 'auth/twofa_post',
         '/profile/save'                        => 'profile/save',
+        '/profile/totp-start'                  => 'profile/totp_start',
+        '/profile/totp-confirm'                => 'profile/totp_confirm',
+        '/profile/totp-disable'                => 'profile/totp_disable',
         '/rma/store'                           => 'rma/store',
         '/rma/([0-9]+)/update'                 => 'rma/update',
         '/rma/([0-9]+)/comment'                => 'rma/comment',
@@ -179,6 +184,7 @@ $routes = [
         '/admin/status/store'                  => 'admin/status_store',
         '/admin/status/update'                 => 'admin/status_update',
         '/admin/permissions/save'              => 'admin/permissions_save',
+        '/admin/users/totp-reset'              => 'admin/user_totp_reset',
         '/admin/settings/save'                 => 'settings/save',
         '/admin/settings/smtp-test'            => 'settings/smtp_test',
         '/admin/settings/sms-test'             => 'settings/sms_test',

@@ -584,6 +584,24 @@ class AdminController {
     // Only Super Admin / Admin may change permissions. Super Admin and Admin
     // themselves are always full-access and are never stored, so they can't be
     // edited or locked out here.
+    /**
+     * Clear a user's authenticator app — the recovery path when someone loses
+     * their phone. They drop back to email/SMS and can enrol again.
+     */
+    public function user_totp_reset(): void {
+        require_login();
+        require_permission('users', 'edit');
+        csrf_verify();
+
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id) {
+            totp_reset($id);
+            $_SESSION['flash'] = ['type' => 'success', 'message' => __('users.totp_reset_done')];
+        }
+        header('Location: /settings?stab=users');
+        exit;
+    }
+
     public function permissions_save(): void {
         require_login();
         if (!is_admin_user()) { http_response_code(403); include views_path('errors/403.php'); exit; }
