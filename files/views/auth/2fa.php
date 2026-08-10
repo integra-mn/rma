@@ -12,9 +12,9 @@
     /* Card and logo deliberately match auth/login.php so the two screens feel
        like one flow - same size, same vertical position. Change both together. */
     .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px;
-            padding: 40px 2rem 2rem; width: 100%; max-width: 380px; min-height: 400px;
+            padding: 50px 2rem 2rem; width: 100%; max-width: 380px; min-height: 400px;
             display: flex; flex-direction: column; justify-content: flex-start; }
-    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a; margin: 0 0 40px; }
+    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a; margin: 0 0 50px; }
     .logo span { color: #1D9E75; }
     .subtitle { font-size: 13px; color: #5f5e5a; text-align: center; margin-bottom: 1.75rem; }
     label { display: block; font-size: 13px; color: #5f5e5a; margin-bottom: 5px; }
@@ -45,7 +45,7 @@
     /* justify-content centres the box+label pair as a group; align-items keeps
        the box on the text baseline rather than floating above it. */
     .trust-row { display: flex; align-items: center; justify-content: center;
-                 gap: 8px; margin-top: 0.75rem; font-size: 13px; color: #5f5e5a; }
+                 gap: 8px; margin: 20px 0 10px; font-size: 13px; color: #5f5e5a; }
     .trust-row input { width: auto; margin: 0; }
     .trust-row label { margin-bottom: 0; line-height: 1; }
 

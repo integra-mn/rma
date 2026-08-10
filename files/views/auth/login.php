@@ -14,9 +14,9 @@
        to be exact, and with centring it would drift as content height changes.
        Mirrored in auth/2fa.php — change both together. */
     .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px;
-            padding: 40px 2rem 2rem; width: 100%; max-width: 380px; min-height: 400px;
+            padding: 50px 2rem 2rem; width: 100%; max-width: 380px; min-height: 400px;
             display: flex; flex-direction: column; justify-content: flex-start; }
-    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a; margin: 0 0 40px; }
+    .logo { font-size: 20px; font-weight: 500; color: #2c2c2a; margin: 0 0 50px; }
     .logo span { color: #1D9E75; }
     label { display: block; font-size: 13px; color: #5f5e5a; margin-bottom: 5px; }
     input[type=email], input[type=password] {

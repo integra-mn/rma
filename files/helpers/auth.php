@@ -369,22 +369,26 @@ function otp_send_email(array $user, string $code): bool {
     $font = "'Montserrat',-apple-system,'Segoe UI',Arial,sans-serif";
     $logo = dirname(__DIR__) . '/assets/integra-email.png';
 
+    // text-align on the container AND on each <p>: Outlook ignores inherited
+    // alignment on block elements, so it has to be repeated to centre reliably.
     $html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head>"
           . "<body style=\"margin:0;padding:24px;background:#f4f4f0;font-family:{$font};\">"
           . "<div style=\"max-width:480px;margin:0 auto;background:#fff;border:0.5px solid #d3d1c7;"
-          . "border-radius:12px;padding:32px;\">"
+          . "border-radius:12px;padding:32px;text-align:center;\">"
           . "<div style=\"text-align:center;margin-bottom:28px;\">"
           . "<img src=\"cid:integralogo\" alt=\"Integra\" height=\"40\" "
           . "style=\"height:40px;width:auto;display:inline-block;border:0;\">"
           . "</div>"
-          . "<p style=\"font-size:15px;color:#5f5e5a;margin:0 0 16px;font-family:{$font};\">"
+          . "<p style=\"font-size:15px;color:#5f5e5a;margin:0 0 16px;text-align:center;font-family:{$font};\">"
           . __('email.otp_greeting', ['name' => $name ?: '']) . "</p>"
-          . "<p style=\"font-size:15px;color:#1a1a18;margin:0 0 8px;font-family:{$font};\">"
+          . "<p style=\"font-size:15px;color:#1a1a18;margin:0 0 8px;text-align:center;font-family:{$font};\">"
           . __('email.otp_intro') . "</p>"
           . "<p style=\"font-size:32px;font-weight:700;letter-spacing:6px;color:#1D9E75;"
           . "margin:16px 0;text-align:center;font-family:{$font};\">{$safe}</p>"
-          . "<p style=\"font-size:13px;color:#888780;margin:16px 0 0;font-family:{$font};\">"
+          . "<p style=\"font-size:13px;color:#888780;margin:16px 0 0;text-align:center;font-family:{$font};\">"
           . __('email.otp_expiry') . "</p>"
+          . "<p style=\"font-size:13px;color:#888780;margin:4px 0 0;text-align:center;font-family:{$font};\">"
+          . __('email.otp_ignore') . "</p>"
           . "</div></body></html>";
 
     $attachments = is_readable($logo)
