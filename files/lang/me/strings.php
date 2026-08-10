@@ -715,6 +715,7 @@ return [
     'suppliers.search' => 'Pretraži po nazivu, emailu ili kontaktu',
     'suppliers.new' => 'Novi brend',
     'suppliers.company' => 'Naziv',
+    'suppliers.zip_code'     => 'Poštanski broj',
     'suppliers.contact_person' => 'Kontakt osoba',
     'suppliers.contact' => 'Kontakt',
     'suppliers.no_results' => 'Nema brendova.',

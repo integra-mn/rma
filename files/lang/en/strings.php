@@ -715,6 +715,7 @@ return [
     'suppliers.search' => 'Search by name, email or contact',
     'suppliers.new' => 'New brand',
     'suppliers.company' => 'Name',
+    'suppliers.zip_code'     => 'ZIP Code',
     'suppliers.contact_person' => 'Contact person',
     'suppliers.contact' => 'Contact',
     'suppliers.no_results' => 'No brands yet.',

@@ -1,6 +1,8 @@
 <?php defined('RMS') or die('Direct access not permitted'); ?>
 
-<div style="padding:1.5rem;">
+<!-- Same width tier as Administration and Partneri so the page lines up
+     with Korisnici rather than running to the window edge. -->
+<div style="padding:1.5rem;max-width:var(--w-content);">
 
   <?php if ($success ?? null): ?>
     <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
@@ -29,19 +31,29 @@
     <h2 style="font-size:15px;font-weight:500;margin-bottom:1rem;"><?= __('suppliers.new') ?></h2>
     <form method="POST" action="/suppliers/store">
       <?= csrf_field() ?>
-      <div class="form-grid" style="">
-        <div class="field"><label><?= __('suppliers.company') ?> *</label><input type="text" name="name" required></div>
+      <!-- Fixed 4-column rows, matching Korisnici and Partneri. The default
+           form-grid is auto-fit, so the column count drifted with the window. -->
+      <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="field"><label><?= __('suppliers.company') ?></label><input type="text" name="name" required></div>
         <div class="field"><label><?= __('suppliers.contact_person') ?></label><input type="text" name="contact"></div>
         <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="phone"></div>
         <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email"></div>
+      </div>
+      <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="field"><label><?= __('label.address') ?></label><input type="text" name="address"></div>
+        <div class="field"><label><?= __('suppliers.zip_code') ?></label><input type="text" name="zip_code"></div>
         <div class="field"><label><?= __('label.city') ?></label><input type="text" name="city"></div>
         <div class="field"><label><?= __('label.country') ?></label><input type="text" name="country"></div>
       </div>
-      <div class="field"><label><?= __('label.notes') ?></label><textarea name="notes" rows="2"></textarea></div>
+      <!-- One line, not resizable, 40px to match the inputs: app.css gives
+           inputs height 40px but textareas min-height 36px. -->
+      <div class="field">
+        <label><?= __('label.notes') ?></label>
+        <textarea name="notes" rows="1" style="height:40px;min-height:40px;padding:10px;line-height:18px;resize:none;overflow:auto;"></textarea>
+      </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
-        <button type="submit" class="btn btn-primary"><?= __('btn.save') ?></button>
-        <button type="button" class="btn" onclick="document.getElementById('add-form').style.display='none'"><?= __('btn.cancel') ?></button>
+        <button type="submit" class="btn btn-primary" style="min-width:100px;"><?= __('btn.save') ?></button>
+        <button type="button" class="btn" style="min-width:100px;" onclick="document.getElementById('add-form').style.display='none'"><?= __('btn.cancel') ?></button>
       </div>
     </form>
   </div>
@@ -93,19 +105,23 @@
     <form method="POST" action="/suppliers/update">
       <?= csrf_field() ?>
       <input type="hidden" name="id" id="e-id">
-      <div class="form-grid" style="">
-        <div class="field"><label><?= __('suppliers.company') ?> *</label><input type="text" name="name" id="e-name" required></div>
+      <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="field"><label><?= __('suppliers.company') ?></label><input type="text" name="name" id="e-name" required></div>
         <div class="field"><label><?= __('suppliers.contact_person') ?></label><input type="text" name="contact" id="e-contact"></div>
         <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="phone" id="e-phone"></div>
         <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email" id="e-email"></div>
         <div class="field"><label><?= __('label.address') ?></label><input type="text" name="address" id="e-address"></div>
+        <div class="field"><label><?= __('suppliers.zip_code') ?></label><input type="text" name="zip_code" id="e-zip"></div>
         <div class="field"><label><?= __('label.city') ?></label><input type="text" name="city" id="e-city"></div>
         <div class="field"><label><?= __('label.country') ?></label><input type="text" name="country" id="e-country"></div>
       </div>
-      <div class="field"><label><?= __('label.notes') ?></label><textarea name="notes" id="e-notes" rows="2"></textarea></div>
+      <div class="field">
+        <label><?= __('label.notes') ?></label>
+        <textarea name="notes" id="e-notes" rows="1" style="height:40px;min-height:40px;padding:10px;line-height:18px;resize:none;overflow:auto;"></textarea>
+      </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
-        <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
-        <button type="button" class="btn" onclick="document.getElementById('edit-modal').style.display='none'"><?= __('btn.cancel') ?></button>
+        <button type="submit" class="btn btn-primary" style="min-width:100px;"><?= __('btn.save_changes') ?></button>
+        <button type="button" class="btn" style="min-width:100px;" onclick="document.getElementById('edit-modal').style.display='none'"><?= __('btn.cancel') ?></button>
       </div>
     </form>
   </div>
@@ -119,6 +135,7 @@ function editSupplier(s) {
   document.getElementById('e-phone').value   = s.phone   || '';
   document.getElementById('e-email').value   = s.email   || '';
   document.getElementById('e-address').value = s.address || '';
+  document.getElementById('e-zip').value     = s.zip_code || '';
   document.getElementById('e-city').value    = s.city    || '';
   document.getElementById('e-country').value = s.country || '';
   document.getElementById('e-notes').value   = s.notes   || '';
