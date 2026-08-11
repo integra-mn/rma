@@ -54,15 +54,18 @@ const PERMISSION_MATRIX = [
     'devices'   => ['view', 'edit'],
     'reports'   => ['view'],
     'invoicing' => ['view'],
-    // Administration = Users, Locations, Devices, Shipments, Statuses.
-    // Was governed by settings.* along with Settings itself, so the two could
-    // not be granted apart, and the sidebar link was gated on a hardcoded role
-    // list that the permission editor could not reach at all.
-    //   view  — see the section and its tabs
-    //   edit  — change locations, device catalogue, couriers, statuses
-    //   users — create/edit/deactivate accounts and reset someone's 2FA. Kept
-    //           separate because it is the one that can hand out access.
-    'administration' => ['view', 'edit', 'users'],
+    // Administration = Users, Locations, Couriers, Statuses.
+    //
+    // The four standard verbs, as elsewhere. A 'users' action used to sit
+    // beside view/edit, which read as a contradiction — those two already
+    // sound like the whole section — and it would have needed its own row on
+    // the Permissions screen, which is ordered to match the sidebar and has no
+    // Users entry there.
+    //
+    //   create — new location, courier, status or user account
+    //   edit   — update or activate/deactivate any of them; reset someone's 2FA
+    //   delete — remove a location, courier or user (statuses have no delete)
+    'administration' => ['view', 'create', 'edit', 'delete'],
     'settings'  => ['view', 'edit'],
     'preferences' => ['theme', 'lang', 'integrations'],
 ];

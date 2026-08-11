@@ -11,7 +11,7 @@ class AdminController {
 
     public function location_store(): void {
         require_login();
-        require_permission('administration', 'edit');
+        require_permission('administration', 'create');
 
         $count = (int) db_val('SELECT COUNT(*) FROM locations WHERE deleted_at IS NULL');
         if ($count >= 10) {
@@ -116,7 +116,7 @@ class AdminController {
 
     public function courier_store(): void {
         require_login();
-        require_permission('administration', 'edit');
+        require_permission('administration', 'create');
         $name = trim($_POST['name'] ?? '');
         if (!$name) {
             $_SESSION['flash'] = ['type'=>'danger','message'=>__('ship.courier_name_required')];
@@ -167,7 +167,7 @@ class AdminController {
 
     public function courier_delete(): void {
         require_login();
-        require_permission('administration', 'edit');
+        require_permission('administration', 'delete');
         $id = (int) ($_POST['id'] ?? 0);
         // In-use couriers can't be hard-deleted (shipments/partners reference them);
         // fall back to disabling so history stays intact.
@@ -192,7 +192,7 @@ class AdminController {
 
     public function user_store(): void {
         require_login();
-        require_permission('administration', 'users');
+        require_permission('administration', 'create');
 
         $name  = trim($_POST['name'] ?? '');
         $email = strtolower(trim($_POST['email'] ?? ''));
@@ -303,7 +303,7 @@ class AdminController {
 
     public function user_update(): void {
         require_login();
-        require_permission('administration', 'users');
+        require_permission('administration', 'edit');
 
         $id   = (int)($_POST['id'] ?? 0);
         $user = db_row('SELECT * FROM users WHERE id = ?', [$id]);
@@ -383,7 +383,7 @@ class AdminController {
 
     public function user_toggle(): void {
         require_login();
-        require_permission('administration', 'users');
+        require_permission('administration', 'edit');
 
         $id   = (int)($_POST['id'] ?? 0);
         $user = db_row('SELECT * FROM users WHERE id = ?', [$id]);
@@ -406,7 +406,7 @@ class AdminController {
 
     public function location_delete(): void {
         require_login();
-        require_permission('administration', 'edit');
+        require_permission('administration', 'delete');
 
         $id = (int)($_POST['id'] ?? 0);
 
@@ -427,7 +427,7 @@ class AdminController {
 
     public function user_delete(): void {
         require_login();
-        require_permission('administration', 'users');
+        require_permission('administration', 'delete');
 
         $id = (int)($_POST['id'] ?? 0);
         if ($id === current_user_id()) {
@@ -546,7 +546,7 @@ class AdminController {
 
     public function status_store(): void {
         require_login();
-        require_permission('administration', 'edit');
+        require_permission('administration', 'create');
 
         $type    = $_POST['type'] ?? '';
         $label   = trim($_POST['label'] ?? '');
@@ -653,7 +653,7 @@ class AdminController {
      */
     public function user_totp_reset(): void {
         require_login();
-        require_permission('administration', 'users');
+        require_permission('administration', 'edit');
         csrf_verify();
 
         $id = (int) ($_POST['id'] ?? 0);
@@ -718,162 +718,10 @@ class AdminController {
     }
 
     public function device_catalog(): void {
-        // Legacy URL — the live page is the Administration → Devices tab.
-        header('Location: /administration?tab=devices', true, 301);
+        // Legacy URL — the catalogue is its own section now. Pointing straight
+        // at it avoids bouncing through /administration, which only redirects
+        // here again.
+        header('Location: /devices', true, 301);
         exit;
-    }
-
-    // ── Category actions ──────────────────────────────────────
-
-    public function category_store(): void {
-        require_login();
-        require_permission('administration', 'edit');
-
-        $name = trim($_POST['name'] ?? '');
-        if (!$name) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('catalog.cat_required')];
-            header('Location: /admin/device-catalog');
-            exit;
-        }
-
-        $slug = $this->slugify($name);
-        $existing = db_val('SELECT id FROM device_categories WHERE slug = ?', [$slug]);
-        if ($existing) $slug .= '-' . time();
-
-        $prefix = strtoupper(trim($_POST['sku_prefix'] ?? ''));
-        if (!$prefix) {
-            // Auto-generate from first 3 letters of name
-            $prefix = strtoupper(preg_replace('/[^A-Z]/', '', strtoupper($name)));
-            $prefix = substr($prefix, 0, 4);
-        }
-
-        $new_id = db_insert('device_categories', [
-            'name'       => $name,
-            'slug'       => $slug,
-            'sku_prefix' => $prefix,
-            'sort_order' => (int)($_POST['sort_order'] ?? 0),
-            'is_active'  => 1,
-        ]);
-        audit('created', 'device_category', $new_id);
-        $_SESSION['flash'] = ['type'=>'success','message'=>__('catalog.category_added')];
-        header('Location: /admin/device-catalog');
-        exit;
-    }
-
-    public function category_delete(): void {
-        require_login();
-        require_permission('administration', 'edit');
-
-        $id = (int)($_POST['id'] ?? 0);
-        $in_use = db_val('SELECT COUNT(*) FROM device_models WHERE category_id = ?', [$id]);
-        if ($in_use) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('catalog.cat_in_use')];
-        } else {
-            db_delete('device_categories', 'id = ?', [$id]);
-            audit('deleted', 'device_category', $id);
-            $_SESSION['flash'] = ['type'=>'success','message'=>__('catalog.category_deleted')];
-        }
-        header('Location: /admin/device-catalog');
-        exit;
-    }
-
-    // ── Brand actions ─────────────────────────────────────────
-
-    public function brand_store(): void {
-        require_login();
-        require_permission('administration', 'edit');
-
-        $name = trim($_POST['name'] ?? '');
-        if (!$name) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('catalog.brand_required')];
-            header('Location: /admin/device-catalog');
-            exit;
-        }
-
-        $slug = $this->slugify($name);
-        $existing = db_val('SELECT id FROM device_brands WHERE slug = ?', [$slug]);
-        if ($existing) $slug .= '-' . time();
-
-        $new_id = db_insert('device_brands', [
-            'name'      => $name,
-            'slug'      => $slug,
-            'is_active' => 1,
-        ]);
-        audit('created', 'device_brand', $new_id);
-        $_SESSION['flash'] = ['type'=>'success','message'=>__('catalog.brand_added')];
-        header('Location: /admin/device-catalog');
-        exit;
-    }
-
-    public function brand_delete(): void {
-        require_login();
-        require_permission('administration', 'edit');
-
-        $id = (int)($_POST['id'] ?? 0);
-        $in_use = db_val('SELECT COUNT(*) FROM device_models WHERE brand_id = ?', [$id]);
-        if ($in_use) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('catalog.brand_in_use')];
-        } else {
-            db_delete('device_brands', 'id = ?', [$id]);
-            audit('deleted', 'device_brand', $id);
-            $_SESSION['flash'] = ['type'=>'success','message'=>__('catalog.brand_deleted')];
-        }
-        header('Location: /admin/device-catalog');
-        exit;
-    }
-
-    // ── Model actions ─────────────────────────────────────────
-
-    public function model_store(): void {
-        require_login();
-        require_permission('administration', 'edit');
-
-        $name        = trim($_POST['name'] ?? '');
-        $brand_id    = (int)($_POST['brand_id'] ?? 0);
-        $category_id = (int)($_POST['category_id'] ?? 0);
-
-        if (!$name || !$brand_id || !$category_id) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('catalog.fields_required')];
-            header('Location: /admin/device-catalog');
-            exit;
-        }
-
-        $new_id = db_insert('device_models', [
-            'name'         => $name,
-            'brand_id'     => $brand_id,
-            'category_id'  => $category_id,
-            'model_number' => trim($_POST['model_number'] ?? ''),
-            'release_year' => $_POST['release_year'] ?: null,
-            'is_active'    => 1,
-        ]);
-        audit('created', 'device_model', $new_id);
-        $_SESSION['flash'] = ['type'=>'success','message'=>__('catalog.model_added')];
-        header('Location: /admin/device-catalog');
-        exit;
-    }
-
-    public function model_delete(): void {
-        require_login();
-        require_permission('administration', 'edit');
-
-        $id = (int)($_POST['id'] ?? 0);
-        $in_use = db_val('SELECT COUNT(*) FROM devices WHERE model_id = ?', [$id]);
-        if ($in_use) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('catalog.model_in_use')];
-        } else {
-            db_delete('device_models', 'id = ?', [$id]);
-            audit('deleted', 'device_model', $id);
-            $_SESSION['flash'] = ['type'=>'success','message'=>__('catalog.model_deleted')];
-        }
-        header('Location: /admin/device-catalog');
-        exit;
-    }
-
-    // ── Helpers ───────────────────────────────────────────────
-
-    private function slugify(string $text): string {
-        $text = strtolower(trim($text));
-        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
-        return trim($text, '-');
     }
 }

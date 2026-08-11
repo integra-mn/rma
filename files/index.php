@@ -165,12 +165,6 @@ $routes = [
         '/partners/([0-9]+)/branches/store'     => 'partners/branch_store',
         '/partners/([0-9]+)/branches/delete'    => 'partners/branch_delete',
         '/partners/([0-9]+)/delete'            => 'partners/delete',
-        '/admin/category/store'                => 'admin/category_store',
-        '/admin/category/delete'               => 'admin/category_delete',
-        '/admin/brand/store'                   => 'admin/brand_store',
-        '/admin/brand/delete'                  => 'admin/brand_delete',
-        '/admin/model/store'                   => 'admin/model_store',
-        '/admin/model/delete'                  => 'admin/model_delete',
         '/admin/location/store'                => 'admin/location_store',
         '/admin/location/toggle'               => 'admin/location_toggle',
         '/admin/location/update'               => 'admin/location_update',
@@ -220,6 +214,16 @@ function dispatch(string $uri, string $method, array $routes): void {
             }
             require_once $file;
             $class = ucfirst($controller) . 'Controller';
+            // A route pointing at a method that doesn't exist used to be a
+            // fatal error rather than a 404 — only the controller file was
+            // checked. /rma/{id}/edit and /rma/{id}/upload are both in that
+            // state today, and removing a method would silently create more.
+            if (!method_exists($class, $action)) {
+                error_log("Route {$uri} -> {$class}::{$action}() which does not exist");
+                http_response_code(404);
+                include views_path('errors/404.php');
+                return;
+            }
             (new $class())->$action(...$matches);
             return;
         }

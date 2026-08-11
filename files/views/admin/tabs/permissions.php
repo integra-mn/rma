@@ -17,7 +17,7 @@ $modules = [
     'customers'      => ['label' => __('nav.customers'), 'actions' => ['view', 'create', 'edit']],
     'invoicing'      => ['label' => __('nav.invoices'),  'actions' => ['view']],
     'reports'        => ['label' => __('nav.reports'),   'actions' => ['view']],
-    'administration' => ['label' => __('nav.administration'), 'actions' => ['view', 'edit', 'users']],
+    'administration' => ['label' => __('nav.administration'), 'actions' => ['view', 'create', 'edit', 'delete']],
     'settings'       => ['label' => __('nav.settings'),  'actions' => ['view', 'edit']],
     'preferences'    => ['label' => __('admin.perm_preferences'), 'actions' => ['theme', 'lang', 'integrations']],
 ];
