@@ -318,7 +318,7 @@ return [
     'profile.totp_disable'      => 'Ukloni aplikaciju',
     'profile.totp_disable_confirm' => 'Ukloniti aplikaciju za autentifikaciju? Kodove ćete ponovo primati na email ili SMS.',
     'profile.totp_disabled'     => 'Aplikacija za autentifikaciju je uklonjena.',
-    'auth.channel_totp'         => 'Aplikacija',
+    'auth.channel_totp'         => 'Autentifikator',
     'auth.totp_hint'            => 'Otvorite aplikaciju za autentifikaciju i unesite trenutni kod.',
     'users.totp_reset'          => 'Resetuj aplikaciju za autentifikaciju',
     'users.totp_reset_done'     => 'Aplikacija resetovana — korisnik može ponovo da je podesi.',
