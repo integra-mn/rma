@@ -48,7 +48,10 @@ const PERMISSION_MATRIX = [
     'shipments' => ['view', 'create', 'edit'],
     'customers' => ['view', 'create', 'edit'],
     'partners'  => ['view', 'edit'],
-    'suppliers' => ['view', 'edit'],
+    // Device catalogue — brands, models, device groups. Its own module because
+    // new models arrive constantly: whoever enters them should not need the
+    // whole Administration section (locations, couriers, statuses) to do it.
+    'devices'   => ['view', 'edit'],
     'reports'   => ['view'],
     'invoicing' => ['view'],
     // Administration = Users, Locations, Devices, Shipments, Statuses.

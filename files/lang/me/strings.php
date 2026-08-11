@@ -592,6 +592,8 @@ return [
     'parts.tab_catalog'        => 'Katalog djelova',
     'parts.tab_receipts'       => 'Prijem robe',
     'parts.tab_inventory'      => 'Popis',
+    'parts.tab_suppliers'    => 'Dobavljači',
+    'parts.tab_part_groups'  => 'Grupe djelova',
     'parts.supplier'           => 'Brend',
     'parts.part'               => 'Dio',
     'parts.brand'              => 'Marka',

@@ -2,15 +2,7 @@
 
 <div style="padding:1.5rem;">
 
-  <!-- Tabs -->
-  <div class="tab-bar">
-    <?php foreach (['stock'=>__('parts.tab_stock'),'parts'=>__('parts.tab_catalog'),'receipts'=>__('parts.tab_receipts'),'inventory'=>__('parts.tab_inventory')] as $t => $l): ?>
-      <a href="?tab=<?= $t ?>"
-         class="tab<?= $tab===$t ? ' active' : '' ?>">
-        <?= $l ?>
-      </a>
-    <?php endforeach; ?>
-  </div>
+  <?php include views_path('parts/_tabs.php'); ?>
 
   <?php if ($success ?? null): ?>
     <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>

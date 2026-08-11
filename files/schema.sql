@@ -1400,7 +1400,7 @@ INSERT INTO role_permissions (role, module, action) VALUES
   ('reception','rma','view'),('reception','rma','create'),('reception','rma','edit'),
   ('reception','repair','view'),
   ('reception','customers','view'),('reception','customers','create'),('reception','customers','edit'),
-  ('reception','partners','view'),('reception','suppliers','view'),
+  ('reception','partners','view'),
   ('reception','reports','view'),
   ('technician','rma','view'),('technician','rma','edit'),
   ('technician','repair','view'),('technician','repair','create'),('technician','repair','edit'),
@@ -1417,8 +1417,9 @@ INSERT INTO role_permissions (role, module, action) VALUES
   ('admin','shipments','view'),('admin','shipments','create'),('admin','shipments','edit'),
   ('admin','customers','view'),('admin','customers','create'),('admin','customers','edit'),
   ('admin','partners','view'),('admin','partners','edit'),
-  ('admin','suppliers','view'),('admin','suppliers','edit'),
+  
   ('admin','reports','view'),
   ('admin','invoicing','view'),
   ('admin','administration','view'),('admin','administration','edit'),('admin','administration','users'),
+  ('admin','devices','view'),('admin','devices','edit'),
   ('admin','preferences','theme'),('admin','preferences','lang'),('admin','preferences','integrations');

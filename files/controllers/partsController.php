@@ -38,6 +38,27 @@ class PartsController {
             return;
         }
 
+        // Suppliers keeps its own URL and controller; the tab bar just points
+        // there. Redirecting means one place loads the supplier list.
+        if ($tab === 'suppliers') {
+            header('Location: /suppliers');
+            exit;
+        }
+
+        if ($tab === 'part-groups') {
+            $part_groups = db_rows(
+                'SELECT pg.*, COUNT(p.id) AS part_count
+                   FROM part_groups pg
+                   LEFT JOIN parts p ON p.part_group_id = pg.id AND p.deleted_at IS NULL
+                  GROUP BY pg.id
+                  ORDER BY pg.sort_order, pg.name'
+            );
+            include views_path('layout/header.php');
+            include views_path('parts/part_groups_tab.php');
+            include views_path('layout/footer.php');
+            return;
+        }
+
         if ($tab === 'inventory') {
             $locations  = db_rows('SELECT * FROM locations WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
             $user       = current_user();

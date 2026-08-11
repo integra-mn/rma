@@ -592,6 +592,8 @@ return [
     'parts.tab_catalog'        => 'Parts Catalog',
     'parts.tab_receipts'       => 'Goods Receipts',
     'parts.tab_inventory'      => 'Inventory Count',
+    'parts.tab_suppliers'    => 'Suppliers',
+    'parts.tab_part_groups'  => 'Part groups',
     'parts.supplier'           => 'Brand',
     'parts.part'               => 'Part',
     'parts.brand'              => 'Brand',

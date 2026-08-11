@@ -4,6 +4,9 @@
      with Korisnici rather than running to the window edge. -->
 <div style="padding:1.5rem;max-width:var(--w-content);">
 
+  <?php $tab = 'suppliers'; ?>
+  <?php include views_path('parts/_tabs.php'); ?>
+
   <?php if ($success ?? null): ?>
     <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
   <?php endif; ?>
@@ -13,7 +16,7 @@
 
   <!-- Add + Search -->
   <div style="display:flex;gap:8px;margin-bottom:1.25rem;align-items:center;flex-wrap:wrap;">
-    <?php if (can('suppliers', 'edit')): ?>
+    <?php if (can('parts', 'edit')): ?>
       <button type="button" class="btn btn-primary" style="min-width:140px;"
               onclick="document.getElementById('add-form').style.display=document.getElementById('add-form').style.display==='none'?'block':'none'">
         <?= __('suppliers.add') ?>
@@ -26,7 +29,7 @@
   </div>
 
   <!-- Add form -->
-  <?php if (can('suppliers', 'edit')): ?>
+  <?php if (can('parts', 'edit')): ?>
   <div id="add-form" style="display:none;margin-bottom:1.25rem;" class="card">
     <h2 style="font-size:15px;font-weight:500;margin-bottom:1rem;"><?= __('suppliers.new') ?></h2>
     <form method="POST" action="/suppliers/store">
@@ -71,7 +74,7 @@
           <th style="width:22%;"><?= __('label.email') ?></th>
           <th style="width:16%;"><?= __('label.city') ?></th>
           <th style="width:10%;"><?= __('label.country') ?></th>
-          <?php if (can('suppliers', 'edit')): ?><th style="width:10%;text-align:right;"><?= __('label.actions') ?></th><?php endif; ?>
+          <?php if (can('parts', 'edit')): ?><th style="width:10%;text-align:right;"><?= __('label.actions') ?></th><?php endif; ?>
         </tr>
       </thead>
       <tbody>
@@ -85,7 +88,7 @@
             <td style="color:var(--text-secondary);"><?= htmlspecialchars($s['email'] ?? '—') ?></td>
             <td style="color:var(--text-secondary);"><?= htmlspecialchars($s['city'] ?? '—') ?></td>
             <td style="color:var(--text-secondary);"><?= htmlspecialchars($s['country'] ?? '—') ?></td>
-            <?php if (can('suppliers', 'edit')): ?>
+            <?php if (can('parts', 'edit')): ?>
             <td style="text-align:right;">
               <button onclick="editSupplier(<?= htmlspecialchars(json_encode($s)) ?>)" class="btn-link"><?= __('btn.edit') ?></button>
             </td>
@@ -98,7 +101,7 @@
 </div>
 
 <!-- Edit modal -->
-<?php if (can('suppliers', 'edit')): ?>
+<?php if (can('parts', 'edit')): ?>
 <div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:50;align-items:center;justify-content:center;">
   <div style="background:var(--bg-surface);border-radius:12px;padding:1.5rem;width:100%;max-width:520px;margin:1rem;max-height:90vh;overflow-y:auto;">
     <h2 style="font-size:16px;font-weight:500;margin-bottom:1rem;"><?= __('suppliers.edit') ?></h2>

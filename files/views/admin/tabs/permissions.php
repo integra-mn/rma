@@ -11,7 +11,7 @@ $modules = [
     'shipments'      => ['label' => __('nav.shipments'), 'actions' => ['view', 'create', 'edit']],
     'customers'      => ['label' => __('nav.customers'), 'actions' => ['view', 'create', 'edit']],
     'partners'       => ['label' => __('nav.partners'),  'actions' => ['view', 'edit']],
-    'suppliers'      => ['label' => __('nav.suppliers'), 'actions' => ['view', 'edit']],
+    'devices'        => ['label' => __('nav.devices'),   'actions' => ['view', 'edit']],
     'reports'        => ['label' => __('nav.reports'),   'actions' => ['view']],
     'invoicing'      => ['label' => __('nav.invoices'),  'actions' => ['view']],
     'administration' => ['label' => __('nav.administration'), 'actions' => ['view', 'edit', 'users']],
@@ -29,7 +29,9 @@ $roles = [
     'partner'     => ['label' => __('users.role_partner'),     'color' => '#5a3a8a', 'full' => false, 'perms' => role_permissions('partner')],
 ];
 
-$can_edit  = is_admin_user();
+// Must match permissions_save(), which is Super Admin only — otherwise the
+// boxes look editable and every tick silently fails to save.
+$can_edit  = is_super_admin();
 ?>
 
 <!-- Editable permissions matrix -->

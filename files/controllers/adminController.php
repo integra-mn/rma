@@ -501,6 +501,9 @@ class AdminController {
         $page_title = __('nav.administration');
 
         if ($tab === 'users') {
+
+        // Old bookmarks: the catalogue moved out to its own section.
+        if ($tab === 'devices') { header('Location: /devices', true, 301); exit; }
             // Super Admin pinned to the top, then the usual active-first,
             // alphabetical order. CASE rather than a role sort so adding roles
             // later doesn't silently reshuffle the list.
@@ -527,25 +530,6 @@ class AdminController {
                                       WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
         } elseif ($tab === 'locations') {
             $locations = db_rows('SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY name');
-        } elseif ($tab === 'devices') {
-            $tab        = 'devices'; // pass to devices/index.php as $tab
-            $categories = db_rows('SELECT * FROM device_categories ORDER BY sort_order, name');
-            $brands     = db_rows('SELECT b.*, COUNT(m.id) as model_count
-                                   FROM device_brands b
-                                   LEFT JOIN device_models m ON m.brand_id = b.id
-                                   GROUP BY b.id ORDER BY b.name');
-            $models     = db_rows('SELECT m.*, b.name as brand_name, c.name as category_name
-                                   FROM device_models m
-                                   JOIN device_brands b ON b.id = m.brand_id
-                                   JOIN device_categories c ON c.id = m.category_id
-                                   ORDER BY b.name, m.name');
-            $part_groups = db_rows(
-                'SELECT pg.*, COUNT(p.id) AS part_count
-                 FROM part_groups pg
-                 LEFT JOIN parts p ON p.part_group_id = pg.id AND p.deleted_at IS NULL
-                 GROUP BY pg.id
-                 ORDER BY pg.sort_order, pg.name'
-            );
         } elseif ($tab === 'statuses') {
             $rma_statuses    = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order, label');
             $repair_statuses = db_rows('SELECT * FROM repair_statuses ORDER BY sort_order, label');

@@ -5,9 +5,9 @@ class SuppliersController {
 
     public function index(): void {
         require_login();
-        require_permission('suppliers', 'view');
+        require_permission('parts', 'view');
 
-        $page_title = __('nav.suppliers');
+        $page_title = __('parts.tab_suppliers');
         $search     = trim($_GET['q'] ?? '');
         $where      = 'deleted_at IS NULL AND is_active = 1';
         $params     = [];
@@ -35,7 +35,7 @@ class SuppliersController {
 
     public function store(): void {
         require_login();
-        require_permission('suppliers', 'edit');
+        require_permission('parts', 'edit');
 
         $name = trim($_POST['name'] ?? '');
         if (!$name) {
@@ -65,7 +65,7 @@ class SuppliersController {
 
     public function update(): void {
         require_login();
-        require_permission('suppliers', 'edit');
+        require_permission('parts', 'edit');
 
         $id   = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');

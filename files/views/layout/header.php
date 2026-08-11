@@ -216,6 +216,15 @@ function nav_active(string $prefix): string {
   </a>
   <?php endif; ?>
 
+  <?php if (can('devices', 'view')): ?>
+  <a href="/devices" class="sidebar-link<?= nav_active('/devices') ?>">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4.5" y="1.5" width="7" height="13" rx="1.5"/>
+      <line x1="6.8" y1="12.6" x2="9.2" y2="12.6"/>
+    </svg>
+    <?= __('nav.devices') ?>
+  </a>
+  <?php endif; ?>
   <?php if (can('customers', 'view') || can('partners', 'view')): ?>
   <?php endif; ?>
 
@@ -230,15 +239,6 @@ function nav_active(string $prefix): string {
   </a>
   <?php endif; ?>
 
-  <?php if (can('suppliers', 'view')): ?>
-  <a href="/suppliers" class="sidebar-link<?= nav_active('/suppliers') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M13.7 8.9l-4.8 4.8a1.33 1.33 0 0 1-1.9 0L1.3 8V1.3H8l5.7 5.7a1.33 1.33 0 0 1 0 1.9z"/>
-      <circle cx="4.6" cy="4.6" r="0.9"/>
-    </svg>
-    <?= __('nav.suppliers') ?>
-  </a>
-  <?php endif; ?>
 
   <?php if (can('customers', 'view')): ?>
   <a href="/customers" class="sidebar-link<?= nav_active('/customers') ?>">

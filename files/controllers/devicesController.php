@@ -5,7 +5,7 @@ class DevicesController {
 
     public function index(): void {
         require_login();
-        require_permission('settings', 'view');
+        require_permission('devices', 'view');
 
         $tab        = $_GET['tab'] ?? 'groups';
         $page_title = __('nav.devices');
@@ -36,7 +36,7 @@ class DevicesController {
     // ── Part groups CRUD (Administration / Devices / Part Group tab) ─────
     public function part_group_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('parts', 'edit');
         $name = trim($_POST['name'] ?? '');
         if ($name) {
             db_insert('part_groups', [
@@ -46,13 +46,13 @@ class DevicesController {
             ]);
             audit('created', 'part_group', 0);
         }
-        header('Location: /administration?tab=devices&dtab=part-groups');
+        header('Location: /parts?tab=part-groups');
         exit;
     }
 
     public function part_group_update(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('parts', 'edit');
         $id   = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         if ($id && $name) {
@@ -63,13 +63,13 @@ class DevicesController {
             ], 'id = ?', [$id]);
             audit('updated', 'part_group', $id);
         }
-        header('Location: /administration?tab=devices&dtab=part-groups');
+        header('Location: /parts?tab=part-groups');
         exit;
     }
 
     public function part_group_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('parts', 'edit');
         $id = (int)($_POST['id'] ?? 0);
         // Refuse if any parts are still tagged to this group — staff should
         // re-tag them first, or we'd orphan the classification.
@@ -80,13 +80,13 @@ class DevicesController {
             db()->prepare('DELETE FROM part_groups WHERE id = ?')->execute([$id]);
             audit('deleted', 'part_group', $id);
         }
-        header('Location: /administration?tab=devices&dtab=part-groups');
+        header('Location: /parts?tab=part-groups');
         exit;
     }
 
     public function category_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('devices', 'edit');
         $name = trim($_POST['name'] ?? '');
         if ($name) {
             db_insert('device_categories', [
@@ -97,7 +97,7 @@ class DevicesController {
             ]);
             audit('created', 'device_category', 0);
         }
-        header('Location: /administration?tab=devices&dtab=groups');
+        header('Location: /devices?dtab=groups');
         exit;
     }
 
@@ -120,7 +120,7 @@ class DevicesController {
 
     public function category_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('devices', 'edit');
         $id = (int)($_POST['id'] ?? 0);
         $used = (int)db_val('SELECT COUNT(*) FROM device_models WHERE category_id = ?', [$id]);
         if ($used) {
@@ -129,13 +129,13 @@ class DevicesController {
             db_delete('device_categories', 'id = ?', [$id]);
             audit('deleted', 'device_category', $id);
         }
-        header('Location: /administration?tab=devices&dtab=groups');
+        header('Location: /devices?dtab=groups');
         exit;
     }
 
     public function brand_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('devices', 'edit');
         $name = trim($_POST['name'] ?? '');
         if ($name) {
             db_insert('device_brands', [
@@ -144,13 +144,13 @@ class DevicesController {
             ]);
             audit('created', 'device_brand', 0);
         }
-        header('Location: /administration?tab=devices&dtab=brands');
+        header('Location: /devices?dtab=brands');
         exit;
     }
 
     public function brand_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('devices', 'edit');
         $id = (int)($_POST['id'] ?? 0);
         $used = (int)db_val('SELECT COUNT(*) FROM device_models WHERE brand_id = ?', [$id]);
         if ($used) {
@@ -159,13 +159,13 @@ class DevicesController {
             db_delete('device_brands', 'id = ?', [$id]);
             audit('deleted', 'device_brand', $id);
         }
-        header('Location: /administration?tab=devices&dtab=brands');
+        header('Location: /devices?dtab=brands');
         exit;
     }
 
     public function model_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('devices', 'edit');
         $name     = trim($_POST['name'] ?? '');
         $brand_id = (int)($_POST['brand_id'] ?? 0);
         $cat_id   = (int)($_POST['category_id'] ?? 0);
@@ -177,13 +177,13 @@ class DevicesController {
             ]);
             audit('created', 'device_model', 0);
         }
-        header('Location: /administration?tab=devices&dtab=models');
+        header('Location: /devices?dtab=models');
         exit;
     }
 
     public function model_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('devices', 'edit');
         $id = (int)($_POST['id'] ?? 0);
         $used = (int)db_val('SELECT COUNT(*) FROM devices WHERE model_id = ?', [$id]);
         if ($used) {
@@ -192,7 +192,7 @@ class DevicesController {
             db_delete('device_models', 'id = ?', [$id]);
             audit('deleted', 'device_model', $id);
         }
-        header('Location: /administration?tab=devices&dtab=models');
+        header('Location: /devices?dtab=models');
         exit;
     }
 
@@ -200,7 +200,7 @@ class DevicesController {
 
     public function category_update(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('devices', 'edit');
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         if ($id && $name) {
@@ -211,26 +211,26 @@ class DevicesController {
             ], 'id = ?', [$id]);
             audit('updated', 'device_category', $id);
         }
-        header('Location: /administration?tab=devices&dtab=groups');
+        header('Location: /devices?dtab=groups');
         exit;
     }
 
     public function brand_update(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('devices', 'edit');
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         if ($id && $name) {
             db_update('device_brands', ['name' => $name], 'id = ?', [$id]);
             audit('updated', 'device_brand', $id);
         }
-        header('Location: /administration?tab=devices&dtab=brands');
+        header('Location: /devices?dtab=brands');
         exit;
     }
 
     public function model_update(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('devices', 'edit');
         $id    = (int)($_POST['id'] ?? 0);
         $name  = trim($_POST['name'] ?? '');
         $brand = (int)($_POST['brand_id'] ?? 0);
@@ -243,7 +243,7 @@ class DevicesController {
             ], 'id = ?', [$id]);
             audit('updated', 'device_model', $id);
         }
-        header('Location: /administration?tab=devices&dtab=models');
+        header('Location: /devices?dtab=models');
         exit;
     }
 }
