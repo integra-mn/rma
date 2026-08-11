@@ -47,12 +47,19 @@
                      margin-bottom: 8px; font-size: 14px; transition: border-color .15s; }
     .channel-label:hover { border-color: #1D9E75; }
     .channel-label input { width: auto; margin: 0; }
-    /* justify-content centres the box+label pair as a group; align-items keeps
-       the box on the text baseline rather than floating above it. */
-    .trust-row { display: flex; align-items: center; justify-content: center;
-                 gap: 8px; margin: 20px 0 10px; font-size: 13px; color: #5f5e5a; }
-    .trust-row input { width: auto; margin: 0; }
-    .trust-row label { margin-bottom: 0; line-height: 1; }
+    /* A bordered row rather than a bare checkbox: the whole thing is a click
+       target, and it highlights when on so the state is unmistakable. It sits
+       ABOVE the code boxes because the form submits itself on the sixth digit
+       — below the field, nobody ever reached it. */
+    .trust-row { display: flex; align-items: center; gap: 10px; padding: 11px 13px;
+                 border: 0.5px solid #d3d1c7; border-radius: 8px; cursor: pointer;
+                 font-size: 13px; color: #2c2c2a; margin-bottom: 18px;
+                 transition: border-color .15s, background .15s; }
+    .trust-row:hover { border-color: #1D9E75; }
+    .trust-row:has(input:checked) { border-color: #1D9E75; background: #f3fbf8; }
+    .trust-row input { width: 16px; height: 16px; margin: 0; flex-shrink: 0;
+                       accent-color: #1D9E75; cursor: pointer; }
+    .trust-row span { line-height: 1.35; }
 
     .back { font-size: 13px; color: #5f5e5a; text-decoration: none;
             display: block; text-align: center; margin-top: 1rem; }
@@ -149,13 +156,16 @@
     <form method="POST" action="/auth/2fa">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="verify">
+      <!-- Above the boxes: the code submits itself on the sixth digit, so
+           this has to be decided first. A <label> wrapping both makes the
+           whole row clickable with no JS. -->
+      <label class="trust-row">
+        <input type="checkbox" id="trust_device" name="trust_device" value="1">
+        <span><?= __('auth.trust_device') ?></span>
+      </label>
       <div class="field">
         <?php $cb_width = 44; $cb_height = 52; ?>
         <?php include views_path('_partials/code_boxes.php'); ?>
-      </div>
-      <div class="trust-row">
-        <input type="checkbox" id="trust_device" name="trust_device" value="1">
-        <label for="trust_device"><?= __('auth.trust_device') ?></label>
       </div>
       <button type="submit" class="btn"><?= __('btn.verify') ?></button>
     </form>
