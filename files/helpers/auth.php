@@ -132,13 +132,17 @@ function auth_attempt(string $email, string $password): array {
 }
 
 /**
- * Canonical ordering for notification / 2FA channels: Email, then SMS, then
- * WhatsApp. Used everywhere channels are listed so the order is consistent
- * (the DB SET column returns them in its own definition order otherwise).
+ * Canonical ordering for notification / 2FA channels. Used everywhere channels
+ * are listed so the order is consistent (the DB SET column returns them in its
+ * own definition order otherwise).
+ *
+ * Authenticator, SMS, Email, WhatsApp — set by Rajo 2026-08-11, replacing the
+ * earlier Authenticator/Email/SMS. Roughly fastest-to-hand first: the app needs
+ * no signal at all, an SMS arrives on the phone already in your hand, email
+ * means finding another window.
  */
 function order_channels(array $channels): array {
-    // Authenticator app first: strongest, instant, no send cost.
-    $rank = ['totp' => 0, 'email' => 1, 'sms' => 2, 'whatsapp' => 3];
+    $rank = ['totp' => 0, 'sms' => 1, 'email' => 2, 'whatsapp' => 3];
     usort($channels, fn($a, $b) => ($rank[$a] ?? 99) <=> ($rank[$b] ?? 99));
     return $channels;
 }
