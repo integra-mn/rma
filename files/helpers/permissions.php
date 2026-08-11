@@ -64,12 +64,16 @@ const PERMISSION_MATRIX = [
     'preferences' => ['theme', 'lang', 'integrations'],
 ];
 
-// Editable roles that always keep certain permissions no matter what the
-// matrix says — so an Admin can never lock every admin out of Settings /
-// the permission editor. Super Admin is separate: always full, never stored.
-const ROLE_LOCKED_PERMISSIONS = [
-    'admin' => ['settings.view', 'settings.edit'],
-];
+// Permissions an editable role keeps no matter what the matrix says.
+//
+// Empty by design (Rajo, 2026-08-11): Settings belongs to Super Admin alone.
+// Admin used to be pinned to settings.view/edit here so it could never be
+// locked out of the permission editor — but that also meant those two boxes
+// could not be unticked, which is the opposite of what is wanted now.
+//
+// Super Admin is unaffected: it bypasses the matrix entirely and is never
+// stored, so there is always exactly one account that can restore access.
+const ROLE_LOCKED_PERMISSIONS = [];
 
 // Flat list of every "module.action" in the matrix (i.e. full access).
 function all_permissions(): array {

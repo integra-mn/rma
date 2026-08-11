@@ -1420,6 +1420,5 @@ INSERT INTO role_permissions (role, module, action) VALUES
   ('admin','suppliers','view'),('admin','suppliers','edit'),
   ('admin','reports','view'),
   ('admin','invoicing','view'),
-  ('admin','settings','view'),('admin','settings','edit'),
   ('admin','administration','view'),('admin','administration','edit'),('admin','administration','users'),
   ('admin','preferences','theme'),('admin','preferences','lang'),('admin','preferences','integrations');

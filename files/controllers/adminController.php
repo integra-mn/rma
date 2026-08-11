@@ -683,7 +683,10 @@ class AdminController {
 
     public function permissions_save(): void {
         require_login();
-        if (!is_admin_user()) { http_response_code(403); include views_path('errors/403.php'); exit; }
+        // Super Admin only. is_admin_user() also matched role 'admin', so an
+        // Admin could POST here and grant itself anything back — which would
+        // make removing its Settings access cosmetic rather than real.
+        if (!is_super_admin()) { http_response_code(403); include views_path('errors/403.php'); exit; }
 
         // Admin + the three fixed roles are editable. Super Admin is always
         // full-access and never stored, so it can't be edited or locked out.
