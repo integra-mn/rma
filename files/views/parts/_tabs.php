@@ -18,10 +18,10 @@
   <?php foreach ([
     'stock'       => ['/parts?tab=stock',       __('parts.tab_stock')],
     'parts'       => ['/parts?tab=parts',       __('parts.tab_catalog')],
+    'part-groups' => ['/parts?tab=part-groups', __('parts.tab_part_groups')],
+    'suppliers'   => ['/suppliers',             __('parts.tab_suppliers')],
     'receipts'    => ['/parts?tab=receipts',    __('parts.tab_receipts')],
     'inventory'   => ['/parts?tab=inventory',   __('parts.tab_inventory')],
-    'suppliers'   => ['/suppliers',             __('parts.tab_suppliers')],
-    'part-groups' => ['/parts?tab=part-groups', __('parts.tab_part_groups')],
   ] as $t => [$href, $label]): ?>
     <a href="<?= $href ?>"
        class="tab<?= ($tab ?? 'stock') === $t ? ' active' : '' ?>">

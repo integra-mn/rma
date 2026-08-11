@@ -2,10 +2,11 @@
 $dtab = $_GET['dtab'] ?? 'brands';
 ?>
 
-<!-- Devices page — sub-tabs and all content capped at --w-content to match
-     the rest of Administration. Padding is provided by admin/index.php, don't
-     add it again here or it doubles up. -->
-<div style="max-width:var(--w-content);">
+<!-- Same wrapper as Parts: 1.5rem padding, no width cap, so the two sections
+     line up. This used to inherit its padding from admin/index.php and cap at
+     --w-content; standing alone at /devices it had no padding at all and sat
+     flush against the edge. -->
+<div style="padding:1.5rem;">
 
   <!-- Sub-tabs -->
   <div class="tab-bar">
@@ -25,7 +26,7 @@ $dtab = $_GET['dtab'] ?? 'brands';
   <?php if ($dtab === 'groups'): ?>
 
     <!-- Add + Search -->
-    <div style="display:flex;gap:8px;margin-bottom:1.25rem;align-items:center;">
+    <div style="display:flex;gap:8px;margin-bottom:1.25rem;align-items:stretch;flex-wrap:wrap;">
       <?php if (can('devices','edit')): ?>
         <button type="button" class="btn btn-primary" style="min-width:140px;"
                 onclick="toggleForm('group-add-form')"><?= __('devices.add_group') ?></button>
@@ -88,7 +89,7 @@ $dtab = $_GET['dtab'] ?? 'brands';
   <?php elseif ($dtab === 'brands'): ?>
 
     <!-- Add + Search -->
-    <div style="display:flex;gap:8px;margin-bottom:1.25rem;align-items:center;">
+    <div style="display:flex;gap:8px;margin-bottom:1.25rem;align-items:stretch;flex-wrap:wrap;">
       <?php if (can('devices','edit')): ?>
         <button type="button" class="btn btn-primary" style="min-width:140px;"
                 onclick="toggleForm('brand-add-form')"><?= __('devices.add_brand') ?></button>
@@ -147,7 +148,7 @@ $dtab = $_GET['dtab'] ?? 'brands';
   <?php elseif ($dtab === 'models'): ?>
 
     <!-- Add + Search -->
-    <div style="display:flex;gap:8px;margin-bottom:1.25rem;align-items:center;">
+    <div style="display:flex;gap:8px;margin-bottom:1.25rem;align-items:stretch;flex-wrap:wrap;">
       <?php if (can('devices','edit')): ?>
         <button type="button" class="btn btn-primary" style="min-width:140px;"
                 onclick="toggleForm('model-add-form')"><?= __('catalog.add_model') ?></button>
