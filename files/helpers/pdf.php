@@ -205,7 +205,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
         <tr><td>' . $t('pdf.name') . '</td><td><strong>' . htmlspecialchars($rma['customer_name'] ?? '—') . '</strong></td></tr>
         ' . ($rma['customer_phone'] ? '<tr><td>' . $t('pdf.phone') . '</td><td>' . htmlspecialchars(format_phone($rma['customer_phone'])) . '</td></tr>' : '') . '
         ' . ($rma['customer_email'] ? '<tr><td>' . $t('pdf.email') . '</td><td>' . htmlspecialchars($rma['customer_email']) . '</td></tr>' : '') . '
-        ' . (function() use ($rma) {
+        ' . (function() use ($rma, $t) {
               // "Street, ZIP City" — zip + city share a space, the street
               // gets its own comma-separated segment.
               $addr = trim((string)($rma['customer_address'] ?? ''));
@@ -484,7 +484,7 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
             <tr><td>' . $t('pdf.name') . '</td><td><strong>' . htmlspecialchars($rma['customer_name'] ?? '—') . '</strong></td></tr>
             ' . ($rma['customer_phone'] ? '<tr><td>' . $t('pdf.phone') . '</td><td>' . htmlspecialchars(format_phone($rma['customer_phone'])) . '</td></tr>' : '') . '
             ' . ($rma['customer_email'] ? '<tr><td>' . $t('pdf.email') . '</td><td>' . htmlspecialchars($rma['customer_email']) . '</td></tr>' : '') . '
-            ' . (function() use ($rma) {
+            ' . (function() use ($rma, $t) {
                   $parts = array_filter([
                       trim((string)($rma['customer_address'] ?? '')),
                       trim((string)($rma['customer_zip'] ?? '')),
