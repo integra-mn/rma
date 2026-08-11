@@ -111,6 +111,7 @@ return [
     'btn.resend'        => 'Pošalji ponovo',
     'btn.sign_in'       => 'Prijava',
     'btn.send_code'     => 'Pošalji kod',
+    'btn.enter_code'    => 'Unesi kod',
 
     // ── Common labels ─────────────────────────────────────────
     'label.name'             => 'Naziv',

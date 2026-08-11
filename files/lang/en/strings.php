@@ -111,6 +111,7 @@ return [
     'btn.resend'        => 'Resend Code',
     'btn.sign_in'       => 'Sign In',
     'btn.send_code'     => 'Send Code',
+    'btn.enter_code'    => 'Enter Code',
 
     // ── Common labels ─────────────────────────────────────────
     'label.name'             => 'Name',

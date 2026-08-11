@@ -102,11 +102,18 @@
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="send">
       <?php
-        // Pre-select the channel chosen in Moj profil, provided the role still
-        // allows it and it is switched on app-wide; otherwise fall back to the
-        // first available rather than assuming email exists.
+        // The authenticator wins when it is available. It only ever appears in
+        // $channels for someone who finished enrolling, and for them it is the
+        // strongest option and needs nothing sent — so it is the default even
+        // if their profile still names email from before they enrolled.
+        //
+        // Otherwise: the channel chosen in Moj profil, provided the role still
+        // allows it and it is switched on app-wide; failing that the first
+        // available, rather than assuming email exists.
         $preferred = $_SESSION['2fa_preferred'] ?? null;
-        $default   = in_array($preferred, $channels, true) ? $preferred : ($channels[0] ?? 'email');
+        $default   = in_array('totp', $channels, true)
+                   ? 'totp'
+                   : (in_array($preferred, $channels, true) ? $preferred : ($channels[0] ?? 'email'));
       ?>
       <?php foreach ($channels as $ch): ?>
         <label class="channel-label">
@@ -120,7 +127,9 @@
           } ?>
         </label>
       <?php endforeach; ?>
-      <button type="submit" class="btn"><?= __('btn.send_code') ?></button>
+      <button type="submit" class="btn" id="send-btn"
+                data-send="<?= htmlspecialchars(__('btn.send_code')) ?>"
+                data-enter="<?= htmlspecialchars(__('btn.enter_code')) ?>"><?= $default === 'totp' ? __('btn.enter_code') : __('btn.send_code') ?></button>
     </form>
     </div><!-- /choose-panel -->
 
@@ -232,6 +241,23 @@
       if (left <= 0) clearInterval(t);
     }, 1000);
   }
+})();
+</script>
+
+<script>
+// The button says "Enter Code" for the authenticator and "Send Code" for the
+// channels that actually send something. Switching channel switches the label,
+// so it never promises to send a message that no one will receive.
+(function () {
+  var btn = document.getElementById('send-btn');
+  if (!btn) return;
+  document.querySelectorAll('input[name="channel"]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      btn.textContent = radio.value === 'totp'
+        ? btn.getAttribute('data-enter')
+        : btn.getAttribute('data-send');
+    });
+  });
 })();
 </script>
 </body>
