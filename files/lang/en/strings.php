@@ -719,6 +719,7 @@ return [
     'partners.branch'   => 'Branch',
     'partners.branches'             => 'Branches',
     'partners.branch_add'           => 'Add branch',
+    'partners.branch_edit'          => 'Edit branch',
     'partners.branch_required'      => 'Branch is required — every partner needs at least one.',
     'partners.branch_last'          => 'Cannot remove the only branch. Add another one first.',
     'partners.branch_saved'         => 'Branch added.',

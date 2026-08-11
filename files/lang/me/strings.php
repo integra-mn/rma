@@ -439,7 +439,7 @@ return [
     // ── Full translation sweep (added) ──────────────────────
     'rma.customer_details' => 'Podaci o kupcu',
     'rma.search_customer' => 'Pretraga kupca',
-    'rma.search_phone_email' => 'Pretraga po telefonu ili e-pošti',
+    'rma.search_phone_email' => 'Pretraga po broju telefona ili email-u',
     'rma.select_partner' => 'Izaberite partnera',
     'rma.select_branch' => 'Izaberite poslovnicu',
     'rma.no_customer_add' => 'Kupac nije pronadjen — dodati novog?',
@@ -719,6 +719,7 @@ return [
     'partners.branch'   => 'Poslovnica',
     'partners.branches'             => 'Poslovnice',
     'partners.branch_add'           => 'Dodaj poslovnicu',
+    'partners.branch_edit'          => 'Izmijeni poslovnicu',
     'partners.branch_required'      => 'Poslovnica je obavezna — svaki partner mora imati bar jednu.',
     'partners.branch_last'          => 'Nije moguće ukloniti jedinu poslovnicu. Prvo dodajte drugu.',
     'partners.branch_saved'         => 'Poslovnica je dodata.',

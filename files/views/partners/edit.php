@@ -130,12 +130,15 @@
               <td style="color:var(--text-secondary);"><?= htmlspecialchars($b['city'] ?? '—') ?></td>
               <td style="color:var(--text-secondary);"><?= htmlspecialchars($b['phone'] ?? '—') ?></td>
               <td style="text-align:right;">
-                <form method="POST" action="/partners/<?= (int)$partner['id'] ?>/branches/delete"
-                      style="display:inline;" data-confirm="<?= __('partners.branch_remove_confirm') ?>">
-                  <?= csrf_field() ?>
-                  <input type="hidden" name="branch_id" value="<?= (int)$b['id'] ?>">
-                  <button type="submit" class="btn-link"><?= __('btn.delete') ?></button>
-                </form>
+                <!-- Edit opens the popup; Delete lives in there, so the list
+                     cannot destroy a branch with one stray click. -->
+                <button type="button" class="btn-link"
+                        onclick='editBranch(<?= htmlspecialchars(json_encode([
+                          "id"    => (int)$b["id"],
+                          "name"  => $b["name"],
+                          "city"  => $b["city"],
+                          "phone" => $b["phone"],
+                        ], JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>)'><?= __('btn.edit') ?></button>
               </td>
             </tr>
           <?php endforeach; ?>
@@ -155,5 +158,51 @@
       </form>
     <?php endif; ?>
   </div>
+
+
+  <?php if (can('partners', 'edit')): ?>
+  <!-- Branch editor. Delete lives in here rather than in the list, so removing
+       a branch takes opening it first — the list row is one click from data
+       that RMAs are counted against. -->
+  <div id="branch-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:50;align-items:center;justify-content:center;">
+    <div style="background:var(--bg-surface);border-radius:12px;padding:1.5rem;width:100%;max-width:520px;margin:1rem;">
+      <h2 style="font-size:16px;font-weight:500;margin-bottom:1rem;"><?= __('partners.branch_edit') ?></h2>
+      <form id="branch-update-form" method="POST" action="/partners/<?= (int)$partner['id'] ?>/branches/update">
+        <?= csrf_field() ?>
+        <input type="hidden" name="branch_id" id="be-id">
+        <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="field"><label><?= __('label.name') ?> *</label><input type="text" name="branch_name" id="be-name" required></div>
+          <div class="field"><label><?= __('label.city') ?></label><input type="text" name="branch_city" id="be-city"></div>
+          <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="branch_phone" id="be-phone"></div>
+        </div>
+      </form>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button type="submit" form="branch-update-form" class="btn btn-primary" style="min-width:100px;"><?= __('btn.save_changes') ?></button>
+        <button type="button" class="btn" style="min-width:100px;"
+                onclick="document.getElementById('branch-edit-modal').style.display='none'"><?= __('btn.cancel') ?></button>
+        <form method="POST" action="/partners/<?= (int)$partner['id'] ?>/branches/delete"
+              style="margin-left:auto;" data-confirm="<?= __('partners.branch_remove_confirm') ?>">
+          <?= csrf_field() ?>
+          <input type="hidden" name="branch_id" id="bd-id">
+          <button type="submit" class="btn btn-danger" style="min-width:100px;"><?= __('btn.delete') ?></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function editBranch(b) {
+    document.getElementById('be-id').value    = b.id;
+    document.getElementById('be-name').value  = b.name  || '';
+    document.getElementById('be-city').value  = b.city  || '';
+    document.getElementById('be-phone').value = b.phone || '';
+    document.getElementById('bd-id').value    = b.id;
+    document.getElementById('branch-edit-modal').style.display = 'flex';
+  }
+  document.getElementById('branch-edit-modal').addEventListener('click', function (e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+  </script>
+  <?php endif; ?>
 
 </div>

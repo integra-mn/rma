@@ -163,6 +163,7 @@ $routes = [
         '/partners/store'                      => 'partners/store',
         '/partners/([0-9]+)/update'            => 'partners/update',
         '/partners/([0-9]+)/branches/store'     => 'partners/branch_store',
+        '/partners/([0-9]+)/branches/update'    => 'partners/branch_update',
         '/partners/([0-9]+)/branches/delete'    => 'partners/branch_delete',
         '/partners/([0-9]+)/delete'            => 'partners/delete',
         '/admin/location/store'                => 'admin/location_store',

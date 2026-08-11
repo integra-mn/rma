@@ -211,6 +211,34 @@ class PartnersController {
         header("Location: /partners/{$partner_id}/edit"); exit;
     }
 
+    public function branch_update(string $id): void {
+        require_login();
+        require_permission('partners', 'edit');
+        csrf_verify();
+
+        $partner_id = (int) $id;
+        $branch_id  = (int) ($_POST['branch_id'] ?? 0);
+        $name       = trim($_POST['branch_name'] ?? '');
+
+        if ($name === '') {
+            $_SESSION['form_error'] = __('partners.branch_name_required');
+            header("Location: /partners/{$partner_id}/edit"); exit;
+        }
+
+        // Scoped to the partner: a crafted post must not rename someone else's
+        // branch by guessing an id.
+        if ($branch_id) {
+            db_update('partner_branches', [
+                'name'  => $name,
+                'city'  => trim($_POST['branch_city'] ?? '') ?: null,
+                'phone' => trim($_POST['branch_phone'] ?? '') ?: null,
+            ], 'id = ? AND partner_id = ?', [$branch_id, $partner_id]);
+            audit('branch_updated', 'partner', $partner_id, ['new' => ['branch' => $name]]);
+            $_SESSION['form_success'] = __('partners.branch_saved');
+        }
+        header("Location: /partners/{$partner_id}/edit"); exit;
+    }
+
     /**
      * Soft-delete: RMAs already reference the branch, and analytics would lose
      * its history if the row vanished.
