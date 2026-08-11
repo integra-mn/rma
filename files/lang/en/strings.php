@@ -710,6 +710,7 @@ return [
     'parts.contact'            => 'Contact',
     'parts.edit_supplier'      => 'Edit supplier',
     'customers.zip_code' => 'ZIP Code',
+    'partners.branch'   => 'Branch',
     'partners.zip_code' => 'ZIP Code',
     'suppliers.add' => 'Add brand',
     'suppliers.search' => 'Search by name, email or contact',

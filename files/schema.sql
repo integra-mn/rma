@@ -156,6 +156,9 @@ CREATE TABLE partners (
   tax_id         VARCHAR(50),
   email          VARCHAR(150),
   phone          VARCHAR(30),
+  -- The partner's own branch/office. Distinct from locations, which are OUR
+  -- service points.
+  branch         VARCHAR(150),
   address        VARCHAR(255),
   zip_code       VARCHAR(30),
   city           VARCHAR(100),

@@ -710,6 +710,7 @@ return [
     'parts.contact'            => 'Kontakt',
     'parts.edit_supplier'      => 'Uredi dobavljača',
     'customers.zip_code' => 'Poštanski broj',
+    'partners.branch'   => 'Poslovnica',
     'partners.zip_code' => 'Poštanski broj',
     'suppliers.add' => 'Novi brend',
     'suppliers.search' => 'Pretraži po nazivu, emailu ili kontaktu',
