@@ -460,6 +460,12 @@ class PortalController {
         $brands  = db_rows('SELECT id, name FROM device_brands ORDER BY name');
         $models  = db_rows('SELECT id, name, brand_id FROM device_models WHERE is_active = 1 ORDER BY name');
 
+        // Which of their own poslovnice this came from. Defaults to the one the
+        // person is assigned to, so the common case needs no thought; still
+        // changeable for anyone who covers more than one office.
+        $branches   = partner_branches($partner_id);
+        $my_branch  = current_partner_branch_id();
+
         // Flash state from a failed POST (sticky form)
         $error = $_SESSION['form_error'] ?? null;
         $old   = $_SESSION['form_old']   ?? [];
@@ -552,6 +558,11 @@ class PortalController {
                 'status_id'         => $status_id,
                 'location_id'       => $location_id,
                 'partner_id'        => $partner_id,
+                // Their office. Falls back to the branch on the person's account
+                // when the form didn't carry one, so the figures stay complete
+                // even if the field was left blank.
+                'partner_branch_id' => valid_partner_branch_id($partner_id, $_POST['partner_branch_id'] ?? null)
+                                       ?? current_partner_branch_id(),
                 'customer_id'       => $customer_id,
                 'device_id'         => $device_id,
                 'complaint'         => $complaint,

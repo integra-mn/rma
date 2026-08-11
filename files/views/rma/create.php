@@ -25,11 +25,24 @@ defined('RMS') or die('Direct access not permitted');
         </div>
         <div>
           <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('rma.partner') ?></label>
-          <select name="partner_id" class="search-select">
+          <select name="partner_id" id="rma-partner" class="search-select">
             <option value=""><?= __('rma.select_partner') ?></option>
             <?php foreach ($partners as $p): ?>
               <option value="<?= (int)$p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
             <?php endforeach; ?>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 1b: which of the partner's own branches sent this in. Sits under
+           the partner it belongs to, and stays hidden until a partner with
+           branches is picked so walk-in intake looks exactly as before. -->
+      <div id="rma-branch-wrap" style="display:none;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+        <div></div>
+        <div>
+          <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('partners.branch') ?></label>
+          <select name="partner_branch_id" id="rma-branch">
+            <option value=""><?= __('rma.select_branch') ?></option>
           </select>
         </div>
       </div>
@@ -696,4 +709,41 @@ function toggleAcc(key) {
     container.appendChild(inp);
   });
 }
+
+// ── Partner branches ────────────────────────────────────────────
+// The branch list depends on the partner, so it is filtered here instead of
+// with a round trip. Partners with no branches never see the field at all.
+(function () {
+  var BRANCHES = <?= json_encode($partner_branches ?? [], JSON_UNESCAPED_UNICODE) ?>;
+  var partner  = document.getElementById('rma-partner');
+  var wrap     = document.getElementById('rma-branch-wrap');
+  var select   = document.getElementById('rma-branch');
+  if (!partner || !wrap || !select) return;
+
+  var placeholder = select.options[0] ? select.options[0].textContent : '';
+
+  function syncBranches() {
+    var pid  = parseInt(partner.value, 10) || 0;
+    var mine = BRANCHES.filter(function (b) { return parseInt(b.partner_id, 10) === pid; });
+
+    select.innerHTML = '';
+    var first = document.createElement('option');
+    first.value = '';
+    first.textContent = placeholder;
+    select.appendChild(first);
+
+    mine.forEach(function (b) {
+      var o = document.createElement('option');
+      o.value = b.id;
+      o.textContent = b.city ? b.name + ' - ' + b.city : b.name;
+      select.appendChild(o);
+    });
+
+    // 'grid', not '', because the wrapper is a two-column grid row.
+    wrap.style.display = mine.length ? 'grid' : 'none';
+  }
+
+  partner.addEventListener('change', syncBranches);
+  syncBranches();
+})();
 </script>

@@ -19,7 +19,6 @@
         <div class="field"><label><?= __('partners.contact_person') ?></label><input type="text" name="contact_person" value="<?= htmlspecialchars($partner['contact_person'] ?? '') ?>"></div>
         <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email" value="<?= htmlspecialchars($partner['email'] ?? '') ?>"></div>
         <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="phone" value="<?= htmlspecialchars($partner['phone'] ?? '') ?>"></div>
-        <div class="field"><label><?= __('partners.branch') ?></label><input type="text" name="branch" value="<?= htmlspecialchars($partner['branch'] ?? '') ?>"></div>
         <div class="field"><label><?= __('partners.zip_code') ?></label><input type="text" name="zip_code" value="<?= htmlspecialchars($partner['zip_code'] ?? '') ?>"></div>
         <div class="field"><label><?= __('label.city') ?></label><input type="text" name="city" value="<?= htmlspecialchars($partner['city'] ?? '') ?>"></div>
         <div class="field"><label><?= __('ship.default_courier') ?></label>
@@ -41,11 +40,12 @@
         <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
         <a href="/partners" class="btn"><?= __('btn.cancel') ?></a>
         <?php if (can('partners', 'edit') && $rma_count === 0): ?>
-          <form method="POST" action="/partners/<?= (int)$partner['id'] ?>/delete"
-                data-confirm="<?= __('msg.confirm_delete') ?>">
-            <?= csrf_field() ?>
-            <button type="submit" class="btn btn-danger"><?= __('partners.delete') ?></button>
-          </form>
+          <!-- formaction, not a nested <form>: the HTML parser discards a form
+               inside a form, so this button used to submit the outer form and
+               silently *save* the partner instead of deleting it. -->
+          <button type="submit" class="btn btn-danger"
+                  formaction="/partners/<?= (int)$partner['id'] ?>/delete"
+                  data-confirm="<?= __('msg.confirm_delete') ?>"><?= __('partners.delete') ?></button>
         <?php endif; ?>
       </div>
     </form>
@@ -81,6 +81,59 @@
           <?php endforeach; ?>
         </tbody>
       </table>
+    <?php endif; ?>
+  </div>
+
+
+  <!-- Branches (poslovnice) — the partner's own offices. Recorded as rows so
+       RMAs can be reported per branch. -->
+  <div class="card" style="margin-bottom:1.5rem;">
+    <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;">
+      <?= __('partners.branches') ?>
+    </h2>
+
+    <?php if (empty($branches)): ?>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem;"><?= __('partners.no_branches') ?></p>
+    <?php else: ?>
+      <table class="data-table" style="margin-bottom:1rem;">
+        <thead>
+          <tr>
+            <th><?= __('label.name') ?></th>
+            <th><?= __('label.city') ?></th>
+            <th><?= __('label.phone') ?></th>
+            <th style="text-align:right;"><?= __('label.actions') ?></th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($branches as $b): ?>
+            <tr>
+              <td style="font-weight:500;"><?= htmlspecialchars($b['name']) ?></td>
+              <td style="color:var(--text-secondary);"><?= htmlspecialchars($b['city'] ?? '—') ?></td>
+              <td style="color:var(--text-secondary);"><?= htmlspecialchars($b['phone'] ?? '—') ?></td>
+              <td style="text-align:right;">
+                <form method="POST" action="/partners/<?= (int)$partner['id'] ?>/branches/delete"
+                      style="display:inline;" data-confirm="<?= __('partners.branch_remove_confirm') ?>">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="branch_id" value="<?= (int)$b['id'] ?>">
+                  <button type="submit" class="btn-link"><?= __('btn.delete') ?></button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    <?php endif; ?>
+
+    <?php if (can('partners', 'edit')): ?>
+      <form method="POST" action="/partners/<?= (int)$partner['id'] ?>/branches/store">
+        <?= csrf_field() ?>
+        <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="field"><label><?= __('label.name') ?></label><input type="text" name="branch_name" required></div>
+          <div class="field"><label><?= __('label.city') ?></label><input type="text" name="branch_city"></div>
+          <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="branch_phone"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="min-width:100px;"><?= __('partners.branch_add') ?></button>
+      </form>
     <?php endif; ?>
   </div>
 

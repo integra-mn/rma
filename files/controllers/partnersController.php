@@ -60,7 +60,6 @@ class PartnersController {
             'email'          => trim($_POST['email'] ?? ''),
             'phone'          => trim($_POST['phone'] ?? ''),
             'address'        => trim($_POST['address'] ?? ''),
-            'branch'         => trim($_POST['branch'] ?? ''),
             'zip_code'       => trim($_POST['zip_code'] ?? ''),
             'city'           => trim($_POST['city'] ?? ''),
             'country'        => trim($_POST['country'] ?? 'Montenegro'),
@@ -80,6 +79,13 @@ class PartnersController {
 
         $partner = db_row('SELECT * FROM partners WHERE id = ? AND deleted_at IS NULL', [(int)$id]);
         if (!$partner) { http_response_code(404); include views_path('errors/404.php'); return; }
+
+        $branches = db_rows(
+            'SELECT * FROM partner_branches
+              WHERE partner_id = ? AND deleted_at IS NULL
+              ORDER BY is_active DESC, name',
+            [(int)$id]
+        );
 
         $users = db_rows('SELECT u.id, u.name, u.email, pu.role
                           FROM partner_users pu
@@ -120,7 +126,6 @@ class PartnersController {
             'email'          => trim($_POST['email'] ?? ''),
             'phone'          => trim($_POST['phone'] ?? ''),
             'address'        => trim($_POST['address'] ?? ''),
-            'branch'         => trim($_POST['branch'] ?? ''),
             'zip_code'       => trim($_POST['zip_code'] ?? ''),
             'city'           => trim($_POST['city'] ?? ''),
             'country'        => trim($_POST['country'] ?? ''),
@@ -151,5 +156,58 @@ class PartnersController {
         }
         header('Location: /partners');
         exit;
+    }
+
+    // ── Branches (poslovnice) ─────────────────────────────────────
+    //
+    // Real rows rather than a text field on the partner, so RMAs can be counted
+    // per branch. See migrations/2026_08_11_partner_branches.sql.
+
+    public function branch_store(string $id): void {
+        require_login();
+        require_permission('partners', 'edit');
+        csrf_verify();
+
+        $partner_id = (int) $id;
+        $name       = trim($_POST['branch_name'] ?? '');
+
+        if ($name === '') {
+            $_SESSION['form_error'] = __('partners.branch_name_required');
+            header("Location: /partners/{$partner_id}/edit"); exit;
+        }
+
+        db_insert('partner_branches', [
+            'partner_id' => $partner_id,
+            'name'       => $name,
+            'city'       => trim($_POST['branch_city'] ?? '') ?: null,
+            'phone'      => trim($_POST['branch_phone'] ?? '') ?: null,
+            'is_active'  => 1,
+        ]);
+
+        audit('branch_added', 'partner', $partner_id, ['new' => ['branch' => $name]]);
+        $_SESSION['form_success'] = __('partners.branch_saved');
+        header("Location: /partners/{$partner_id}/edit"); exit;
+    }
+
+    /**
+     * Soft-delete: RMAs already reference the branch, and analytics would lose
+     * its history if the row vanished.
+     */
+    public function branch_delete(string $id): void {
+        require_login();
+        require_permission('partners', 'edit');
+        csrf_verify();
+
+        $partner_id = (int) $id;
+        $branch_id  = (int) ($_POST['branch_id'] ?? 0);
+
+        if ($branch_id) {
+            db_update('partner_branches',
+                ['deleted_at' => date('Y-m-d H:i:s'), 'is_active' => 0],
+                'id = ? AND partner_id = ?', [$branch_id, $partner_id]);
+            audit('branch_removed', 'partner', $partner_id);
+            $_SESSION['form_success'] = __('partners.branch_removed');
+        }
+        header("Location: /partners/{$partner_id}/edit"); exit;
     }
 }

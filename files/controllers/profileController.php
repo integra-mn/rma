@@ -14,6 +14,12 @@ class ProfileController {
             $policy ? order_channels(explode(',', $policy['allowed_2fa_channels'] ?? 'email')) : ['email']
         );
 
+        // Partner staff can move themselves between their employer's poslovnice.
+        // Empty for Integra staff, whose placement is an Integra location set by
+        // an administrator.
+        $my_branches = $user['role'] === 'partner' ? partner_branches(current_partner_id()) : [];
+        $my_branch   = current_partner_branch_id();
+
         $success = $_SESSION['form_success'] ?? null;
         $error   = $_SESSION['form_error'] ?? null;
         unset($_SESSION['form_success'], $_SESSION['form_error']);
@@ -135,6 +141,22 @@ class ProfileController {
         $_SESSION['user']['lang']  = $lang;
         $_SESSION['user']['theme'] = $theme;
         $_SESSION['user']['phone'] = $phone;
+
+        // Partner staff may move between their employer's poslovnice. Only their
+        // own partner's branches are accepted, and the move is logged separately
+        // so "why did this branch's numbers change" has an answer.
+        if (($user['role'] ?? '') === 'partner') {
+            $partner_id = current_partner_id();
+            $old_branch = current_partner_branch_id();
+            $new_branch = valid_partner_branch_id($partner_id, $_POST['partner_branch_id'] ?? null);
+
+            if ($partner_id && $new_branch !== $old_branch) {
+                db_update('partner_users', ['branch_id' => $new_branch],
+                          'user_id = ?', [current_user_id()]);
+                audit('branch_changed', 'user', current_user_id(),
+                      ['old' => ['branch_id' => $old_branch], 'new' => ['branch_id' => $new_branch]]);
+            }
+        }
 
         audit('profile_updated', 'user', current_user_id());
         $_SESSION['form_success'] = __('profile.preferences_saved');

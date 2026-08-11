@@ -30,6 +30,23 @@
           <input type="email" name="cust_email"
                  value="<?= htmlspecialchars($old['cust_email'] ?? '') ?>">
         </div>
+        <?php if (!empty($branches)): ?>
+        <!-- Which of our own poslovnice is sending this in. Pre-set to the one
+             on the person's account, so most people never touch it. Hidden
+             entirely for partners who haven't recorded any branches. -->
+        <div class="field">
+          <label><?= __('partners.branch') ?></label>
+          <?php $sel = $old['partner_branch_id'] ?? $my_branch; ?>
+          <select name="partner_branch_id">
+            <option value=""><?= __('users.no_branch') ?></option>
+            <?php foreach ($branches as $b): ?>
+              <option value="<?= (int)$b['id'] ?>" <?= (int)$sel === (int)$b['id'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($b['city'] ? $b['name'] . ' - ' . $b['city'] : $b['name']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <?php endif; ?>
       </div>
     </div>
 

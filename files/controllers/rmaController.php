@@ -98,6 +98,13 @@ class RmaController {
         $breadcrumb_parent_url = '/rma';
         $customers  = db_rows('SELECT id, name, phone, email FROM customers WHERE deleted_at IS NULL ORDER BY name');
         $partners   = db_rows('SELECT id, name FROM partners WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
+        // Every active branch, keyed by partner — the form filters them client
+        // side when a partner is picked, so no round trip is needed.
+        $partner_branches = db_rows(
+            'SELECT id, partner_id, name, city FROM partner_branches
+              WHERE deleted_at IS NULL AND is_active = 1
+              ORDER BY name'
+        );
         $brands     = db_rows('SELECT * FROM device_brands WHERE is_active = 1 ORDER BY name');
         $models     = db_rows('SELECT m.*, b.name as brand_name FROM device_models m JOIN device_brands b ON b.id = m.brand_id WHERE m.is_active = 1 ORDER BY b.name, m.name');
         $categories = db_rows('SELECT * FROM device_categories WHERE is_active = 1 ORDER BY sort_order, name');
@@ -211,6 +218,7 @@ class RmaController {
             'device_id'           => $device_id,
             'customer_id'         => $customer_id,
             'partner_id'          => $partner_id  ?: null,
+            'partner_branch_id'   => valid_partner_branch_id($partner_id, $_POST['partner_branch_id'] ?? null),
             'submitted_by'        => current_user_id(),
             'assigned_tech'       => (int)($_POST['assigned_tech'] ?? 0) ?: null,
             'status_id'           => $status_id,
@@ -276,6 +284,7 @@ class RmaController {
         $rma = db_row("SELECT r.*, s.label as status_label, s.color as status_color, s.code as status_code,
                               c.name as customer_name, c.email as customer_email, c.phone as customer_phone,
                               p.name as partner_name,
+                              pb.name as partner_branch_name,
                               l.name as location_name,
                               u.name as tech_name,
                               dm.name as model_name, db2.name as brand_name,
@@ -286,6 +295,7 @@ class RmaController {
                        JOIN rma_statuses s ON s.id = r.status_id
                        LEFT JOIN customers c ON c.id = r.customer_id
                        LEFT JOIN partners p ON p.id = r.partner_id
+                       LEFT JOIN partner_branches pb ON pb.id = r.partner_branch_id
                        LEFT JOIN locations l ON l.id = r.location_id
                        LEFT JOIN users u ON u.id = r.assigned_tech
                        LEFT JOIN devices d ON d.id = r.device_id
@@ -732,6 +742,7 @@ class RmaController {
             throw $e;
         }
     }
+
 
     private function generate_rma_number(int $location_id): string {
         $loc  = db_row('SELECT code, name, city FROM locations WHERE id = ?', [$location_id]);

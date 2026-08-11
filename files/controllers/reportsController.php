@@ -93,6 +93,20 @@ class ReportsController {
                  WHERE {$rma_where}
                  GROUP BY r.location_id, l.name ORDER BY cnt DESC", $rma_params);
 
+            // By partner branch (poslovnica). Only RMAs that carry a branch are
+            // counted — walk-in intake has none, and listing it as a blank row
+            // would read as an unnamed branch rather than "no branch".
+            $by_branch = db_rows(
+                "SELECT p.name as partner_name, pb.name as branch_name, COUNT(*) as cnt
+                 FROM rma_requests r
+                 LEFT JOIN devices d ON d.id = r.device_id
+                 LEFT JOIN device_models dm ON dm.id = d.model_id
+                 LEFT JOIN device_brands db2 ON db2.id = dm.brand_id
+                 JOIN partner_branches pb ON pb.id = r.partner_branch_id
+                 LEFT JOIN partners p ON p.id = pb.partner_id
+                 WHERE {$rma_where}
+                 GROUP BY pb.id, pb.name, p.name ORDER BY cnt DESC", $rma_params);
+
             // By brand
             $by_brand = db_rows(
                 "SELECT COALESCE(db2.name, 'Unknown') as brand, COUNT(*) as cnt
@@ -287,6 +301,15 @@ class ReportsController {
             // MySQL accepted it, which is why this survived the port.
             $rows = db_rows("SELECT l.name, COUNT(*) cnt FROM rma_requests r {$join} LEFT JOIN locations l ON l.id=r.location_id WHERE {$rma_where} GROUP BY r.location_id, l.name ORDER BY cnt DESC", $rma_params);
             $sections[] = ['title'=>__('reports.by_location'), 'columns'=>[__('label.location'), __('reports.count')], 'rows'=>array_map(fn($r)=>[$r['name'] ?? '—', (int)$r['cnt']], $rows)];
+            // Partner branches. Inner join on the branch: RMAs without one are
+            // walk-ins, not an unnamed branch. Section is skipped when empty so
+            // exports don't carry an empty table before branches are in use.
+            $rows = db_rows("SELECT p.name partner_name, pb.name branch_name, COUNT(*) cnt FROM rma_requests r {$join} JOIN partner_branches pb ON pb.id=r.partner_branch_id LEFT JOIN partners p ON p.id=pb.partner_id WHERE {$rma_where} GROUP BY pb.id, pb.name, p.name ORDER BY cnt DESC", $rma_params);
+            if ($rows) {
+                $sections[] = ['title'=>__('reports.by_branch'),
+                               'columns'=>[__('rma.partner'), __('partners.branch'), __('reports.count')],
+                               'rows'=>array_map(fn($r)=>[$r['partner_name'] ?? '—', $r['branch_name'], (int)$r['cnt']], $rows)];
+            }
             $rows = db_rows("SELECT MIN(DATE_FORMAT(r.created_at,'%b %Y')) label, COUNT(*) cnt FROM rma_requests r {$join} WHERE {$rma_where} GROUP BY DATE_FORMAT(r.created_at,'%Y-%m') ORDER BY MIN(r.created_at)", $rma_params);
             $sections[] = ['title'=>__('reports.monthly_trend'), 'columns'=>[__('reports.month'), __('reports.rmas')], 'rows'=>array_map(fn($r)=>[$r['label'], (int)$r['cnt']], $rows)];
 

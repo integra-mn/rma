@@ -147,6 +147,27 @@
 
     </div>
 
+    <!-- By partner branch (poslovnica). Full width because it names both the
+         partner and the branch. Hidden until branches are actually in use, so
+         the page doesn't grow an empty table for shops that don't have any. -->
+    <?php if (!empty($by_branch)): ?>
+    <div style="margin-top:1.5rem;">
+      <h3 style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:0.75rem;"><?= __('reports.by_branch') ?></h3>
+      <table class="data-table">
+        <thead><tr><th><?= __('rma.partner') ?></th><th><?= __('partners.branch') ?></th><th style="text-align:right;"><?= __('reports.count') ?></th></tr></thead>
+        <tbody>
+          <?php foreach ($by_branch as $r): ?>
+            <tr>
+              <td><?= htmlspecialchars($r['partner_name'] ?? '—') ?></td>
+              <td><?= htmlspecialchars($r['branch_name']) ?></td>
+              <td style="text-align:right;font-weight:500;"><?= (int)$r['cnt'] ?></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+    <?php endif; ?>
+
     <!-- Monthly trend -->
     <?php if (!empty($monthly)): ?>
     <div style="margin-top:1.5rem;">

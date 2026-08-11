@@ -156,9 +156,6 @@ CREATE TABLE partners (
   tax_id         VARCHAR(50),
   email          VARCHAR(150),
   phone          VARCHAR(30),
-  -- The partner's own branch/office. Distinct from locations, which are OUR
-  -- service points.
-  branch         VARCHAR(150),
   address        VARCHAR(255),
   zip_code       VARCHAR(30),
   city           VARCHAR(100),
@@ -172,16 +169,36 @@ CREATE TABLE partners (
   deleted_at     DATETIME DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Partner branches (poslovnice). Distinct from locations, which are OUR service
+-- points — these belong to the partner, and an RMA records which one sent it.
+CREATE TABLE partner_branches (
+  id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  partner_id INT UNSIGNED NOT NULL,
+  name       VARCHAR(150) NOT NULL,
+  city       VARCHAR(100),
+  phone      VARCHAR(30),
+  is_active  TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME DEFAULT NOW(),
+  deleted_at DATETIME DEFAULT NULL,
+  INDEX idx_pb_partner (partner_id),
+  FOREIGN KEY (partner_id) REFERENCES partners(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE partner_users (
   id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   partner_id INT UNSIGNED NOT NULL,
   user_id    INT UNSIGNED NOT NULL,
+  -- Which of the partner's own poslovnice this person sits in. Not
+  -- users.location_id: that column means an INTEGRA service point.
+  branch_id  INT UNSIGNED DEFAULT NULL,
   role       ENUM('admin','staff') DEFAULT 'staff',
   invited_by INT UNSIGNED DEFAULT NULL,
   created_at DATETIME DEFAULT NOW(),
   UNIQUE KEY uq_partner_user (partner_id, user_id),
+  KEY idx_pu_branch (branch_id),
   FOREIGN KEY (partner_id) REFERENCES partners(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (branch_id) REFERENCES partner_branches(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE api_tokens (
@@ -293,6 +310,8 @@ CREATE TABLE rma_requests (
   device_id              INT UNSIGNED DEFAULT NULL,
   customer_id            INT UNSIGNED DEFAULT NULL,
   partner_id             INT UNSIGNED DEFAULT NULL,
+  -- Which of the partner's own branches sent this in.
+  partner_branch_id      INT UNSIGNED DEFAULT NULL,
   submitted_by           INT UNSIGNED DEFAULT NULL,
   assigned_tech          INT UNSIGNED DEFAULT NULL,
   status_id              INT UNSIGNED NOT NULL,
@@ -329,6 +348,7 @@ CREATE TABLE rma_requests (
   FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE SET NULL,
   FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
   FOREIGN KEY (partner_id) REFERENCES partners(id) ON DELETE SET NULL,
+  FOREIGN KEY (partner_branch_id) REFERENCES partner_branches(id) ON DELETE SET NULL,
   FOREIGN KEY (status_id) REFERENCES rma_statuses(id),
   FOREIGN KEY (assigned_tech) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

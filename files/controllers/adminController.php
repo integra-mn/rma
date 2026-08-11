@@ -225,6 +225,15 @@ class AdminController {
             }
         }
 
+        // A partner-role account with no partner behind it logs in to an empty
+        // portal, which looks like a broken app rather than a missing field.
+        // Refuse up front instead of creating one.
+        if ($role === 'partner' && !(int)($_POST['partner_id'] ?? 0)) {
+            $_SESSION['flash'] = ['type'=>'danger','message'=>__('users.partner_required')];
+            header('Location: /administration?tab=users');
+            exit;
+        }
+
         $id = db_insert('users', [
             'name'          => $name,
             'email'         => $email,
@@ -241,10 +250,55 @@ class AdminController {
                              ? $_POST['access_scope'] : default_access_scope($role),
         ]);
 
+        $this->sync_partner_link($id, $role);
+
         audit('created', 'user', $id);
         $_SESSION['flash'] = ['type'=>'success','message'=>__('users.created', ['name'=>$name])];
         header('Location: /administration?tab=users');
         exit;
+    }
+
+    /**
+     * Keep the person ↔ partner ↔ poslovnica link in step with the role.
+     *
+     * A partner-role account is useless without this row: the portal works out
+     * who you are from partner_users, so an account without it logs in and sees
+     * an empty portal. Equally, demoting someone out of the partner role has to
+     * drop the link, or they keep partner access through a stale row.
+     *
+     * Exactly one row per user is kept, which is what the users list join and
+     * current_partner_id() both assume.
+     */
+    private function sync_partner_link(int $user_id, string $role): void {
+        if ($role !== 'partner') {
+            db_delete('partner_users', 'user_id = ?', [$user_id]);
+            return;
+        }
+
+        $partner_id = (int)($_POST['partner_id'] ?? 0);
+        if (!$partner_id) {
+            // No partner chosen — leave any existing link untouched rather than
+            // silently cutting someone off from their portal.
+            return;
+        }
+
+        // The branch is only accepted if it belongs to the partner just chosen.
+        $branch_id = valid_partner_branch_id($partner_id, $_POST['partner_branch_id'] ?? null);
+        $existing  = db_row('SELECT id, partner_id FROM partner_users WHERE user_id = ? LIMIT 1', [$user_id]);
+
+        if ($existing && (int)$existing['partner_id'] === $partner_id) {
+            db_update('partner_users', ['branch_id' => $branch_id], 'id = ?', [(int)$existing['id']]);
+            return;
+        }
+
+        db_delete('partner_users', 'user_id = ?', [$user_id]);
+        db_insert('partner_users', [
+            'partner_id' => $partner_id,
+            'user_id'    => $user_id,
+            'branch_id'  => $branch_id,
+            'role'       => 'staff',
+            'invited_by' => current_user_id(),
+        ]);
     }
 
     public function user_update(): void {
@@ -290,6 +344,14 @@ class AdminController {
             exit;
         }
 
+        // Same rule as on create: promoting someone to partner without naming
+        // the partner would leave them with a portal that shows nothing.
+        if ($new_role === 'partner' && !(int)($_POST['partner_id'] ?? 0)) {
+            $_SESSION['flash'] = ['type'=>'danger','message'=>__('users.partner_required')];
+            header('Location: /administration?tab=users');
+            exit;
+        }
+
         $data = [
             'name'        => trim($_POST['name'] ?? $user['name']),
             'email'       => strtolower(trim($_POST['email'] ?? $user['email'])),
@@ -312,6 +374,7 @@ class AdminController {
         }
 
         db_update('users', $data, 'id = ?', [$id]);
+        $this->sync_partner_link($id, $new_role);
         audit('updated', 'user', $id);
         $_SESSION['flash'] = ['type'=>'success','message'=>__('users.updated')];
         header('Location: /administration?tab=users');
@@ -441,13 +504,27 @@ class AdminController {
             // Super Admin pinned to the top, then the usual active-first,
             // alphabetical order. CASE rather than a role sort so adding roles
             // later doesn't silently reshuffle the list.
-            $users     = db_rows("SELECT u.*, l.name as location_name
+            // partner_users is joined for the partner-side people: which partner
+            // they work for and which of that partner's poslovnice they sit in.
+            // At most one row per user — user_store()/user_update() enforce it.
+            $users     = db_rows("SELECT u.*, l.name as location_name,
+                                         pu.partner_id, pu.branch_id,
+                                         p.name as partner_name, pb.name as branch_name
                                   FROM users u
                                   LEFT JOIN locations l ON l.id = u.location_id
+                                  LEFT JOIN partner_users pu ON pu.user_id = u.id
+                                  LEFT JOIN partners p ON p.id = pu.partner_id
+                                  LEFT JOIN partner_branches pb ON pb.id = pu.branch_id
                                   WHERE u.deleted_at IS NULL
                                   ORDER BY CASE WHEN u.role = 'super_admin' THEN 0 ELSE 1 END,
                                            u.is_active DESC, u.name");
             $locations = db_rows('SELECT * FROM locations WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
+            $partners  = db_rows('SELECT id, name FROM partners WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
+            // Every active branch with its partner_id, so the form can narrow the
+            // list once a partner is picked without another round trip. Roughly
+            // 50 rows in total, so sending them all costs nothing.
+            $all_branches = db_rows('SELECT id, partner_id, name, city FROM partner_branches
+                                      WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
         } elseif ($tab === 'locations') {
             $locations = db_rows('SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY name');
         } elseif ($tab === 'devices') {

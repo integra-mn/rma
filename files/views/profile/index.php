@@ -40,6 +40,21 @@
           <label><?= __('profile.phone_number') ?></label>
           <input type="text" name="phone" value="<?= htmlspecialchars($user['phone'] ?? '') ?>" placeholder="+382 67 123 456">
         </div>
+        <?php if (!empty($my_branches)): ?>
+        <!-- Partner staff only: which of their employer's poslovnice they work
+             from. Shown here so a transfer doesn't need an administrator. -->
+        <div class="field">
+          <label><?= __('partners.branch') ?></label>
+          <select name="partner_branch_id">
+            <option value=""><?= __('users.no_branch') ?></option>
+            <?php foreach ($my_branches as $b): ?>
+              <option value="<?= (int)$b['id'] ?>" <?= (int)$my_branch === (int)$b['id'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($b['city'] ? $b['name'] . ' - ' . $b['city'] : $b['name']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <?php endif; ?>
         <?php if (count($allowed_channels) > 1): ?>
         <div class="field">
           <label><?= __('profile.preferred_2fa') ?></label>

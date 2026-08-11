@@ -29,13 +29,32 @@
       </div>
       <!-- Row 2 -->
       <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
-        <div class="field">
+        <!-- Poslovnica, staff version: one of OUR service points. Swapped for
+             the partner pair below when the role is Partner, so the field
+             always answers the same question — which branch does this person
+             sit in — with the list that is true for them. -->
+        <div class="field" id="a-loc-wrap">
           <label><?= __('label.location') ?></label>
-          <select name="location_id" class="custom-select">
+          <select name="location_id" id="a-location" class="custom-select">
             <option value=""><?= __('users.no_location') ?></option>
             <?php foreach ($locations as $l): ?>
               <option value="<?= (int)$l['id'] ?>"><?= htmlspecialchars($l['name']) ?></option>
             <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field" id="a-partner-wrap" style="display:none;">
+          <label><?= __('users.partner') ?></label>
+          <select name="partner_id" id="a-partner" class="custom-select">
+            <option value=""><?= __('users.select_partner') ?></option>
+            <?php foreach ($partners as $p): ?>
+              <option value="<?= (int)$p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field" id="a-branch-wrap" style="display:none;">
+          <label><?= __('partners.branch') ?></label>
+          <select name="partner_branch_id" id="a-branch" class="custom-select">
+            <option value=""><?= __('users.no_branch') ?></option>
           </select>
         </div>
         <div class="field">
@@ -110,7 +129,19 @@
               <?= role_label($u['role']) ?>
             </span>
           </td>
-          <td style="color:var(--text-secondary);"><?= htmlspecialchars($u['location_name'] ?? '—') ?></td>
+          <?php
+            // One column, one question: which branch does this person sit in.
+            // Integra staff show our service point; partner staff show their own
+            // poslovnica, prefixed with the partner so the list stays readable.
+            if (($u['role'] ?? '') === 'partner') {
+              $where = $u['branch_name']
+                     ? ($u['partner_name'] ? $u['partner_name'] . ' - ' . $u['branch_name'] : $u['branch_name'])
+                     : ($u['partner_name'] ?: '—');
+            } else {
+              $where = $u['location_name'] ?: '—';
+            }
+          ?>
+          <td style="color:var(--text-secondary);"><?= htmlspecialchars($where) ?></td>
           <td style="color:var(--text-muted);"><?= strtoupper($u['lang'] ?? 'en') ?></td>
           <td style="text-align:center;">
             <span class="badge" style="background:<?= $u['is_active']?'var(--accent-bg)':'var(--bg-subtle)' ?>;color:<?= $u['is_active']?'var(--accent-text)':'var(--text-muted)' ?>;">
@@ -133,7 +164,28 @@
             <?= format_datetime($u['last_login'], 'Never') ?>
           </td>
           <td style="text-align:right;">
-            <button onclick="editUser(<?= htmlspecialchars(json_encode($u)) ?>)" class="btn-link"><?= __('btn.edit') ?></button>
+            <?php
+              // Only the fields the edit form actually uses. json_encode($u)
+              // shipped the whole row into this attribute — including
+              // password_hash and, worse, totp_secret, which is the live 2FA
+              // shared secret and would let anyone reading the page source
+              // generate valid codes for every account.
+              $edit_data = [
+                'id'           => (int)$u['id'],
+                'name'         => $u['name'],
+                'email'        => $u['email'],
+                'phone'        => $u['phone'],
+                'role'         => $u['role'],
+                'location_id'  => $u['location_id'],
+                'partner_id'   => $u['partner_id'] ?? null,
+                'branch_id'    => $u['branch_id'] ?? null,
+                'lang'         => $u['lang'],
+                'is_active'    => (int)$u['is_active'],
+                'require_2fa'  => (int)$u['require_2fa'],
+                'access_scope' => $u['access_scope'] ?? 'any',
+              ];
+            ?>
+            <button onclick="editUser(<?= htmlspecialchars(json_encode($edit_data)) ?>)" class="btn-link"><?= __('btn.edit') ?></button>
           </td>
         </tr>
       <?php endforeach; ?>
@@ -161,13 +213,30 @@
         </div>
         <div class="field"><label><?= __('label.phone') ?></label><input type="tel" name="phone" id="e-phone" required></div>
         <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email" id="e-email" required></div>
-        <div class="field">
+        <!-- Same swap as the add form: Integra location for staff, partner +
+             poslovnica for partner-side people. -->
+        <div class="field" id="e-loc-wrap">
           <label><?= __('label.location') ?></label>
           <select name="location_id" id="e-location" class="custom-select">
             <option value=""><?= __('users.no_location') ?></option>
             <?php foreach ($locations as $l): ?>
               <option value="<?= (int)$l['id'] ?>"><?= htmlspecialchars($l['name']) ?></option>
             <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field" id="e-partner-wrap" style="display:none;">
+          <label><?= __('users.partner') ?></label>
+          <select name="partner_id" id="e-partner" class="custom-select">
+            <option value=""><?= __('users.select_partner') ?></option>
+            <?php foreach ($partners as $p): ?>
+              <option value="<?= (int)$p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field" id="e-branch-wrap" style="display:none;">
+          <label><?= __('partners.branch') ?></label>
+          <select name="partner_branch_id" id="e-branch" class="custom-select">
+            <option value=""><?= __('users.no_branch') ?></option>
           </select>
         </div>
         <div class="field">
@@ -237,8 +306,15 @@ function editUser(u) {
   document.getElementById('e-active').value   = (u.is_active == 1) ? '1' : '0';
   document.getElementById('e-2fa').value      = (u.require_2fa == 1) ? '1' : '0';
   document.getElementById('e-scope').value    = (u.access_scope === 'lan') ? 'lan' : 'any';
+  // Partner-side people: their partner, and the branch within it. Filled
+  // before the rebuild below so the custom-select shows the right label.
+  if (editBinder) {
+    editBinder.partner.value = u.partner_id || '';
+    editBinder.fillBranches(u.branch_id || null);
+    editBinder.applyRole();
+  }
   // Refresh the custom-select buttons to reflect the values we just set.
-  ['e-lang','e-location','e-role','e-2fa','e-scope','e-active'].forEach(function(id){
+  ['e-lang','e-location','e-role','e-2fa','e-scope','e-active','e-partner'].forEach(function(id){
     var s = document.getElementById(id);
     if (s && s._customRebuild) s._customRebuild();
   });
@@ -269,4 +345,61 @@ document.getElementById('edit-modal').addEventListener('click', function(e) {
     if (scope._customRebuild) scope._customRebuild();
   });
 })();
+
+// ── Partner / poslovnica fields ─────────────────────────────────
+//
+// "Which branch does this person sit in" is one question with two different
+// answers depending on who they work for: an Integra service point for our own
+// staff, one of the partner's own offices for theirs. So the form shows one or
+// the other, never both, and the branch list is narrowed to the chosen partner
+// — never the full set across all partners.
+var ALL_BRANCHES = <?= json_encode($all_branches ?? [], JSON_UNESCAPED_UNICODE) ?>;
+
+function branchBinder(prefix) {
+  var role    = document.getElementById(prefix + '-role');
+  var locWrap = document.getElementById(prefix + '-loc-wrap');
+  var pWrap   = document.getElementById(prefix + '-partner-wrap');
+  var bWrap   = document.getElementById(prefix + '-branch-wrap');
+  var partner = document.getElementById(prefix + '-partner');
+  var branch  = document.getElementById(prefix + '-branch');
+  if (!role || !locWrap || !pWrap || !bWrap || !partner || !branch) return null;
+
+  var placeholder = branch.options[0] ? branch.options[0].textContent : '';
+
+  function fillBranches(selected) {
+    var pid  = parseInt(partner.value, 10) || 0;
+    var mine = ALL_BRANCHES.filter(function (b) { return parseInt(b.partner_id, 10) === pid; });
+
+    branch.innerHTML = '';
+    var first = document.createElement('option');
+    first.value = '';
+    first.textContent = placeholder;
+    branch.appendChild(first);
+
+    mine.forEach(function (b) {
+      var o = document.createElement('option');
+      o.value = b.id;
+      o.textContent = b.city ? b.name + ' - ' + b.city : b.name;
+      if (selected && parseInt(selected, 10) === parseInt(b.id, 10)) o.selected = true;
+      branch.appendChild(o);
+    });
+    if (branch._customRebuild) branch._customRebuild();
+  }
+
+  function applyRole() {
+    var isPartner = role.value === 'partner';
+    locWrap.style.display = isPartner ? 'none' : '';
+    pWrap.style.display   = isPartner ? '' : 'none';
+    bWrap.style.display   = isPartner ? '' : 'none';
+  }
+
+  role.addEventListener('change', applyRole);
+  partner.addEventListener('change', function () { fillBranches(null); });
+
+  return { applyRole: applyRole, fillBranches: fillBranches, partner: partner };
+}
+
+var addBinder  = branchBinder('a');
+var editBinder = branchBinder('e');
+if (addBinder) addBinder.applyRole();
 </script>
