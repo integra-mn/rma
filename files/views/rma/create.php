@@ -16,8 +16,12 @@ defined('RMS') or die('Direct access not permitted');
     <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
       <h2 style="font-size:14px;font-weight:500;color:#5f5e5a;margin-bottom:1rem;"><?= __('rma.customer_details') ?></h2>
 
-      <!-- Row 1: Search Customer + Partner -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+      <!-- Row 1: Search Customer + Partner + Poslovnica. Three columns, matching
+           the rest of this section. The branch stays visible whether or not a
+           partner is chosen — it used to appear only once one was, which moved
+           everything below it and made the field easy to miss. Its options are
+           filled from the chosen partner. -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:8px;">
         <div>
           <label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:3px;"><?= __('rma.search_customer') ?></label>
           <input type="text" id="cust-search-input" placeholder="<?= __('rma.search_phone_email') ?>"
@@ -32,16 +36,9 @@ defined('RMS') or die('Direct access not permitted');
             <?php endforeach; ?>
           </select>
         </div>
-      </div>
-
-      <!-- Row 1b: which of the partner's own branches sent this in. Sits under
-           the partner it belongs to, and stays hidden until a partner with
-           branches is picked so walk-in intake looks exactly as before. -->
-      <div id="rma-branch-wrap" style="display:none;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
-        <div></div>
         <div>
           <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('partners.branch') ?></label>
-          <select name="partner_branch_id" id="rma-branch">
+          <select name="partner_branch_id" id="rma-branch" class="search-select">
             <option value=""><?= __('rma.select_branch') ?></option>
           </select>
         </div>
@@ -712,13 +709,13 @@ function toggleAcc(key) {
 
 // ── Partner branches ────────────────────────────────────────────
 // The branch list depends on the partner, so it is filtered here instead of
-// with a round trip. Partners with no branches never see the field at all.
+// with a round trip. The field itself is always visible; only its options
+// depend on the partner.
 (function () {
   var BRANCHES = <?= json_encode($partner_branches ?? [], JSON_UNESCAPED_UNICODE) ?>;
-  var partner  = document.getElementById('rma-partner');
-  var wrap     = document.getElementById('rma-branch-wrap');
-  var select   = document.getElementById('rma-branch');
-  if (!partner || !wrap || !select) return;
+  var partner = document.getElementById('rma-partner');
+  var select  = document.getElementById('rma-branch');
+  if (!partner || !select) return;
 
   var placeholder = select.options[0] ? select.options[0].textContent : '';
 
@@ -739,8 +736,6 @@ function toggleAcc(key) {
       select.appendChild(o);
     });
 
-    // 'grid', not '', because the wrapper is a two-column grid row.
-    wrap.style.display = mine.length ? 'grid' : 'none';
   }
 
   partner.addEventListener('change', syncBranches);
