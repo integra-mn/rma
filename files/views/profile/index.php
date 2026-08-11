@@ -150,9 +150,12 @@
                  so a longer translation cannot break the alignment. -->
             <div class="field" style="width:228px;max-width:100%;margin-bottom:8px;">
               <label><?= __('profile.totp_enter_code') ?></label>
-              <input type="text" name="code" maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
-                     autocomplete="one-time-code" required
-                     style="text-align:center;font-size:18px;letter-spacing:5px;">
+              <?php
+                // Same six boxes as the login screen, sized to the 228px column
+                // this card uses: 6*33 + 5*6 = 228.
+                $cb_width = 33; $cb_height = 44; $cb_gap = 6; $cb_id = 'totp-code';
+              ?>
+              <?php include views_path('_partials/code_boxes.php'); ?>
             </div>
             <div style="display:flex;gap:8px;width:228px;max-width:100%;">
               <button type="submit" class="btn btn-primary" style="flex:1;margin-top:0;"><?= __('btn.confirm') ?></button>
