@@ -51,6 +51,15 @@ const PERMISSION_MATRIX = [
     'suppliers' => ['view', 'edit'],
     'reports'   => ['view'],
     'invoicing' => ['view'],
+    // Administration = Users, Locations, Devices, Shipments, Statuses.
+    // Was governed by settings.* along with Settings itself, so the two could
+    // not be granted apart, and the sidebar link was gated on a hardcoded role
+    // list that the permission editor could not reach at all.
+    //   view  — see the section and its tabs
+    //   edit  — change locations, device catalogue, couriers, statuses
+    //   users — create/edit/deactivate accounts and reset someone's 2FA. Kept
+    //           separate because it is the one that can hand out access.
+    'administration' => ['view', 'edit', 'users'],
     'settings'  => ['view', 'edit'],
     'preferences' => ['theme', 'lang', 'integrations'],
 ];

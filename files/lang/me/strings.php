@@ -838,6 +838,7 @@ return [
     'admin.perm_action_create' => 'kreiranje',
     'admin.perm_action_edit'   => 'izmjena',
     'admin.perm_action_delete' => 'brisanje',
+    'admin.perm_action_users'  => 'upravljanje korisnicima',
     'admin.perm_action_theme'  => 'tema',
     'admin.perm_action_lang'   => 'jezik',
     'admin.perm_action_integrations' => 'integracije',

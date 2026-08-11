@@ -270,7 +270,10 @@ function nav_active(string $prefix): string {
   </a>
   <?php endif; ?>
 
-  <?php if (in_array($role, ['super_admin','admin','main_admin','lite_admin'])): ?>
+  <!-- Both links are permission-driven now. They shared one hardcoded role
+       list, so Settings > Permissions could never grant either of them:
+       you could tick the boxes and nothing happened. -->
+  <?php if (can('administration', 'view')): ?>
   <a href="/administration" class="sidebar-link<?= nav_active('/administration') ?>">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
       <circle cx="6" cy="5" r="2.5"/>
@@ -279,6 +282,8 @@ function nav_active(string $prefix): string {
     </svg>
     <?= __('nav.administration') ?>
   </a>
+  <?php endif; ?>
+  <?php if (can('settings', 'view')): ?>
   <a href="/settings" class="sidebar-link<?= nav_active('/settings') ?>">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
       <circle cx="8" cy="8" r="2.5"/>

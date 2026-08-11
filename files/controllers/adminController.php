@@ -11,7 +11,7 @@ class AdminController {
 
     public function location_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $count = (int) db_val('SELECT COUNT(*) FROM locations WHERE deleted_at IS NULL');
         if ($count >= 10) {
@@ -47,7 +47,7 @@ class AdminController {
 
     public function location_toggle(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $id  = (int)($_POST['id'] ?? 0);
         $loc = db_row('SELECT * FROM locations WHERE id = ?', [$id]);
@@ -74,7 +74,7 @@ class AdminController {
 
     public function location_update(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $id   = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
@@ -116,7 +116,7 @@ class AdminController {
 
     public function courier_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
         $name = trim($_POST['name'] ?? '');
         if (!$name) {
             $_SESSION['flash'] = ['type'=>'danger','message'=>__('ship.courier_name_required')];
@@ -136,7 +136,7 @@ class AdminController {
 
     public function courier_update(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
         $id   = (int) ($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         if (!$id || !$name) {
@@ -155,7 +155,7 @@ class AdminController {
 
     public function courier_toggle(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
         $id = (int) ($_POST['id'] ?? 0);
         $c  = db_row('SELECT is_active FROM couriers WHERE id = ?', [$id]);
         if ($c) {
@@ -167,7 +167,7 @@ class AdminController {
 
     public function courier_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
         $id = (int) ($_POST['id'] ?? 0);
         // In-use couriers can't be hard-deleted (shipments/partners reference them);
         // fall back to disabling so history stays intact.
@@ -192,7 +192,7 @@ class AdminController {
 
     public function user_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'users');
 
         $name  = trim($_POST['name'] ?? '');
         $email = strtolower(trim($_POST['email'] ?? ''));
@@ -303,7 +303,7 @@ class AdminController {
 
     public function user_update(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'users');
 
         $id   = (int)($_POST['id'] ?? 0);
         $user = db_row('SELECT * FROM users WHERE id = ?', [$id]);
@@ -383,7 +383,7 @@ class AdminController {
 
     public function user_toggle(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'users');
 
         $id   = (int)($_POST['id'] ?? 0);
         $user = db_row('SELECT * FROM users WHERE id = ?', [$id]);
@@ -406,7 +406,7 @@ class AdminController {
 
     public function location_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $id = (int)($_POST['id'] ?? 0);
 
@@ -427,7 +427,7 @@ class AdminController {
 
     public function user_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'users');
 
         $id = (int)($_POST['id'] ?? 0);
         if ($id === current_user_id()) {
@@ -487,7 +487,7 @@ class AdminController {
 
     public function index(): void {
         require_login();
-        require_permission('settings', 'view');
+        require_permission('administration', 'view');
 
         // Redirect /admin to /settings
         $uri = strtok($_SERVER['REQUEST_URI'], '?');
@@ -562,7 +562,7 @@ class AdminController {
 
     public function status_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $type    = $_POST['type'] ?? '';
         $label   = trim($_POST['label'] ?? '');
@@ -597,7 +597,7 @@ class AdminController {
 
     public function status_update(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $type    = $_POST['type'] ?? '';
         $id      = (int)($_POST['id'] ?? 0);
@@ -669,7 +669,7 @@ class AdminController {
      */
     public function user_totp_reset(): void {
         require_login();
-        require_permission('users', 'edit');
+        require_permission('administration', 'users');
         csrf_verify();
 
         $id = (int) ($_POST['id'] ?? 0);
@@ -740,7 +740,7 @@ class AdminController {
 
     public function category_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $name = trim($_POST['name'] ?? '');
         if (!$name) {
@@ -775,7 +775,7 @@ class AdminController {
 
     public function category_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $id = (int)($_POST['id'] ?? 0);
         $in_use = db_val('SELECT COUNT(*) FROM device_models WHERE category_id = ?', [$id]);
@@ -794,7 +794,7 @@ class AdminController {
 
     public function brand_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $name = trim($_POST['name'] ?? '');
         if (!$name) {
@@ -820,7 +820,7 @@ class AdminController {
 
     public function brand_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $id = (int)($_POST['id'] ?? 0);
         $in_use = db_val('SELECT COUNT(*) FROM device_models WHERE brand_id = ?', [$id]);
@@ -839,7 +839,7 @@ class AdminController {
 
     public function model_store(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $name        = trim($_POST['name'] ?? '');
         $brand_id    = (int)($_POST['brand_id'] ?? 0);
@@ -867,7 +867,7 @@ class AdminController {
 
     public function model_delete(): void {
         require_login();
-        require_permission('settings', 'edit');
+        require_permission('administration', 'edit');
 
         $id = (int)($_POST['id'] ?? 0);
         $in_use = db_val('SELECT COUNT(*) FROM devices WHERE model_id = ?', [$id]);

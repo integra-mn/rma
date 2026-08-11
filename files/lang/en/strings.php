@@ -838,6 +838,7 @@ return [
     'admin.perm_action_create' => 'create',
     'admin.perm_action_edit'   => 'edit',
     'admin.perm_action_delete' => 'delete',
+    'admin.perm_action_users'  => 'manage users',
     'admin.perm_action_theme'  => 'theme',
     'admin.perm_action_lang'   => 'language',
     'admin.perm_action_integrations' => 'integrations',
