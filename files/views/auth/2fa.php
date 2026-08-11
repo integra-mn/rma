@@ -59,6 +59,16 @@
     .code-label { text-align: center; }
     .code-input { text-align: center; font-size: 20px; letter-spacing: 6px;
                   font-variant-numeric: tabular-nums; }
+    /* Six boxes across a 380px card: 6*44 + 5*8 = 304px, comfortably inside
+       the ~316px of usable width. */
+    .code-boxes { display: flex; gap: 8px; justify-content: center; }
+    .code-box { width: 44px; height: 52px; padding: 0; text-align: center;
+                font-size: 22px; font-variant-numeric: tabular-nums;
+                border: 0.5px solid #d3d1c7; border-radius: 8px; background: #fff;
+                color: #2c2c2a; outline: none; font-family: inherit;
+                transition: border-color .15s; }
+    .code-box:focus { border-color: #1D9E75; }
+    .code-box.filled { border-color: #1D9E75; }
     .back { font-size: 13px; color: #5f5e5a; text-decoration: none;
             display: block; text-align: center; margin-top: 1rem; }
     .back:hover { color: #1D9E75; }
@@ -155,10 +165,27 @@
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="verify">
       <div class="field">
-        <label for="code" class="code-label"><?= __('auth.code_label') ?></label>
-        <input type="text" id="code" name="code" maxlength="6" pattern="[0-9]{6}"
-               inputmode="numeric" autocomplete="one-time-code" autofocus
-               class="code-input">
+        <label for="code-1" class="code-label"><?= __('auth.code_label') ?></label>
+        <!-- Six boxes, one digit each. They carry no name: JS combines them into
+             the hidden field below, so the server still receives a single `code`
+             exactly as before. The first box keeps autocomplete="one-time-code"
+             so a phone still offers the SMS code, and the paste/autofill handler
+             spreads a multi-character value across all six. -->
+        <div class="code-boxes" id="code-boxes">
+          <?php for ($i = 1; $i <= 6; $i++): ?>
+            <input type="text" id="code-<?= $i ?>" class="code-box"
+                   inputmode="numeric" pattern="[0-9]*" maxlength="1"
+                   aria-label="<?= __('auth.code_digit', ['n' => $i]) ?>"
+                   <?= $i === 1 ? 'autocomplete="one-time-code" autofocus' : 'autocomplete="off"' ?>>
+          <?php endfor; ?>
+        </div>
+        <input type="hidden" name="code" id="code">
+        <noscript>
+          <!-- Without JS the boxes cannot be combined, so fall back to the plain
+               field this screen used before. -->
+          <input type="text" name="code" maxlength="6" pattern="[0-9]{6}"
+                 inputmode="numeric" class="code-input" style="margin-top:8px;">
+        </noscript>
       </div>
       <div class="trust-row">
         <input type="checkbox" id="trust_device" name="trust_device" value="1">
@@ -262,6 +289,95 @@
         : btn.getAttribute('data-send');
     });
   });
+})();
+</script>
+
+<script>
+// Six one-digit boxes behaving like a single field.
+//
+// The boxes carry no name; this fills the hidden `code` input, so the server
+// still receives one 6-digit value and nothing behind it had to change.
+(function () {
+  var wrap = document.getElementById('code-boxes');
+  var joined = document.getElementById('code');
+  if (!wrap || !joined) return;
+
+  var boxes = Array.prototype.slice.call(wrap.querySelectorAll('.code-box'));
+  var form  = wrap.closest('form');
+
+  function digitsOnly(t) { return (t || '').replace(/\D/g, ''); }
+
+  function sync() {
+    var code = boxes.map(function (b) { return b.value; }).join('');
+    joined.value = code;
+    boxes.forEach(function (b) { b.classList.toggle('filled', b.value !== ''); });
+    return code;
+  }
+
+  // Spread a multi-character value across the boxes. This covers three cases
+  // at once: pasting a code from an email, a phone autofilling an SMS code
+  // into the first box, and a password manager doing the same.
+  function spread(text, startIndex) {
+    var chars = digitsOnly(text).split('');
+    if (!chars.length) return;
+    var i = startIndex;
+    while (chars.length && i < boxes.length) { boxes[i++].value = chars.shift(); }
+    boxes[Math.min(i, boxes.length - 1)].focus();
+    finish();
+  }
+
+  function finish() {
+    var code = sync();
+    // Submitting on the sixth digit saves hunting for the button — the code is
+    // complete and there is nothing else to fill in.
+    if (code.length === boxes.length && form && !form.__submitted) {
+      form.__submitted = true;
+      if (form.requestSubmit) form.requestSubmit(); else form.submit();
+    }
+  }
+
+  boxes.forEach(function (box, index) {
+    box.addEventListener('input', function () {
+      if (box.value.length > 1) { spread(box.value, index); return; }
+      box.value = digitsOnly(box.value);
+      if (box.value && index < boxes.length - 1) boxes[index + 1].focus();
+      finish();
+    });
+
+    box.addEventListener('keydown', function (e) {
+      if (e.key === 'Backspace' && !box.value && index > 0) {
+        // Step back and clear, so holding backspace walks the code away.
+        e.preventDefault();
+        boxes[index - 1].value = '';
+        boxes[index - 1].focus();
+        sync();
+      } else if (e.key === 'ArrowLeft' && index > 0) {
+        e.preventDefault(); boxes[index - 1].focus();
+      } else if (e.key === 'ArrowRight' && index < boxes.length - 1) {
+        e.preventDefault(); boxes[index + 1].focus();
+      }
+    });
+
+    box.addEventListener('paste', function (e) {
+      e.preventDefault();
+      spread((e.clipboardData || window.clipboardData).getData('text'), index);
+    });
+
+    // Selecting the content on focus means typing replaces rather than appends.
+    box.addEventListener('focus', function () { box.select(); });
+  });
+
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      if (sync().length !== boxes.length) {
+        // Incomplete: stop, and put the cursor on the first empty box.
+        e.preventDefault();
+        form.__submitted = false;
+        var first = boxes.filter(function (b) { return !b.value; })[0];
+        if (first) first.focus();
+      }
+    });
+  }
 })();
 </script>
 </body>

@@ -332,6 +332,7 @@ return [
     'auth.code_expires_in'   => 'Code expires in :time',
     'auth.code_expired_hint' => 'Code expired — request a new one.',
     'auth.code_label'        => '6-digit code',
+    'auth.code_digit'        => 'Digit :n of 6',
     'auth.trust_device'      => 'Trust this device for 30 days',
     'auth.back_to_login'     => 'Back to login',
     'auth.change_channel'    => 'Choose another method',

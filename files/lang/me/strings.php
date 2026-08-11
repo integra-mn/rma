@@ -332,6 +332,7 @@ return [
     'auth.code_expires_in'   => 'Kod ističe za :time',
     'auth.code_expired_hint' => 'Kod je istekao — zatražite novi.',
     'auth.code_label'        => '6-cifreni kod',
+    'auth.code_digit'        => 'Cifra :n od 6',
     'auth.trust_device'      => 'Zapamti ovaj uredjaj 30 dana',
     'auth.back_to_login'     => 'Nazad na prijavu',
     'auth.change_channel'    => 'Izaberi drugi način',
