@@ -27,7 +27,11 @@
     }
     input:focus, select:focus { border-color: #1D9E75; }
     .field { margin-bottom: 1rem; }
+    /* Fixed line-height and min-height: the label swaps between Send Code
+       and Enter Code as the channel changes, and without these the box
+       resizes with its text. */
     .btn { width: 100%; padding: 10px; font-size: 14px; font-weight: 500;
+           line-height: 20px; min-height: 42px;
            background: #1D9E75; color: #fff; border: none; border-radius: 8px;
            font-family: inherit;   /* form controls don't inherit the page font */
            cursor: pointer; margin-top: 0.5rem; transition: background .15s; }

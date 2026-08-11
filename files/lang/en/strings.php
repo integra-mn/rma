@@ -318,7 +318,7 @@ return [
     'profile.totp_disable'      => 'Remove app',
     'profile.totp_disable_confirm' => 'Remove the authenticator app? You will go back to receiving codes by email or SMS.',
     'profile.totp_disabled'     => 'Authenticator app removed.',
-    'auth.channel_totp'         => 'Authenticator app',
+    'auth.channel_totp'         => 'Authenticator',
     'auth.totp_hint'            => 'Open your authenticator app and enter the current code.',
     'users.totp_reset'          => 'Reset authenticator app',
     'users.totp_reset_done'     => 'Authenticator app reset — the user can enrol again.',
