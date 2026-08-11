@@ -49,8 +49,8 @@ $dtab = $_GET['dtab'] ?? 'brands';
           <div class="field"><label><?= __('devices.sort_order') ?></label><input type="number" name="sort_order" value="0" min="0"></div>
         </div>
         <div style="display:flex;gap:8px;">
-          <button type="submit" class="btn btn-primary"><?= __('btn.save') ?></button>
-          <button type="button" class="btn" onclick="toggleForm('group-add-form')"><?= __('btn.cancel') ?></button>
+          <button type="submit" class="btn btn-primary" style="min-width:140px;"><?= __('btn.save') ?></button>
+          <button type="button" class="btn" style="min-width:140px;" onclick="toggleForm('group-add-form')"><?= __('btn.cancel') ?></button>
         </div>
       </form>
     </div>
@@ -110,8 +110,8 @@ $dtab = $_GET['dtab'] ?? 'brands';
           <div class="field"><label><?= __('catalog.brand_name') ?> *</label><input type="text" name="name" required placeholder="<?= __('devices.brand_name_ph') ?>"></div>
         </div>
         <div style="display:flex;gap:8px;">
-          <button type="submit" class="btn btn-primary"><?= __('btn.save') ?></button>
-          <button type="button" class="btn" onclick="toggleForm('brand-add-form')"><?= __('btn.cancel') ?></button>
+          <button type="submit" class="btn btn-primary" style="min-width:140px;"><?= __('btn.save') ?></button>
+          <button type="button" class="btn" style="min-width:140px;" onclick="toggleForm('brand-add-form')"><?= __('btn.cancel') ?></button>
         </div>
       </form>
     </div>
@@ -187,8 +187,8 @@ $dtab = $_GET['dtab'] ?? 'brands';
           </div>
         </div>
         <div style="display:flex;gap:8px;">
-          <button type="submit" class="btn btn-primary"><?= __('btn.save') ?></button>
-          <button type="button" class="btn" onclick="toggleForm('model-add-form')"><?= __('btn.cancel') ?></button>
+          <button type="submit" class="btn btn-primary" style="min-width:140px;"><?= __('btn.save') ?></button>
+          <button type="button" class="btn" style="min-width:140px;" onclick="toggleForm('model-add-form')"><?= __('btn.cancel') ?></button>
         </div>
       </form>
     </div>
@@ -240,11 +240,11 @@ $dtab = $_GET['dtab'] ?? 'brands';
       </div>
     </form>
     <div class="modal-actions" style="display:flex;gap:8px;align-items:center;">
-      <button type="submit" form="group-update-form" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
-      <button type="button" class="btn" onclick="closeDevModal()"><?= __('btn.cancel') ?></button>
+      <button type="submit" form="group-update-form" class="btn btn-primary" style="min-width:140px;"><?= __('btn.save_changes') ?></button>
+      <button type="button" class="btn" style="min-width:140px;" onclick="closeDevModal()"><?= __('btn.cancel') ?></button>
       <form method="POST" action="/devices/category/delete" style="margin-left:auto;" data-confirm="<?= htmlspecialchars(__('devices.confirm_delete_group'), ENT_QUOTES) ?>">
         <?= csrf_field() ?><input type="hidden" name="id" id="gd-id">
-        <button type="submit" class="btn btn-sm btn-danger"><?= __('btn.delete') ?></button>
+        <button type="submit" class="btn btn-sm btn-danger" style="min-width:140px;"><?= __('btn.delete') ?></button>
       </form>
     </div>
   </div>
@@ -258,11 +258,11 @@ $dtab = $_GET['dtab'] ?? 'brands';
       <div class="field" style="margin-bottom:10px;"><label><?= __('catalog.brand_name') ?> *</label><input type="text" name="name" id="be-name" required></div>
     </form>
     <div class="modal-actions" style="display:flex;gap:8px;align-items:center;">
-      <button type="submit" form="brand-update-form" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
-      <button type="button" class="btn" onclick="closeDevModal()"><?= __('btn.cancel') ?></button>
+      <button type="submit" form="brand-update-form" class="btn btn-primary" style="min-width:140px;"><?= __('btn.save_changes') ?></button>
+      <button type="button" class="btn" style="min-width:140px;" onclick="closeDevModal()"><?= __('btn.cancel') ?></button>
       <form method="POST" action="/devices/brand/delete" style="margin-left:auto;" data-confirm="<?= htmlspecialchars(__('devices.confirm_delete_brand'), ENT_QUOTES) ?>">
         <?= csrf_field() ?><input type="hidden" name="id" id="bd-id">
-        <button type="submit" class="btn btn-sm btn-danger"><?= __('btn.delete') ?></button>
+        <button type="submit" class="btn btn-sm btn-danger" style="min-width:140px;"><?= __('btn.delete') ?></button>
       </form>
     </div>
   </div>
@@ -288,11 +288,11 @@ $dtab = $_GET['dtab'] ?? 'brands';
       </div>
     </form>
     <div class="modal-actions" style="display:flex;gap:8px;align-items:center;">
-      <button type="submit" form="model-update-form" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
-      <button type="button" class="btn" onclick="closeDevModal()"><?= __('btn.cancel') ?></button>
+      <button type="submit" form="model-update-form" class="btn btn-primary" style="min-width:140px;"><?= __('btn.save_changes') ?></button>
+      <button type="button" class="btn" style="min-width:140px;" onclick="closeDevModal()"><?= __('btn.cancel') ?></button>
       <form method="POST" action="/devices/model/delete" style="margin-left:auto;" data-confirm="<?= htmlspecialchars(__('devices.confirm_delete_model'), ENT_QUOTES) ?>">
         <?= csrf_field() ?><input type="hidden" name="id" id="md-id">
-        <button type="submit" class="btn btn-sm btn-danger"><?= __('btn.delete') ?></button>
+        <button type="submit" class="btn btn-sm btn-danger" style="min-width:140px;"><?= __('btn.delete') ?></button>
       </form>
     </div>
   </div>

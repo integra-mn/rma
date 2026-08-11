@@ -207,7 +207,9 @@ function nav_active(string $prefix): string {
   <?php endif; ?>
 
   <?php if (can('parts', 'view')): ?>
-  <a href="/parts" class="sidebar-link<?= nav_active('/parts') ?>">
+  <!-- Suppliers is a Parts tab but keeps its own /suppliers URL, so the
+       highlight has to cover both or the sidebar goes blank on that tab. -->
+  <a href="/parts" class="sidebar-link<?= nav_active('/parts') ?: nav_active('/suppliers') ?>">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M8 2L14 5.5v5L8 14 2 10.5v-5L8 2z"/>
       <path d="M8 2v12M2 5.5l6 3.5 6-3.5"/>
