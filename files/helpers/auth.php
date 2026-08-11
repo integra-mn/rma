@@ -542,6 +542,14 @@ function otp_send_whatsapp(array $user, string $code): bool {
 function otp_send_sms(array $user, string $code): bool {
     $phone = $user['phone'] ?? '';
     if ($phone === '') return false;
-    $text = "Integra RMA: your verification code is {$code}. It expires in 10 minutes.";
+
+    // Pinned to Montenegrin rather than the recipient's profile language: the
+    // people receiving these are staff in Montenegro, and a login code is not
+    // the place for a language surprise. m:tel accepts UTF-8, so the diacritics
+    // survive — no transliteration needed (see _sms_server/MTEL-PROFILE.md §7).
+    //
+    // No "Integra RMA:" prefix any more — m:tel already shows "Integra" as the
+    // sender, so it only ate characters and read as a duplicate.
+    $text = __in('me', 'auth.sms_otp', ['code' => $code]);
     return sms_send($phone, $text);
 }

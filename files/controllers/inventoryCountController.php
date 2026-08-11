@@ -64,7 +64,7 @@ class InventoryCountController {
         }
 
         audit('started', 'inventory_count', $count_id);
-        $_SESSION['form_success'] = __('parts.count_started', [':count'=>count($parts)]);
+        $_SESSION['form_success'] = __('parts.count_started', ['count'=>count($parts)]);
         header('Location: /parts?tab=inventory');
         exit;
     }

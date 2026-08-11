@@ -75,7 +75,7 @@ class DevicesController {
         // re-tag them first, or we'd orphan the classification.
         $used = (int) db_val('SELECT COUNT(*) FROM parts WHERE part_group_id = ? AND deleted_at IS NULL', [$id]);
         if ($used) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('devices.group_in_use_parts', [':count'=>$used])];
+            $_SESSION['flash'] = ['type'=>'danger','message'=>__('devices.group_in_use_parts', ['count'=>$used])];
         } else {
             db()->prepare('DELETE FROM part_groups WHERE id = ?')->execute([$id]);
             audit('deleted', 'part_group', $id);
@@ -124,7 +124,7 @@ class DevicesController {
         $id = (int)($_POST['id'] ?? 0);
         $used = (int)db_val('SELECT COUNT(*) FROM device_models WHERE category_id = ?', [$id]);
         if ($used) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('devices.category_in_use', [':count'=>$used])];
+            $_SESSION['flash'] = ['type'=>'danger','message'=>__('devices.category_in_use', ['count'=>$used])];
         } else {
             db_delete('device_categories', 'id = ?', [$id]);
             audit('deleted', 'device_category', $id);
@@ -154,7 +154,7 @@ class DevicesController {
         $id = (int)($_POST['id'] ?? 0);
         $used = (int)db_val('SELECT COUNT(*) FROM device_models WHERE brand_id = ?', [$id]);
         if ($used) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('devices.brand_in_use', [':count'=>$used])];
+            $_SESSION['flash'] = ['type'=>'danger','message'=>__('devices.brand_in_use', ['count'=>$used])];
         } else {
             db_delete('device_brands', 'id = ?', [$id]);
             audit('deleted', 'device_brand', $id);
@@ -187,7 +187,7 @@ class DevicesController {
         $id = (int)($_POST['id'] ?? 0);
         $used = (int)db_val('SELECT COUNT(*) FROM devices WHERE model_id = ?', [$id]);
         if ($used) {
-            $_SESSION['flash'] = ['type'=>'danger','message'=>__('devices.model_in_use', [':count'=>$used])];
+            $_SESSION['flash'] = ['type'=>'danger','message'=>__('devices.model_in_use', ['count'=>$used])];
         } else {
             db_delete('device_models', 'id = ?', [$id]);
             audit('deleted', 'device_model', $id);

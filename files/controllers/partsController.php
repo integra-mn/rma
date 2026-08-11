@@ -162,7 +162,7 @@ class PartsController {
         // Check supplier SKU uniqueness
         $supplier_sku = trim($_POST['supplier_sku'] ?? '') ?: null;
         if ($supplier_sku && db_val('SELECT id FROM parts WHERE supplier_sku = ? AND deleted_at IS NULL', [$supplier_sku])) {
-            $_SESSION['form_error'] = __('parts.supplier_sku_exists', [':sku'=>$supplier_sku]);
+            $_SESSION['form_error'] = __('parts.supplier_sku_exists', ['sku'=>$supplier_sku]);
             header('Location: /parts');
             exit;
         }
@@ -187,7 +187,7 @@ class PartsController {
             'is_active'     => 1,
         ]);
         audit('created', 'part', $id);
-        $_SESSION['form_success'] = __('parts.added_with_sku', [':sku'=>$internal_sku]);
+        $_SESSION['form_success'] = __('parts.added_with_sku', ['sku'=>$internal_sku]);
         header('Location: /parts');
         exit;
     }

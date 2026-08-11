@@ -203,7 +203,7 @@ class GoodsReceiptController {
             ]);
         }
 
-        $_SESSION['form_success'] = __('parts.lines_imported', [':count'=>count($rows)]);
+        $_SESSION['form_success'] = __('parts.lines_imported', ['count'=>count($rows)]);
         header("Location: /parts/receipts/{$id}");
         exit;
     }
@@ -288,7 +288,7 @@ class GoodsReceiptController {
 
         foreach ($items as $item) {
             if (!$item['part_id']) {
-                $_SESSION['form_error'] = __('parts.part_not_matched', [':name'=>$item['part_name_raw']]);
+                $_SESSION['form_error'] = __('parts.part_not_matched', ['name'=>$item['part_name_raw']]);
                 header("Location: /parts/receipts/{$id}");
                 exit;
             }

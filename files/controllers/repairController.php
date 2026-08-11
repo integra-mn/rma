@@ -385,7 +385,7 @@ class RepairController {
         }
 
         if ($stock && $stock['quantity'] < $quantity) {
-            $_SESSION['form_error'] = __('repair.insufficient_stock', [':qty'=>$stock['quantity']]);
+            $_SESSION['form_error'] = __('repair.insufficient_stock', ['qty'=>$stock['quantity']]);
             header("Location: /repair/{$id}");
             exit;
         }

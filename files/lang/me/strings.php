@@ -386,6 +386,7 @@ return [
     'email.otp_subject'      => ':sender — verifikacioni kod',
     'email.otp_greeting'     => 'Poštovani :name,',
     'email.otp_intro'        => 'Vaš verifikacioni kod je:',
+    'auth.sms_otp'           => 'Vaš verifikacioni kod je: :code. Kod ističe za 10 minuta.',
     'email.otp_expiry'       => 'Kod ističe za 10 minuta',
     'email.otp_ignore'       => 'Ako niste tražili kod, zanemarite ovaj email',
     'auth.otp_exhausted'     => 'Previše pokušaja. Zatražite novi kod.',

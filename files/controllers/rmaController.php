@@ -255,7 +255,7 @@ class RmaController {
         // Send receipt email to customer
         send_rma_receipt($rma_id);
 
-        $_SESSION['form_success'] = __('rma.created_with_number', [':number'=>$rma_number]);
+        $_SESSION['form_success'] = __('rma.created_with_number', ['number'=>$rma_number]);
         header("Location: /rma/{$rma_id}");
         exit;
     }
