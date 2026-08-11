@@ -340,8 +340,8 @@ return [
     'auth.otp_expired'       => 'Code expired. Please request a new one.',
 
     // Verification-code email
-    'lang.me'                => 'Crnogorski',
-    'lang.en'                => 'English',
+    'lang.me'                => 'ME',
+    'lang.en'                => 'EN',
     'customers.lang'         => 'Language',
     'customers.lang_hint'    => 'Used for the receipt email and printed receipt.',
     // Printed RMA receipt (PDF)

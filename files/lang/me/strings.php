@@ -340,8 +340,8 @@ return [
     'auth.otp_expired'       => 'Kod je istekao. Zatražite novi.',
 
     // Email sa verifikacionim kodom
-    'lang.me'                => 'Crnogorski',
-    'lang.en'                => 'English',
+    'lang.me'                => 'ME',
+    'lang.en'                => 'EN',
     'customers.lang'         => 'Jezik',
     'customers.lang_hint'    => 'Koristi se za email potvrde i štampanu potvrdu.',
     // Štampana potvrda o prijemu (PDF)
