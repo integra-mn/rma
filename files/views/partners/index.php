@@ -51,10 +51,14 @@
         <div class="field"><label><?= __('partners.tax_id') ?></label><input type="text" name="tax_id"></div>
         <!-- The partner's first poslovnica. Saved as a partner_branches row, not
              as text on the partner, so RMAs can be counted against it. Any
-             further branches are added on the partner's own page. -->
+             further branches are added on the partner's own page.
+             Required: a partner with no branches has an empty branch dropdown
+             everywhere it appears, which reads as a broken screen rather than
+             as missing data. A single-office partner just names it after the
+             town. -->
         <div class="field">
-          <label><?= __('partners.branch') ?></label>
-          <input type="text" name="branch_name" placeholder="<?= __('partners.branch_first_hint') ?>">
+          <label><?= __('partners.branch') ?> *</label>
+          <input type="text" name="branch_name" required>
         </div>
         <!-- One line, not resizable, and 40px to match the inputs beside it:
              app.css gives inputs height 40px but textareas min-height 36px,

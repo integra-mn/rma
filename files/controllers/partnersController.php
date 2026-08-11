@@ -54,6 +54,16 @@ class PartnersController {
             exit;
         }
 
+        // Checked here as well as on the form: `required` is a client-side hint
+        // and a partner created without a branch would look broken everywhere a
+        // branch dropdown appears.
+        $branch = trim($_POST['branch_name'] ?? '');
+        if ($branch === '') {
+            $_SESSION['form_error'] = __('partners.branch_required');
+            header('Location: /partners');
+            exit;
+        }
+
         $id = db_insert('partners', [
             'name'           => $name,
             'tax_id'         => trim($_POST['tax_id'] ?? ''),
@@ -69,19 +79,16 @@ class PartnersController {
         ]);
         audit('created', 'partner', $id);
 
-        // The first poslovnica, if one was typed on the form. A row rather than
-        // text on the partner, so RMAs can be counted against it; the partner's
-        // own page is where any further branches get added.
-        $branch = trim($_POST['branch_name'] ?? '');
-        if ($branch !== '') {
-            db_insert('partner_branches', [
-                'partner_id' => $id,
-                'name'       => $branch,
-                'city'       => trim($_POST['city'] ?? '') ?: null,
-                'is_active'  => 1,
-            ]);
-            audit('branch_added', 'partner', $id, ['new' => ['branch' => $branch]]);
-        }
+        // The first poslovnica. A row rather than text on the partner, so RMAs
+        // can be counted against it; further branches are added on the
+        // partner's own page.
+        db_insert('partner_branches', [
+            'partner_id' => $id,
+            'name'       => $branch,
+            'city'       => trim($_POST['city'] ?? '') ?: null,
+            'is_active'  => 1,
+        ]);
+        audit('branch_added', 'partner', $id, ['new' => ['branch' => $branch]]);
 
         $_SESSION['form_success'] = __('partners.added');
         header('Location: /partners');
@@ -217,6 +224,20 @@ class PartnersController {
         $branch_id  = (int) ($_POST['branch_id'] ?? 0);
 
         if ($branch_id) {
+            // Every partner keeps at least one poslovnica. It is required when
+            // the partner is created, and without this the rule would only hold
+            // until someone removed the last one — putting the partner back in
+            // the state where every branch dropdown looks empty and broken.
+            $remaining = (int) db_val(
+                'SELECT COUNT(*) FROM partner_branches
+                  WHERE partner_id = ? AND deleted_at IS NULL',
+                [$partner_id]
+            );
+            if ($remaining <= 1) {
+                $_SESSION['form_error'] = __('partners.branch_last');
+                header("Location: /partners/{$partner_id}/edit"); exit;
+            }
+
             db_update('partner_branches',
                 ['deleted_at' => date('Y-m-d H:i:s'), 'is_active' => 0],
                 'id = ? AND partner_id = ?', [$branch_id, $partner_id]);
