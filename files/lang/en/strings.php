@@ -714,6 +714,7 @@ return [
     'partners.branch'   => 'Branch',
     'partners.branches'             => 'Branches',
     'partners.branch_add'           => 'Add branch',
+    'partners.branch_first_hint'    => 'First branch (optional)',
     'partners.branch_saved'         => 'Branch added.',
     'partners.branch_removed'       => 'Branch removed.',
     'partners.branch_name_required' => 'Branch name is required.',

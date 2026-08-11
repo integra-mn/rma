@@ -49,10 +49,17 @@
       </div>
       <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="field"><label><?= __('partners.tax_id') ?></label><input type="text" name="tax_id"></div>
+        <!-- The partner's first poslovnica. Saved as a partner_branches row, not
+             as text on the partner, so RMAs can be counted against it. Any
+             further branches are added on the partner's own page. -->
+        <div class="field">
+          <label><?= __('partners.branch') ?></label>
+          <input type="text" name="branch_name" placeholder="<?= __('partners.branch_first_hint') ?>">
+        </div>
         <!-- One line, not resizable, and 40px to match the inputs beside it:
              app.css gives inputs height 40px but textareas min-height 36px,
              so the default left this cell visibly shorter. -->
-        <div class="field" style="grid-column:span 3;">
+        <div class="field" style="grid-column:span 2;">
           <label><?= __('label.notes') ?></label>
           <textarea name="notes" rows="1"
                     style="height:40px;min-height:40px;padding:10px;line-height:18px;resize:none;overflow:auto;"></textarea>

@@ -68,6 +68,21 @@ class PartnersController {
             'is_active'      => 1,
         ]);
         audit('created', 'partner', $id);
+
+        // The first poslovnica, if one was typed on the form. A row rather than
+        // text on the partner, so RMAs can be counted against it; the partner's
+        // own page is where any further branches get added.
+        $branch = trim($_POST['branch_name'] ?? '');
+        if ($branch !== '') {
+            db_insert('partner_branches', [
+                'partner_id' => $id,
+                'name'       => $branch,
+                'city'       => trim($_POST['city'] ?? '') ?: null,
+                'is_active'  => 1,
+            ]);
+            audit('branch_added', 'partner', $id, ['new' => ['branch' => $branch]]);
+        }
+
         $_SESSION['form_success'] = __('partners.added');
         header('Location: /partners');
         exit;

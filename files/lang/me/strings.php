@@ -714,6 +714,7 @@ return [
     'partners.branch'   => 'Poslovnica',
     'partners.branches'             => 'Poslovnice',
     'partners.branch_add'           => 'Dodaj poslovnicu',
+    'partners.branch_first_hint'    => 'Prva poslovnica (opciono)',
     'partners.branch_saved'         => 'Poslovnica je dodata.',
     'partners.branch_removed'       => 'Poslovnica je uklonjena.',
     'partners.branch_name_required' => 'Naziv poslovnice je obavezan.',
