@@ -1,6 +1,7 @@
 <?php defined('RMS') or die('Direct access not permitted'); ?>
 
-<div style="padding:1.5rem;">
+<!-- Same width tier as Administration, Partneri and Brendovi. -->
+<div style="padding:1.5rem;max-width:var(--w-content);">
 
   <?php if ($error ?? null): ?>
     <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
@@ -29,19 +30,37 @@
     <h2 style="font-size:15px;font-weight:500;margin-bottom:1rem;"><?= __('customers.new') ?></h2>
     <form method="POST" action="/customers/store">
       <?= csrf_field() ?>
-      <div class="form-grid" style="">
-        <div class="field"><label><?= __('label.name') ?> *</label><input type="text" name="name" required></div>
+      <!-- Fixed 4-column rows, matching Korisnici, Partneri and Brendovi. -->
+      <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="field"><label><?= __('label.name') ?></label><input type="text" name="name" required></div>
+        <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="phone"></div>
+        <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email"></div>
+        <!-- Language decides what this customer receives (receipt email and
+             printed receipt). It was only on the edit screen, so a foreign
+             walk-in had to be created first and corrected afterwards. -->
+        <div class="field">
+          <label><?= __('customers.lang') ?></label>
+          <select name="lang" class="custom-select">
+            <option value="me"><?= __('lang.me') ?></option>
+            <option value="en"><?= __('lang.en') ?></option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="field"><label><?= __('label.address') ?></label><input type="text" name="address"></div>
         <div class="field"><label><?= __('customers.zip_code') ?></label><input type="text" name="zip_code"></div>
         <div class="field"><label><?= __('label.city') ?></label><input type="text" name="city"></div>
         <div class="field"><label><?= __('label.country') ?></label><input type="text" name="country"></div>
-        <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="phone"></div>
-        <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email"></div>
       </div>
-      <div class="field"><label><?= __('label.notes') ?></label><textarea name="notes" rows="2"></textarea></div>
+      <!-- One line, not resizable, 40px to match the inputs: app.css gives
+           inputs height 40px but textareas min-height 36px. -->
+      <div class="field">
+        <label><?= __('label.notes') ?></label>
+        <textarea name="notes" rows="1" style="height:40px;min-height:40px;padding:10px;line-height:18px;resize:none;overflow:auto;"></textarea>
+      </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
-        <button type="submit" class="btn btn-primary"><?= __('btn.save') ?></button>
-        <button type="button" class="btn" onclick="document.getElementById('add-form').style.display='none'"><?= __('btn.cancel') ?></button>
+        <button type="submit" class="btn btn-primary" style="min-width:100px;"><?= __('btn.save') ?></button>
+        <button type="button" class="btn" style="min-width:100px;" onclick="document.getElementById('add-form').style.display='none'"><?= __('btn.cancel') ?></button>
       </div>
     </form>
   </div>
