@@ -17,7 +17,7 @@
     <?php if (can('shipments', 'create')): ?>
       <button type="button" class="btn btn-sm btn-primary"
               onclick="var f=document.getElementById('ship-add');f.style.display=f.style.display==='none'?'block':'none';">
-        + <?= __('ship.add') ?>
+        <?= __('ship.add') ?>
       </button>
     <?php endif; ?>
   </div>
