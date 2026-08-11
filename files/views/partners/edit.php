@@ -1,6 +1,9 @@
 <?php defined('RMS') or die('Direct access not permitted'); ?>
 
-<div style="padding:1.5rem;max-width:720px;">
+<!-- Same width tier as the partners list and its Novi partner card, so the
+     card doesn't visibly narrow when you open a partner. Was a hardcoded
+     720px, which predated the --w-* tiers. -->
+<div style="padding:1.5rem;max-width:var(--w-content);">
 
   <?php if ($error ?? null): ?>
     <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
@@ -13,14 +16,26 @@
     <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;"><?= __('partners.details') ?></h2>
     <form method="POST" action="/partners/<?= (int)$partner['id'] ?>/update">
       <?= csrf_field() ?>
-      <div class="form-grid" style="">
+      <!-- Fixed 4-column rows in the same field order as Novi partner, so the
+           card doesn't rearrange itself when you open a partner. The default
+           form-grid is auto-fit, which at this width spread the fields over six
+           ragged columns. -->
+      <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="field"><label><?= __('partners.company') ?> *</label><input type="text" name="name" required value="<?= htmlspecialchars($partner['name']) ?>"></div>
-        <div class="field"><label><?= __('partners.tax_id') ?></label><input type="text" name="tax_id" value="<?= htmlspecialchars($partner['tax_id'] ?? '') ?>"></div>
         <div class="field"><label><?= __('partners.contact_person') ?></label><input type="text" name="contact_person" value="<?= htmlspecialchars($partner['contact_person'] ?? '') ?>"></div>
-        <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email" value="<?= htmlspecialchars($partner['email'] ?? '') ?>"></div>
         <div class="field"><label><?= __('label.phone') ?></label><input type="text" name="phone" value="<?= htmlspecialchars($partner['phone'] ?? '') ?>"></div>
+        <div class="field"><label><?= __('label.email') ?></label><input type="email" name="email" value="<?= htmlspecialchars($partner['email'] ?? '') ?>"></div>
+      </div>
+      <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="field"><label><?= __('label.address') ?></label><input type="text" name="address" value="<?= htmlspecialchars($partner['address'] ?? '') ?>"></div>
         <div class="field"><label><?= __('partners.zip_code') ?></label><input type="text" name="zip_code" value="<?= htmlspecialchars($partner['zip_code'] ?? '') ?>"></div>
         <div class="field"><label><?= __('label.city') ?></label><input type="text" name="city" value="<?= htmlspecialchars($partner['city'] ?? '') ?>"></div>
+        <!-- Country was missing here while update() still wrote $_POST['country'],
+             so saving a partner silently cleared whatever was set on create. -->
+        <div class="field"><label><?= __('label.country') ?></label><input type="text" name="country" value="<?= htmlspecialchars($partner['country'] ?? '') ?>"></div>
+      </div>
+      <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="field"><label><?= __('partners.tax_id') ?></label><input type="text" name="tax_id" value="<?= htmlspecialchars($partner['tax_id'] ?? '') ?>"></div>
         <div class="field"><label><?= __('ship.default_courier') ?></label>
           <select name="default_courier_id" class="custom-select">
             <option value=""><?= __('ship.no_courier') ?></option>
@@ -29,9 +44,13 @@
             <?php endforeach; ?>
           </select>
         </div>
+        <!-- Same one-line, non-resizable 40px treatment as Novi partner. -->
+        <div class="field" style="grid-column:span 2;">
+          <label><?= __('label.notes') ?></label>
+          <textarea name="notes" rows="1"
+                    style="height:40px;min-height:40px;padding:10px;line-height:18px;resize:none;overflow:auto;"><?= htmlspecialchars($partner['notes'] ?? '') ?></textarea>
+        </div>
       </div>
-      <div class="field"><label><?= __('label.address') ?></label><input type="text" name="address" value="<?= htmlspecialchars($partner['address'] ?? '') ?>"></div>
-      <div class="field"><label><?= __('label.notes') ?></label><textarea name="notes" rows="2"><?= htmlspecialchars($partner['notes'] ?? '') ?></textarea></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
         <input type="checkbox" id="is_active" name="is_active" value="1" <?= $partner['is_active'] ? 'checked' : '' ?>>
         <label for="is_active" style="font-size:13px;margin-bottom:0;"><?= __('label.active') ?></label>
