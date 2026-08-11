@@ -7,7 +7,7 @@
 
   <!-- Tabs -->
   <div class="tab-bar">
-    <?php foreach (['users'=>__('admin.users'),'locations'=>__('admin.locations'),'couriers'=>__('nav.shipments'),'statuses'=>__('admin.statuses')] as $t => $l): ?>
+    <?php foreach (['users'=>__('admin.users'),'locations'=>__('admin.locations'),'couriers'=>__('admin.couriers'),'statuses'=>__('admin.statuses')] as $t => $l): ?>
       <a href="/administration?tab=<?= $t ?>"
          class="tab<?= $tab===$t ? ' active' : '' ?>">
         <?= $l ?>

@@ -292,6 +292,7 @@ return [
     'admin.users'            => 'Users',
     'admin.users_desc'       => 'Manage staff and access',
     'admin.locations'        => 'Locations',
+    'admin.couriers'         => 'Couriers',
     'admin.locations_desc'   => 'Branches and offices',
     'admin.settings'         => 'Settings',
     'admin.settings_desc'    => 'App configuration',

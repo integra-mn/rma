@@ -4,16 +4,19 @@
 // Modules and their actions shown in the editable matrix. This mirrors
 // PERMISSION_MATRIX in helpers/permissions.php (the single source of truth
 // used by can() and the save handler); only the labels are added here.
+// Ordered to match the sidebar, so finding a module here means looking in
+// the same place you look in the app. `preferences` is last: it is the only
+// entry with no sidebar section of its own.
 $modules = [
     'rma'            => ['label' => __('nav.rma'),       'actions' => ['view', 'create', 'edit']],
     'repair'         => ['label' => __('nav.repairs'),   'actions' => ['view', 'create', 'edit']],
-    'parts'          => ['label' => __('nav.parts'),     'actions' => ['view', 'create', 'edit', 'delete']],
     'shipments'      => ['label' => __('nav.shipments'), 'actions' => ['view', 'create', 'edit']],
-    'customers'      => ['label' => __('nav.customers'), 'actions' => ['view', 'create', 'edit']],
-    'partners'       => ['label' => __('nav.partners'),  'actions' => ['view', 'edit']],
+    'parts'          => ['label' => __('nav.parts'),     'actions' => ['view', 'create', 'edit', 'delete']],
     'devices'        => ['label' => __('nav.devices'),   'actions' => ['view', 'edit']],
-    'reports'        => ['label' => __('nav.reports'),   'actions' => ['view']],
+    'partners'       => ['label' => __('nav.partners'),  'actions' => ['view', 'edit']],
+    'customers'      => ['label' => __('nav.customers'), 'actions' => ['view', 'create', 'edit']],
     'invoicing'      => ['label' => __('nav.invoices'),  'actions' => ['view']],
+    'reports'        => ['label' => __('nav.reports'),   'actions' => ['view']],
     'administration' => ['label' => __('nav.administration'), 'actions' => ['view', 'edit', 'users']],
     'settings'       => ['label' => __('nav.settings'),  'actions' => ['view', 'edit']],
     'preferences'    => ['label' => __('admin.perm_preferences'), 'actions' => ['theme', 'lang', 'integrations']],

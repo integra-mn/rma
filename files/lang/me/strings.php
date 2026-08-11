@@ -292,6 +292,7 @@ return [
     'admin.users'            => 'Korisnici',
     'admin.users_desc'       => 'Upravljanje osobljem i pristupom',
     'admin.locations'        => 'Lokacije',
+    'admin.couriers'         => 'Kuriri',
     'admin.locations_desc'   => 'Filijale i kancelarije',
     'admin.settings'         => 'Podešavanja',
     'admin.settings_desc'    => 'Konfiguracija aplikacije',
