@@ -336,7 +336,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
                  .then(function (res) {
                    if (!res.success) {
                      btn.disabled = false; btn.textContent = "' . $t('pdf.sig_get') . '";
-                     alert(res.error || "Could not generate signing link.");
+                     alert(res.error || "' . $t('sign.link_failed') . '");
                      return;
                    }
                    currentToken = res.token;

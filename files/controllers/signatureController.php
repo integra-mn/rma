@@ -54,7 +54,7 @@ class SignatureController {
     public function mobile(string $token): void {
         $sig = db_row(
             'SELECT s.*, r.rma_number, r.complaint,
-                    c.name AS customer_name,
+                    c.name AS customer_name, c.lang AS customer_lang,
                     dm.name AS model_name, db2.name AS brand_name,
                     d.serial_number, d.imei
              FROM rma_signatures s
@@ -73,22 +73,29 @@ class SignatureController {
             http_response_code(404);
             echo '<!DOCTYPE html><html><head><meta charset="UTF-8">'
                . '<meta name="viewport" content="width=device-width,initial-scale=1">'
-               . '<title>Link expired</title>'
+               . '<title>' . htmlspecialchars(__('sign.expired_title')) . '</title>'
                . '<link href="/assets/css/fonts.css" rel="stylesheet">'
                . '<style>body{font-family:"Montserrat",system-ui,-apple-system,sans-serif;padding:2rem;text-align:center;background:#f4f4f0;color:#2c2c2a;}</style>'
-               . '</head><body><h2>Link expired or invalid</h2><p>Please ask staff to generate a new QR code.</p></body></html>';
+               . '</head><body><h2>' . htmlspecialchars(__('sign.expired_title')) . '</h2>'
+               . '<p>' . htmlspecialchars(__('sign.expired_text')) . '</p></body></html>';
             return;
         }
 
         if (!empty($sig['signed_at'])) {
             // Already signed — show the "thank you" screen, don't accept another signature.
-            $this->render_done($sig['rma_number']);
+            $this->render_done($sig['rma_number'], customer_lang($sig['customer_lang'] ?? null));
             return;
         }
 
         if (empty($sig['visited_at'])) {
             db_update('rma_signatures', ['visited_at' => date('Y-m-d H:i:s')], 'token = ?', [$token]);
         }
+
+        // This page is read by the customer on their own phone, so it follows
+        // THEIR language — the same rule the printed receipt uses — not the
+        // language of whoever is logged in at the counter.
+        $lang = customer_lang($sig['customer_lang'] ?? null);
+        $st   = fn(string $k): string => htmlspecialchars(__in($lang, $k));
 
         $device  = trim(($sig['brand_name'] ?? '') . ' ' . ($sig['model_name'] ?? ''));
         $ident   = $sig['imei'] ?: ($sig['serial_number'] ?? '');
@@ -99,12 +106,12 @@ class SignatureController {
         $h_comp  = htmlspecialchars($sig['complaint'] ?? '');
         $h_tok   = htmlspecialchars($token);
         ?><!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars($lang) ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Signature — <?= $h_rma ?></title>
+<title><?= $st('sign.title') ?> — <?= $h_rma ?></title>
 <link href="/assets/css/fonts.css" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -113,7 +120,7 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:#f4f4f0;color:#2c2
      display:flex;flex-direction:column;height:100dvh;-webkit-user-select:none;user-select:none;}
 
 .top{padding:14px 20px;flex-shrink:0;background:#fff;border-bottom:0.5px solid #e8e6e0;}
-.top .logo img{height:28px;vertical-align:middle;}
+.top .logo img{height:40px;vertical-align:middle;}
 .summary{padding:14px 20px;font-size:13px;flex-shrink:0;}
 .summary .row{display:flex;margin-bottom:4px;}
 .summary .k{color:#888780;width:64px;flex-shrink:0;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;}
@@ -159,17 +166,14 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 
 <div class="summary">
   <?php if ($h_rma):  ?><div class="row"><span class="k">RMA</span><span class="v"><?= $h_rma ?></span></div><?php endif; ?>
-  <?php if ($h_cust): ?><div class="row"><span class="k">Name</span><span class="v"><?= $h_cust ?></span></div><?php endif; ?>
-  <?php if ($h_dev):  ?><div class="row"><span class="k">Device</span><span class="v"><?= $h_dev ?></span></div><?php endif; ?>
-  <?php if ($h_ident):?><div class="row"><span class="k"><?= !empty($sig['imei']) ? 'IMEI' : 'Serial' ?></span><span class="v"><?= $h_ident ?></span></div><?php endif; ?>
-  <div class="note">
-    By signing, I confirm the device described above has been received for repair
-    as described and the reported issue has been recorded correctly.
-  </div>
+  <?php if ($h_cust): ?><div class="row"><span class="k"><?= $st('sign.name') ?></span><span class="v"><?= $h_cust ?></span></div><?php endif; ?>
+  <?php if ($h_dev):  ?><div class="row"><span class="k"><?= $st('sign.device') ?></span><span class="v"><?= $h_dev ?></span></div><?php endif; ?>
+  <?php if ($h_ident):?><div class="row"><span class="k"><?= $st('pdf.sn_imei') ?></span><span class="v"><?= $h_ident ?></span></div><?php endif; ?>
+  <div class="note"><?= $st('sign.consent') ?></div>
 </div>
 
 <div class="pad-wrap" id="pad-wrap">
-  <div class="pad-hint" id="pad-hint">Sign with your finger</div>
+  <div class="pad-hint" id="pad-hint"><?= $st('sign.hint') ?></div>
   <canvas id="pad"></canvas>
   <div class="baseline"></div>
 </div>
@@ -177,16 +181,16 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 <div class="sig-error" id="sig-error"></div>
 
 <div class="bottom">
-  <button type="button" class="btn btn-clear" id="btn-clear">Clear</button>
-  <button type="button" class="btn btn-submit" id="btn-submit" disabled>Submit</button>
+  <button type="button" class="btn btn-clear" id="btn-clear"><?= $st('sign.clear') ?></button>
+  <button type="button" class="btn btn-submit" id="btn-submit" disabled><?= $st('sign.submit') ?></button>
 </div>
 
 <div class="done" id="done">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
     <circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12" stroke-width="2"/>
   </svg>
-  <h2>Signature received</h2>
-  <p>Thank you. You can close this page.</p>
+  <h2><?= $st('sign.done_title') ?></h2>
+  <p><?= $st('sign.done_text') ?></p>
 </div>
 
 <script>
@@ -505,12 +509,13 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:#1A1A1F;color:#fff
     }
 
     // ── "Thank you" screen after the page auto-closes a signed token ──────
-    private function render_done(string $rma_number): void {
+    private function render_done(string $rma_number, string $lang = 'me'): void {
+        $st = fn(string $k): string => htmlspecialchars(__in($lang, $k));
         ?><!DOCTYPE html>
-<html lang="en"><head>
+<html lang="<?= htmlspecialchars($lang) ?>"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Signature received</title>
+<title><?= $st('sign.done_title') ?></title>
 <link href="/assets/css/fonts.css" rel="stylesheet">
 <style>
 body{margin:0;background:#1D9E75;color:#fff;font-family:Montserrat,system-ui,sans-serif;
@@ -522,9 +527,9 @@ p{font-size:14px;opacity:0.9;margin:0;}
 </style></head>
 <body>
 <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>
-<h2>Signature received</h2>
+<h2><?= $st('sign.done_title') ?></h2>
 <p>RMA <?= htmlspecialchars($rma_number) ?></p>
-<p>You can close this page.</p>
+<p><?= $st('sign.done_text') ?></p>
 </body></html><?php
     }
 }
