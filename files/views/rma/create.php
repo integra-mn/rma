@@ -24,8 +24,13 @@ defined('RMS') or die('Direct access not permitted');
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:8px;">
         <div>
           <label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:3px;"><?= __('rma.search_customer') ?></label>
+          <!-- The box sits inside the RMA form, so Enter submitted the whole
+               thing and reloaded the page. Enter now runs the search instead,
+               without waiting for the debounce. -->
           <input type="text" id="cust-search-input" placeholder="<?= __('rma.search_phone_email') ?>"
-                 oninput="searchCustomers(this.value)" autocomplete="off" style="width:100%;">
+                 oninput="searchCustomers(this.value)"
+                 onkeydown="if (event.key === 'Enter') { event.preventDefault(); searchCustomers(this.value, true); }"
+                 autocomplete="off" style="width:100%;">
         </div>
         <div>
           <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('rma.partner') ?></label>
@@ -291,7 +296,17 @@ let searchTimeout = null;
 
 let pendingMatch = null;
 
-function searchCustomers(q) {
+// Labels, so the panel is not English inside a Montenegrin form.
+const SEARCH_MSG = {
+  found:    <?= json_encode(__('rma.match_found')) ?>,
+  use:      <?= json_encode(__('rma.match_use')) ?>,
+  addNew:   <?= json_encode(__('rma.match_new')) ?>,
+  multiple: <?= json_encode(__('rma.match_multiple')) ?>,
+  none:     <?= json_encode(__('rma.match_none')) ?>,
+  failed:   <?= json_encode(__('rma.search_failed')) ?>
+};
+
+function searchCustomers(q, immediate) {
   clearTimeout(searchTimeout);
   const confirm   = document.getElementById('cust-match-confirm');
   const noResults = document.getElementById('cust-no-results');
@@ -314,16 +329,16 @@ function searchCustomers(q) {
           const c = data[0];
           const detail = [c.name, c.phone_display||c.phone||'', c.email||'', c.city||''].filter(Boolean).join(' · ');
           confirm.innerHTML = `
-            <p style="font-weight:500;color:#7a5c00;margin-bottom:8px;">Found existing customer — is this the same person?</p>
+            <p style="font-weight:500;color:#7a5c00;margin-bottom:8px;">${escHtml(SEARCH_MSG.found)}</p>
             <p style="color:#5f5e5a;margin-bottom:10px;">${escHtml(detail)}</p>
             <div style="display:flex;gap:8px;">
-              <button type="button" class="btn btn-primary" onclick="confirmMatch()">Yes, use this customer</button>
-              <button type="button" class="btn" onclick="dismissMatch()">No, add as new</button>
+              <button type="button" class="btn btn-primary" onclick="confirmMatch()">${escHtml(SEARCH_MSG.use)}</button>
+              <button type="button" class="btn" onclick="dismissMatch()">${escHtml(SEARCH_MSG.addNew)}</button>
             </div>`;
           confirm.style.display = 'block';
         } else {
           pendingMatch = null;
-          confirm.innerHTML = `<p style="font-weight:500;color:#7a5c00;margin-bottom:8px;">Multiple customers found — select one:</p>`
+          confirm.innerHTML = `<p style="font-weight:500;color:#7a5c00;margin-bottom:8px;">${escHtml(SEARCH_MSG.multiple)}</p>`
             + data.map(c => `
               <div onclick="confirmDirect(${c.id},'${escHtml(c.name)}','${escHtml(c.phone_display||c.phone||'')}','${escHtml(c.email||'')}','${escHtml(c.city||'')}','${escHtml(c.address||'')}')"
                    style="padding:8px 10px;cursor:pointer;font-size:13px;border-radius:6px;margin-bottom:4px;border:0.5px solid #d3d1c7;"
@@ -331,11 +346,18 @@ function searchCustomers(q) {
                 <strong>${escHtml(c.name)}</strong>
                 <span style="color:#888780;margin-left:8px;">${escHtml(c.phone_display||c.phone||'')} ${c.email?'· '+escHtml(c.email):''}</span>
               </div>`).join('')
-            + `<button type="button" class="btn" style="margin-top:6px;" onclick="dismissMatch()">None of these — add as new</button>`;
+            + `<button type="button" class="btn" style="margin-top:6px;" onclick="dismissMatch()">${escHtml(SEARCH_MSG.none)}</button>`;
           confirm.style.display = 'block';
         }
+      })
+      .catch(() => {
+        // Previously silent: a failed request left the form looking as though
+        // nothing had been typed at all.
+        noResults.style.display = 'none';
+        confirm.innerHTML = '<p style="color:#791f1f;">' + escHtml(SEARCH_MSG.failed) + '</p>';
+        confirm.style.display = 'block';
       });
-  }, 400);
+  }, immediate ? 0 : 400);
 }
 
 function hideAllBanners() {
