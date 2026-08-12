@@ -134,10 +134,13 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   /* On-screen preview: 1080px wide card on a muted background.
      Print output: A4 (see @media print below) — same content, different container. */
   /* A real A4 sheet on screen — the same width, height and 10mm padding the
-     printer uses, so the view matches what comes out. */
+     printer uses, so the view matches what comes out.
+     The column layout is what lets .footer sit on the bottom edge of the sheet
+     on screen, the way it does on paper, instead of floating directly under
+     the signature box. */
   .page { width: 210mm; min-height: 297mm; max-width: 100%; margin: 0 auto 24px;
           padding: 10mm; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-          border-radius: 8px; }
+          border-radius: 8px; display: flex; flex-direction: column; }
   .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid #1D9E75; }
   .logo img { height: 36px; width: auto; display: block; margin-bottom: 6px; }
   .company p { font-size: 10.5px; color: #888780; margin-top: 1px; line-height: 1.5; }
@@ -164,8 +167,11 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   /* Company details live here rather than under the logo. Left-aligned, and
      pinned to the foot of the sheet when printed so it reads as stationery
      rather than as one more content block. */
-  .footer { border-top: 0.5px solid #e8e6e0; padding-top: 10px; margin-top: 28px;
-            text-align: left; font-size: 9.5px; color: #888780; }
+  /* auto pushes it to the foot of the sheet. When the content is long enough
+     to reach down here by itself, the 16px margin under the signature box plus
+     the 10px padding here keeps the two apart. */
+  .footer { border-top: 0.5px solid #e8e6e0; padding-top: 10px;
+            margin-top: auto; text-align: left; font-size: 9.5px; color: #888780; }
   .signature-box { border: 0.5px solid #d3d1c7; border-radius: 6px; padding: 11px 13px; margin-bottom: 16px; }
   .signature-box p { font-size: 10.5px; color: #888780; margin-bottom: 36px; }
   .signature-line { border-top: 0.5px solid #2c2c2a; width: 200px; font-size: 9.5px; color: #888780; padding-top: 3px; }
@@ -209,7 +215,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
 </head>
 <body>
 
-<div class="no-print" style="width:1080px;max-width:100%;height:72px;margin:0 auto;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;gap:10px;font-family:Montserrat,system-ui,sans-serif;">
+<div class="no-print" id="toolbar" style="width:210mm;max-width:100%;height:64px;margin:0 auto;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;gap:10px;font-family:Montserrat,system-ui,sans-serif;">
   <a href="/rma/' . (int)$rma['id'] . '/receipt?engine=mpdf&mode=download"
      style="background:#1D9E75;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;text-decoration:none;">' . $t('pdf.btn_save') . '</a>
   <button onclick="window.print()" style="background:#2563EB;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;">' . $t('pdf.btn_print') . '</button>
@@ -365,6 +371,37 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   <div class="footer">' . implode(' &nbsp;|&nbsp; ', $footer_parts) . '</div>
 
 </div>
+
+<script>
+/* The sheet is a fixed A4, so on a tall screen it left a band of empty
+   background below it. Scale the whole preview up to use that spare height —
+   the "fit page" behaviour a PDF viewer has.
+
+   Only ever upwards: shrinking to fit a short window would make the preview
+   smaller than the paper and it would stop telling the truth about what
+   prints. A receipt whose content runs past one A4 measures taller than the
+   window, so it is simply left alone. */
+(function () {
+  var bar  = document.getElementById("toolbar");
+  var page = document.querySelector(".page");
+  if (!bar || !page) return;
+
+  function fit() {
+    document.body.style.zoom = "";                 /* measure at 100% */
+    var natural = bar.offsetHeight + page.offsetHeight + 24;   /* 24 = .page bottom margin */
+    var z = window.innerHeight / natural;
+    if (z > 1.005) document.body.style.zoom = z.toFixed(3);
+  }
+  function reset() { document.body.style.zoom = ""; }
+
+  fit();
+  window.addEventListener("resize", fit);
+  /* Paper gets the real A4, never the screen zoom. */
+  window.addEventListener("beforeprint", reset);
+  window.addEventListener("afterprint", fit);
+})();
+</script>
+
 </body>
 </html>';
 }
