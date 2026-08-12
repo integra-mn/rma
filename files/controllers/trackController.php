@@ -75,7 +75,7 @@ class TrackController {
     // ── Render tracking page ──────────────────────────────────
 
     private function show_tracking(array $rma, string $token): void {
-        $history  = db_rows("SELECT h.*, s.label as status_label, s.color as status_color
+        $history  = db_rows("SELECT h.*, s.code as status_code, s.label as status_label, s.color as status_color
                               FROM rma_status_history h
                               JOIN rma_statuses s ON s.id = h.status_id
                               WHERE h.rma_id = ? ORDER BY h.created_at ASC", [(int)$rma['id']]);
@@ -139,7 +139,7 @@ class TrackController {
 
     private function rma_by_token(string $token): ?array {
         return db_row("SELECT r.*,
-                              s.label as status_label, s.color as status_color,
+                              s.code as status_code, s.label as status_label, s.color as status_color,
                               c.name as customer_name, c.email as customer_email, c.phone as customer_phone, c.lang as customer_lang,
                               dm.name as model_name, db2.name as brand_name,
                               d.serial_number, d.imei

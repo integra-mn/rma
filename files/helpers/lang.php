@@ -67,7 +67,7 @@ function __(string $key, array $replace = []): string {
 //   2. the shipped default in the language file (status.<code>),
 //   3. the English `label` column / passed fallback.
 // For any other language it uses the English `label`. Returns HTML-escaped text.
-function status_label(string $code, string $fallback = ''): string {
+function status_label(string $code, string $fallback = '', ?string $lang_override = null): string {
     static $map = null;
     if ($map === null) {
         $map = [];
@@ -81,15 +81,19 @@ function status_label(string $code, string $fallback = ''): string {
             $map = []; // column/table missing (e.g. migration not yet run) -> fall back
         }
     }
-    $lang = current_user()['lang'] ?? setting('default_lang', 'en');
+    // $lang_override lets a page pick the language explicitly — the public
+    // tracking page has no logged-in user and should follow the CUSTOMER's
+    // language, the same rule the printed receipt uses.
+    $lang = $lang_override ?? (current_user()['lang'] ?? setting('default_lang', 'en'));
     $row  = $map[$code] ?? null;
 
     if ($lang === 'me') {
         if ($row && !empty($row['label_me'])) {
             return htmlspecialchars($row['label_me'], ENT_QUOTES, 'UTF-8');
         }
-        $strings = load_lang();
-        if ($code !== '' && isset($strings['status.' . $code])) return __('status.' . $code);
+        if ($code !== '' && __in($lang, 'status.' . $code) !== 'status.' . $code) {
+            return htmlspecialchars(__in($lang, 'status.' . $code), ENT_QUOTES, 'UTF-8');
+        }
     }
     if ($row) return htmlspecialchars($row['label'], ENT_QUOTES, 'UTF-8');
     return htmlspecialchars($fallback !== '' ? $fallback : $code, ENT_QUOTES, 'UTF-8');

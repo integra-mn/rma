@@ -1,10 +1,20 @@
+<?php
+  // This page is read by the customer, not by staff, so status names follow
+  // THEIR language — the same rule the receipt and the signing page use.
+  // Without it status_label() falls back to the app default, and a customer
+  // set to English would still be shown Montenegrin.
+  $track_lang = customer_lang($rma['customer_lang'] ?? null);
+  // Same escaping $tt() applies, so nothing on the page loses it.
+  $tt = fn(string $k, array $r = []): string =>
+      htmlspecialchars(__in($track_lang, $k, $r), ENT_QUOTES, 'UTF-8');
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars($track_lang) ?>">
 <head>
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/assets/img/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= __('track.title') ?> — <?= htmlspecialchars($rma['rma_number']) ?></title>
+  <title><?= $tt('track.title') ?> — <?= htmlspecialchars($rma['rma_number']) ?></title>
   <?php $font_slug = strtolower(str_replace(' ', '-', setting('app_font', 'Montserrat'))); ?>
   <link rel="preload" href="/assets/fonts/<?= $font_slug ?>-400-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/<?= $font_slug ?>-500-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -196,22 +206,22 @@
     <div class="pills">
       <span class="pill"
             style="background:<?= htmlspecialchars($rma['status_color']) ?>22;color:<?= htmlspecialchars($rma['status_color']) ?>;">
-        <?= htmlspecialchars($rma['status_label']) ?>
+        <?= status_label((string)($rma['status_code'] ?? ''), $rma['status_label'], $track_lang) ?>
       </span>
       <?php if ($rma['is_warranty']): ?>
-        <span class="pill pill-warranty"><?= __('rma.warranty') ?></span>
+        <span class="pill pill-warranty"><?= $tt('rma.warranty') ?></span>
       <?php endif; ?>
     </div>
     <?php if ($rma['created_at'] || ($vis['est_completion'] && $rma['estimated_completion'])): ?>
       <div class="eta">
         <?php if ($vis['est_completion'] && $rma['estimated_completion']): ?>
           <div>
-            <div class="eta-label"><?= __('track.est_completion') ?></div>
+            <div class="eta-label"><?= $tt('track.est_completion') ?></div>
             <div class="eta-value"><?= format_date($rma['estimated_completion']) ?></div>
           </div>
         <?php endif; ?>
         <div>
-          <div class="eta-label"><?= __('track.submitted') ?></div>
+          <div class="eta-label"><?= $tt('track.submitted') ?></div>
           <div class="eta-value"><?= format_date($rma['created_at']) ?></div>
         </div>
       </div>
@@ -222,13 +232,13 @@
   <?php if (!empty($return_shipment) && !empty($return_shipment['tracking_number'])):
       $ret_url = courier_tracking_url($return_shipment['courier_tracking_url'] ?? null, $return_shipment['tracking_number']); ?>
   <div class="card" style="border:1px solid var(--accent, #1D9E75);">
-    <p class="card-title"><?= __('track.return_shipment') ?></p>
-    <p style="font-size:14px;line-height:1.5;margin-bottom:10px;"><?= __('track.return_shipment_msg') ?></p>
+    <p class="card-title"><?= $tt('track.return_shipment') ?></p>
+    <p style="font-size:14px;line-height:1.5;margin-bottom:10px;"><?= $tt('track.return_shipment_msg') ?></p>
     <div style="display:flex;flex-wrap:wrap;gap:18px;font-size:14px;">
       <?php if (!empty($return_shipment['courier_name'])): ?>
-        <span><?= __('ship.courier') ?>: <strong><?= htmlspecialchars($return_shipment['courier_name']) ?></strong></span>
+        <span><?= $tt('ship.courier') ?>: <strong><?= htmlspecialchars($return_shipment['courier_name']) ?></strong></span>
       <?php endif; ?>
-      <span><?= __('ship.tracking') ?>:
+      <span><?= $tt('ship.tracking') ?>:
         <?php if ($ret_url): ?>
           <a href="<?= htmlspecialchars($ret_url) ?>" target="_blank" rel="noopener" style="font-weight:600;"><?= htmlspecialchars($return_shipment['tracking_number']) ?></a>
         <?php else: ?>
@@ -249,25 +259,25 @@
 
     <?php if ($has_customer): ?>
     <div class="card">
-      <p class="card-title"><?= __('rma.customer') ?></p>
+      <p class="card-title"><?= $tt('rma.customer') ?></p>
       <?php if ($rma['customer_name']): ?>
-        <div class="detail-row"><span class="k"><?= __('label.name') ?></span><span class="v"><strong><?= htmlspecialchars($rma['customer_name']) ?></strong></span></div>
+        <div class="detail-row"><span class="k"><?= $tt('label.name') ?></span><span class="v"><strong><?= htmlspecialchars($rma['customer_name']) ?></strong></span></div>
       <?php endif; ?>
       <?php if ($rma['customer_phone']): ?>
-        <div class="detail-row"><span class="k"><?= __('label.phone') ?></span><span class="v"><?= htmlspecialchars(format_phone($rma['customer_phone'])) ?></span></div>
+        <div class="detail-row"><span class="k"><?= $tt('label.phone') ?></span><span class="v"><?= htmlspecialchars(format_phone($rma['customer_phone'])) ?></span></div>
       <?php endif; ?>
       <?php if ($rma['customer_email']): ?>
-        <div class="detail-row"><span class="k"><?= __('label.email') ?></span><span class="v"><?= htmlspecialchars($rma['customer_email']) ?></span></div>
+        <div class="detail-row"><span class="k"><?= $tt('label.email') ?></span><span class="v"><?= htmlspecialchars($rma['customer_email']) ?></span></div>
       <?php endif; ?>
     </div>
     <?php endif; ?>
 
     <?php if ($has_device): ?>
     <div class="card">
-      <p class="card-title"><?= __('track.device') ?></p>
+      <p class="card-title"><?= $tt('track.device') ?></p>
       <?php if ($rma['brand_name'] || $rma['model_name']): ?>
         <div class="detail-row">
-          <span class="k"><?= __('reports.model') ?></span>
+          <span class="k"><?= $tt('reports.model') ?></span>
           <span class="v"><strong><?= htmlspecialchars(trim(($rma['brand_name'] ?? '').' '.($rma['model_name'] ?? ''))) ?></strong></span>
         </div>
       <?php endif; ?>
@@ -278,7 +288,7 @@
         </div>
       <?php elseif (!empty($rma['serial_number'])): ?>
         <div class="detail-row">
-          <span class="k"><?= __('misc.serial') ?></span>
+          <span class="k"><?= $tt('misc.serial') ?></span>
           <span class="v mono"><?= htmlspecialchars($rma['serial_number']) ?></span>
         </div>
       <?php endif; ?>
@@ -298,14 +308,14 @@
 
     <?php if ($acc_text): ?>
     <div class="card">
-      <p class="card-title"><?= __('portal.accessories_received') ?></p>
+      <p class="card-title"><?= $tt('portal.accessories_received') ?></p>
       <p class="prose"><?= htmlspecialchars($acc_text) ?></p>
     </div>
     <?php endif; ?>
 
     <?php if ($complaint !== ''): ?>
     <div class="card">
-      <p class="card-title"><?= __('portal.reported_issue') ?></p>
+      <p class="card-title"><?= $tt('portal.reported_issue') ?></p>
       <p class="prose"><?= htmlspecialchars($complaint) ?></p>
     </div>
     <?php endif; ?>
@@ -331,25 +341,25 @@
   <div class="row-2">
 
     <div class="card">
-      <p class="card-title"><?= __('portal.tech_findings') ?></p>
+      <p class="card-title"><?= $tt('portal.tech_findings') ?></p>
       <?php if ($findings !== ''): ?>
         <p class="prose"><?= htmlspecialchars($findings) ?></p>
       <?php else: ?>
-        <p class="muted"><?= __('portal.not_diagnosed') ?></p>
+        <p class="muted"><?= $tt('portal.not_diagnosed') ?></p>
       <?php endif; ?>
     </div>
 
     <div class="card">
-      <p class="card-title"><?= __('portal.work_done') ?></p>
+      <p class="card-title"><?= $tt('portal.work_done') ?></p>
       <?php if ($resolution !== ''): ?>
         <p class="prose"><?= htmlspecialchars($resolution) ?></p>
       <?php else: ?>
-        <p class="muted"><?= __('portal.work_not_done') ?></p>
+        <p class="muted"><?= $tt('portal.work_not_done') ?></p>
       <?php endif; ?>
       <?php if (!empty($rep['technician_name']) || !empty($rep['completed_at'])): ?>
         <p class="meta-line">
-          <?php if (!empty($rep['technician_name'])): ?><?= __('rma.technician') ?>: <?= htmlspecialchars($rep['technician_name']) ?><?php endif; ?>
-          <?php if (!empty($rep['completed_at'])): ?><?= !empty($rep['technician_name']) ? ' · ' : '' ?><?= __('misc.completed') ?> <?= format_date($rep['completed_at']) ?><?php endif; ?>
+          <?php if (!empty($rep['technician_name'])): ?><?= $tt('rma.technician') ?>: <?= htmlspecialchars($rep['technician_name']) ?><?php endif; ?>
+          <?php if (!empty($rep['completed_at'])): ?><?= !empty($rep['technician_name']) ? ' · ' : '' ?><?= $tt('misc.completed') ?> <?= format_date($rep['completed_at']) ?><?php endif; ?>
         </p>
       <?php endif; ?>
     </div>
@@ -360,7 +370,7 @@
   <!-- ── PHOTO EVIDENCE (full width, only if any) ── -->
   <?php if ($vis['tech_notes'] && !empty($photos)): ?>
   <div class="card">
-    <p class="card-title"><?= __('misc.photo_evidence') ?></p>
+    <p class="card-title"><?= $tt('misc.photo_evidence') ?></p>
     <div class="photo-grid" id="lb-grid">
       <?php foreach ($photos as $idx => $ph):
         $src = '/storage/' . $ph['filename'];
@@ -374,9 +384,9 @@
                 data-full="<?= htmlspecialchars($src) ?>"
                 data-caption="<?= htmlspecialchars($caption) ?>"
                 data-index="<?= $idx ?>"
-                aria-label="<?= htmlspecialchars($ph['original_name'] ?? '') ?: __('misc.evidence_photo') ?>">
+                aria-label="<?= htmlspecialchars($ph['original_name'] ?? '') ?: $tt('misc.evidence_photo') ?>">
           <img src="<?= htmlspecialchars($src) ?>"
-               alt="<?= htmlspecialchars($ph['original_name'] ?? '') ?: __('misc.evidence_photo') ?>"
+               alt="<?= htmlspecialchars($ph['original_name'] ?? '') ?: $tt('misc.evidence_photo') ?>"
                loading="lazy">
         </button>
       <?php endforeach; ?>
@@ -384,17 +394,17 @@
   </div>
 
   <!-- Lightbox overlay -->
-  <div class="lb-overlay" id="lb" role="dialog" aria-modal="true" aria-label="<?= __('misc.photo_viewer') ?>">
+  <div class="lb-overlay" id="lb" role="dialog" aria-modal="true" aria-label="<?= $tt('misc.photo_viewer') ?>">
     <div class="lb-stage">
       <img class="lb-img" id="lb-img" alt="">
       <div class="lb-counter" id="lb-counter"></div>
-      <button type="button" class="lb-close" id="lb-close" aria-label="<?= __('misc.close') ?>">
+      <button type="button" class="lb-close" id="lb-close" aria-label="<?= $tt('misc.close') ?>">
         <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <button type="button" class="lb-prev" id="lb-prev" aria-label="<?= __('misc.previous') ?>">
+      <button type="button" class="lb-prev" id="lb-prev" aria-label="<?= $tt('misc.previous') ?>">
         <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
-      <button type="button" class="lb-next" id="lb-next" aria-label="<?= __('misc.next') ?>">
+      <button type="button" class="lb-next" id="lb-next" aria-label="<?= $tt('misc.next') ?>">
         <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
@@ -483,7 +493,7 @@
   <!-- ── PROGRESS (full width) ── -->
   <?php if ($vis['status'] && !empty($history)): ?>
   <div class="card">
-    <p class="card-title"><?= __('misc.progress') ?></p>
+    <p class="card-title"><?= $tt('misc.progress') ?></p>
     <div class="timeline">
       <?php
       $last_i = count($history) - 1;
@@ -494,7 +504,7 @@
         <div class="tl-item<?= $is_current ? ' is-current' : '' ?>"
              style="--status-color: <?= $color ?>;">
           <div class="tl-dot" style="background:<?= $color ?>;"></div>
-          <div class="tl-label"><?= htmlspecialchars($h['status_label']) ?></div>
+          <div class="tl-label"><?= status_label((string)($h['status_code'] ?? ''), $h['status_label'], $track_lang) ?></div>
           <div class="tl-date"><?= format_datetime($h['created_at']) ?></div>
           <?php if (trim((string)$h['note']) !== ''): ?>
             <div class="tl-note"><?= htmlspecialchars($h['note']) ?></div>
@@ -508,12 +518,12 @@
   <!-- ── Optional trailing cards: Comments + Delivery/Invoice side-by-side ── -->
   <?php if (!empty($comments)): ?>
   <div class="card">
-    <p class="card-title"><?= __('rma.comments') ?></p>
+    <p class="card-title"><?= $tt('rma.comments') ?></p>
     <?php foreach ($comments as $c):
       // Source is authoritative: staff type it either way, but `source`
       // says whose words these actually are.
       $is_customer = ($c['source'] ?? 'staff') === 'customer';
-      $label = $is_customer ? __('misc.customer_comment') : __('misc.staff_note');
+      $label = $is_customer ? $tt('misc.customer_comment') : $tt('misc.staff_note');
     ?>
       <div class="comment <?= $is_customer ? 'comment-customer' : 'comment-staff' ?>">
         <div class="comment-head">
@@ -535,25 +545,25 @@
 
     <?php if ($show_delivery): ?>
     <div class="card">
-      <p class="card-title"><?= __('misc.delivery') ?></p>
+      <p class="card-title"><?= $tt('misc.delivery') ?></p>
       <?php if (!empty($shipment['status'])): ?>
-        <div class="detail-row"><span class="k"><?= __('label.status') ?></span><span class="v"><?= htmlspecialchars($shipment['status']) ?></span></div>
+        <div class="detail-row"><span class="k"><?= $tt('label.status') ?></span><span class="v"><?= htmlspecialchars($shipment['status']) ?></span></div>
       <?php endif; ?>
       <?php if (!empty($shipment['tracking_number'])): ?>
-        <div class="detail-row"><span class="k"><?= __('misc.tracking') ?></span><span class="v mono"><?= htmlspecialchars($shipment['tracking_number']) ?></span></div>
+        <div class="detail-row"><span class="k"><?= $tt('misc.tracking') ?></span><span class="v mono"><?= htmlspecialchars($shipment['tracking_number']) ?></span></div>
       <?php endif; ?>
       <?php if (!empty($shipment['delivered_at'])): ?>
-        <div class="detail-row"><span class="k"><?= __('misc.delivered') ?></span><span class="v"><?= format_date($shipment['delivered_at']) ?></span></div>
+        <div class="detail-row"><span class="k"><?= $tt('misc.delivered') ?></span><span class="v"><?= format_date($shipment['delivered_at']) ?></span></div>
       <?php endif; ?>
     </div>
     <?php endif; ?>
 
     <?php if ($show_invoice): ?>
     <div class="card">
-      <p class="card-title"><?= __('track.invoice') ?></p>
-      <div class="detail-row"><span class="k"><?= __('misc.number') ?></span><span class="v"><?= htmlspecialchars($invoice['invoice_number']) ?></span></div>
-      <div class="detail-row"><span class="k"><?= __('misc.amount') ?></span><span class="v"><?= number_format((float)$invoice['total'], 2) ?> <?= htmlspecialchars($invoice['currency']) ?></span></div>
-      <div class="detail-row"><span class="k"><?= __('label.status') ?></span><span class="v"><?= htmlspecialchars(ucfirst($invoice['status'])) ?></span></div>
+      <p class="card-title"><?= $tt('track.invoice') ?></p>
+      <div class="detail-row"><span class="k"><?= $tt('misc.number') ?></span><span class="v"><?= htmlspecialchars($invoice['invoice_number']) ?></span></div>
+      <div class="detail-row"><span class="k"><?= $tt('misc.amount') ?></span><span class="v"><?= number_format((float)$invoice['total'], 2) ?> <?= htmlspecialchars($invoice['currency']) ?></span></div>
+      <div class="detail-row"><span class="k"><?= $tt('label.status') ?></span><span class="v"><?= htmlspecialchars(ucfirst($invoice['status'])) ?></span></div>
     </div>
     <?php endif; ?>
 
