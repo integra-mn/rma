@@ -1,10 +1,17 @@
+<?php
+  // Customer-facing, so it follows THEIR language — the same rule as the
+  // tracking page itself. $tt keeps the escaping $tt() applies.
+  $track_lang = customer_lang($rma['customer_lang'] ?? null);
+  $tt = fn(string $k, array $r = []): string =>
+      htmlspecialchars(__in($track_lang, $k, $r), ENT_QUOTES, 'UTF-8');
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars($track_lang) ?>">
 <head>
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/assets/img/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= __('track.title') ?> — Integra RMA</title>
+  <title><?= $tt('track.title') ?> — Integra RMA</title>
   <?php $font_slug = strtolower(str_replace(' ', '-', setting('app_font', 'Montserrat'))); ?>
   <link rel="preload" href="/assets/fonts/<?= $font_slug ?>-400-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/<?= $font_slug ?>-500-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -47,8 +54,8 @@
     <img src="/assets/integra.svg" alt="Integra">
   </div>
 
-  <h1><?= __('track.title') ?></h1>
-  <p class="subtitle"><?= __('track.verify') ?></p>
+  <h1><?= $tt('track.title') ?></h1>
+  <p class="subtitle"><?= $tt('track.verify') ?></p>
 
   <?php if ($error ?? null): ?>
     <div class="error"><?= htmlspecialchars($error) ?></div>
@@ -57,7 +64,7 @@
   <form method="POST" action="/track/<?= htmlspecialchars($token ?? '') ?>">
       <?= csrf_field() ?>
     <input type="text" name="identifier" required autofocus>
-    <button type="submit" class="btn"><?= __('track.submit') ?></button>
+    <button type="submit" class="btn"><?= $tt('track.submit') ?></button>
   </form>
 </div>
 

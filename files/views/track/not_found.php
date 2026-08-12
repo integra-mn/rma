@@ -1,10 +1,17 @@
+<?php
+  // No RMA here — a bad token — so there is no customer language to follow.
+  // The app default at least makes <html lang> honest.
+  $track_lang = setting('default_lang', 'en');
+  $tt = fn(string $k, array $r = []): string =>
+      htmlspecialchars(__in($track_lang, $k, $r), ENT_QUOTES, 'UTF-8');
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars($track_lang) ?>">
 <head>
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/assets/img/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= __('misc.rma_not_found') ?> — Integra RMA</title>
+  <title><?= $tt('misc.rma_not_found') ?> — Integra RMA</title>
   <?php $font_slug = strtolower(str_replace(' ', '-', setting('app_font', 'Montserrat'))); ?>
   <link rel="preload" href="/assets/fonts/<?= $font_slug ?>-400-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/<?= $font_slug ?>-500-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -24,8 +31,8 @@
 <body>
 <div class="card">
   <img src="/assets/integra.svg" alt="Integra">
-  <h1><?= __('misc.rma_not_found') ?></h1>
-  <p><?= __('misc.tracking_invalid') ?></p>
+  <h1><?= $tt('misc.rma_not_found') ?></h1>
+  <p><?= $tt('misc.tracking_invalid') ?></p>
 </div>
 </body>
 </html>
