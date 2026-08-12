@@ -42,15 +42,6 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
 }
 
 /**
- * "14 dana" / "1 dan" — Montenegrin uses the singular for numbers ending in 1
- * except 11, and the same shape reads correctly in English (1 day / 14 days).
- */
-function pdf_days(int $n, callable $t): string {
-    $singular = ($n % 10 === 1 && $n % 100 !== 11);
-    return $n . ' ' . ($t($singular ? 'pdf.days_one' : 'pdf.days_other'));
-}
-
-/**
  * HTML print view — opens in browser, user prints/saves as PDF
  */
 /**
@@ -233,18 +224,6 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
         <tr><td>' . $t('pdf.name') . '</td><td><strong>' . htmlspecialchars($rma['customer_name'] ?? '—') . '</strong></td></tr>
         ' . ($rma['customer_phone'] ? '<tr><td>' . $t('pdf.phone') . '</td><td>' . htmlspecialchars(format_phone($rma['customer_phone'])) . '</td></tr>' : '') . '
         ' . ($rma['customer_email'] ? '<tr><td>' . $t('pdf.email') . '</td><td>' . htmlspecialchars($rma['customer_email']) . '</td></tr>' : '') . '
-        ' . (function() use ($rma, $t) {
-              // "Street, ZIP City" — zip + city share a space, the street
-              // gets its own comma-separated segment.
-              $addr = trim((string)($rma['customer_address'] ?? ''));
-              $zip  = trim((string)($rma['customer_zip'] ?? ''));
-              $city = trim((string)($rma['customer_city'] ?? ''));
-              $locality = trim(($zip !== '' ? $zip . ' ' : '') . $city);
-              $parts = array_filter([$addr, $locality], fn($s) => $s !== '');
-              return $parts
-                  ? '<tr><td>' . $t('pdf.address') . '</td><td>' . htmlspecialchars(implode(', ', $parts)) . '</td></tr>'
-                  : '';
-          })() . '
       </table>
     </div>
     <div class="col">
@@ -260,9 +239,6 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
               !empty($rma['is_warranty']) ? ' · ' . $t('pdf.status_warranty')
             : (!empty($rma['warranty_refusal']) ? ' · ' . $t('pdf.status_warranty_no') : '')
         ) . '</td></tr>
-        ' . ($rma['estimated_completion']
-              ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . pdf_days(max(0, (int) round((strtotime($rma['estimated_completion']) - strtotime($rma['created_at'])) / 86400)), $t) . '</td></tr>'
-              : '') . '
       </table>
     </div>
   </div>
@@ -519,16 +495,6 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
             <tr><td>' . $t('pdf.name') . '</td><td><strong>' . htmlspecialchars($rma['customer_name'] ?? '—') . '</strong></td></tr>
             ' . ($rma['customer_phone'] ? '<tr><td>' . $t('pdf.phone') . '</td><td>' . htmlspecialchars(format_phone($rma['customer_phone'])) . '</td></tr>' : '') . '
             ' . ($rma['customer_email'] ? '<tr><td>' . $t('pdf.email') . '</td><td>' . htmlspecialchars($rma['customer_email']) . '</td></tr>' : '') . '
-            ' . (function() use ($rma, $t) {
-                  $parts = array_filter([
-                      trim((string)($rma['customer_address'] ?? '')),
-                      trim((string)($rma['customer_zip'] ?? '')),
-                      trim((string)($rma['customer_city'] ?? '')),
-                  ], fn($s) => $s !== '');
-                  return $parts
-                      ? '<tr><td>' . $t('pdf.address') . '</td><td>' . htmlspecialchars(implode(', ', $parts)) . '</td></tr>'
-                      : '';
-              })() . '
           </table>
         </td>
         <td width="50%" style="vertical-align:top;padding-left:10px;">
@@ -544,9 +510,6 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
                   !empty($rma['is_warranty']) ? ' · ' . $t('pdf.status_warranty')
                 : (!empty($rma['warranty_refusal']) ? ' · ' . $t('pdf.status_warranty_no') : '')
             ) . '</td></tr>
-            ' . ($rma['estimated_completion']
-              ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . pdf_days(max(0, (int) round((strtotime($rma['estimated_completion']) - strtotime($rma['created_at'])) / 86400)), $t) . '</td></tr>'
-              : '') . '
           </table>
         </td>
       </tr>
