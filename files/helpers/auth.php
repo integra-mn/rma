@@ -98,13 +98,22 @@ function auth_attempt(string $email, string $password): array {
     record_attempt($email, $ip, true);
 
     $policy = auth_policy($user['role']);
-    // 2FA fires when the user's role requires it, when this individual account
-    // has 2FA switched on, or when it's a new/untrusted device on a role that
-    // enforces that. Every policy field is coalesced so a role with no
-    // security_policies row still behaves sanely (per-user 2FA keeps working).
-    $needs_2fa = !empty($policy['require_2fa'])
+    // 2FA fires when the role requires it, when the individual account has it
+    // switched on, or when the role enforces it for new devices. Every policy
+    // field is coalesced so a role with no security_policies row still behaves
+    // sanely (per-user 2FA keeps working).
+    //
+    // A trusted device then skips the code — and only the code. The password is
+    // always required; nothing here logs anyone in without one.
+    //
+    // The trusted check used to sit inside the last clause only, so an account
+    // or role with require_2fa set never reached it: the box saved the device
+    // and the login ignored it.
+    $requires_2fa = !empty($policy['require_2fa'])
         || !empty($user['require_2fa'])
-        || (!empty($policy['force_2fa_new_device']) && !is_trusted_device($user['id']));
+        || !empty($policy['force_2fa_new_device']);
+
+    $needs_2fa = $requires_2fa && !is_trusted_device($user['id']);
 
     if ($needs_2fa) {
         $_SESSION['pending_user_id'] = $user['id'];
@@ -305,8 +314,12 @@ function record_attempt(string $identifier, string $ip, bool $success): void {
 // The previous design used hash(UA + Accept-Language) which any attacker
 // who could inspect the victim's headers could trivially reproduce.
 
-const DEVICE_COOKIE_NAME = 'rms_device';
-const DEVICE_COOKIE_TTL  = 60 * 60 * 24 * 90; // 90 days
+const DEVICE_COOKIE_NAME  = 'rms_device';
+// The window the "Zapamti ovaj uredjaj 30 dana" checkbox promises. The cookie
+// used to last 90 days while the label said 30; one constant now drives both,
+// so the two cannot drift apart again.
+const TRUSTED_DEVICE_DAYS = 30;
+const DEVICE_COOKIE_TTL   = 60 * 60 * 24 * TRUSTED_DEVICE_DAYS;
 
 function device_cookie_value(): ?string {
     $v = $_COOKIE[DEVICE_COOKIE_NAME] ?? null;
@@ -322,8 +335,23 @@ function device_fingerprint(): ?string {
 function is_trusted_device(int $user_id): bool {
     $hash = device_fingerprint();
     if ($hash === null) return false;
-    db_update('trusted_devices', ['last_seen' => date('Y-m-d H:i:s')], 'user_id = ? AND device_hash = ?', [$user_id, $hash]);
-    return (bool) db_val('SELECT COUNT(*) FROM trusted_devices WHERE user_id = ? AND device_hash = ?', [$user_id, $hash]);
+
+    // The age is checked here rather than left to the cookie's own expiry: a
+    // cookie copied to another machine carries no expiry with it, and would
+    // otherwise be trusted for ever. Compared in PHP rather than with SQL date
+    // arithmetic so it reads the same on Postgres and MySQL.
+    $cutoff  = date('Y-m-d H:i:s', time() - TRUSTED_DEVICE_DAYS * 86400);
+    $trusted = (bool) db_val(
+        'SELECT COUNT(*) FROM trusted_devices
+          WHERE user_id = ? AND device_hash = ? AND created_at > ?',
+        [$user_id, $hash, $cutoff]
+    );
+
+    if ($trusted) {
+        db_update('trusted_devices', ['last_seen' => date('Y-m-d H:i:s')],
+                  'user_id = ? AND device_hash = ?', [$user_id, $hash]);
+    }
+    return $trusted;
 }
 
 function trust_device(int $user_id): void {
@@ -344,7 +372,17 @@ function trust_device(int $user_id): void {
     }
     $hash = hash('sha256', $cookie);
 
-    if (!(bool) db_val('SELECT COUNT(*) FROM trusted_devices WHERE user_id = ? AND device_hash = ?', [$user_id, $hash])) {
+    // An existing row is renewed rather than left alone — otherwise a device
+    // trusted 31 days ago could never be trusted again, since the insert would
+    // be skipped and the old row stays expired.
+    $existing = db_val('SELECT id FROM trusted_devices WHERE user_id = ? AND device_hash = ?', [$user_id, $hash]);
+    if ($existing) {
+        db_update('trusted_devices', [
+            'created_at' => date('Y-m-d H:i:s'),
+            'last_seen'  => date('Y-m-d H:i:s'),
+            'ip_address' => client_ip(),
+        ], 'id = ?', [(int) $existing]);
+    } else {
         db_insert('trusted_devices', [
             'user_id'    => $user_id,
             'device_hash'=> $hash,
