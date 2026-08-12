@@ -368,6 +368,16 @@ return [
     'pdf.btn_print'          => 'Print',
     'pdf.btn_save'           => 'Save PDF',
     'pdf.btn_close'          => 'Close',
+    'pdf.status_received'    => 'Received',
+    'pdf.status_warranty'    => 'In Warranty',
+    'pdf.status_warranty_no' => 'Warranty Refused',
+    'pdf.track_hint'         => 'Scan the QR code or visit the link below to check the status of your repair at any time.',
+    'pdf.sig_alt'            => 'Customer signature',
+    'pdf.sig_signed'         => 'Signed :date',
+    'pdf.sig_awaiting'       => '(awaiting signature)',
+    'pdf.sig_get'            => 'Get signature',
+    'pdf.sig_station_hint'   => 'If a signing tablet is active at this location, it will open automatically.',
+    'pdf.sn_imei'            => 'SN / IMEI',
 
     // RMA receipt email (sent to the customer)
     'receipt.subject'        => 'Receipt — :number',

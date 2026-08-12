@@ -224,13 +224,13 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
       <table class="info">
         ' . ($device ? '<tr><td>' . $t('pdf.model') . '</td><td><strong>' . htmlspecialchars($device) . '</strong></td></tr>' : '') . '
         ' . (!empty($rma['imei'])
-              ? '<tr><td>IMEI</td><td style="font-family:monospace;">' . htmlspecialchars($rma['imei']) . '</td></tr>'
+              ? '<tr><td>' . $t('pdf.sn_imei') . '</td><td style="font-family:monospace;">' . htmlspecialchars($rma['imei']) . '</td></tr>'
               : (!empty($rma['serial_number'])
-                  ? '<tr><td>' . $t('pdf.serial') . '</td><td style="font-family:monospace;">' . htmlspecialchars($rma['serial_number']) . '</td></tr>'
+                  ? '<tr><td>' . $t('pdf.sn_imei') . '</td><td style="font-family:monospace;">' . htmlspecialchars($rma['serial_number']) . '</td></tr>'
                   : '')) . '
-        <tr><td>' . $t('pdf.status') . '</td><td>Received' . (
-              !empty($rma['is_warranty']) ? ' · In Warranty'
-            : (!empty($rma['warranty_refusal']) ? ' · Warranty Refused' : '')
+        <tr><td>' . $t('pdf.status') . '</td><td>' . $t('pdf.status_received') . (
+              !empty($rma['is_warranty']) ? ' · ' . $t('pdf.status_warranty')
+            : (!empty($rma['warranty_refusal']) ? ' · ' . $t('pdf.status_warranty_no') : '')
         ) . '</td></tr>
         ' . ($rma['estimated_completion']
               ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . (
@@ -257,7 +257,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
     ' . ($qr_base64 ? '<img src="' . $qr_base64 . '" alt="QR Code">' : '') . '
     <div class="qr-text">
       <h3>' . $t('pdf.track_title') . '</h3>
-      <p>Scan the QR code or visit the link below to check the status of your repair at any time.</p>
+      <p>' . $t('pdf.track_hint') . '</p>
       <a href="' . htmlspecialchars($tracking_url) . '">' . htmlspecialchars($tracking_url) . '</a>
     </div>
   </div>
@@ -267,15 +267,15 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
     <p>' . $t('pdf.signature_consent') . '</p>
     ' . ($signature
         ? '<div style="height:90px;display:flex;align-items:flex-end;margin:8px 0 4px;">
-             <img src="/storage/' . htmlspecialchars($signature['filename']) . '" alt="Customer signature"
+             <img src="/storage/' . htmlspecialchars($signature['filename']) . '" alt="' . $t('pdf.sig_alt') . '"
                   style="max-height:80px;max-width:320px;object-fit:contain;">
            </div>
-           <div class="signature-line">Signed ' . format_datetime($signature['signed_at']) . '</div>'
+           <div class="signature-line">' . $t('pdf.sig_signed', ['date' => format_datetime($signature['signed_at'])]) . '</div>'
         : '<div id="sig-placeholder" style="height:90px;display:flex;align-items:center;justify-content:space-between;margin:4px 0;">
-             <span class="signature-line" style="border-top:0;padding-top:0;color:#b5b2a8;">(awaiting signature)</span>
+             <span class="signature-line" style="border-top:0;padding-top:0;color:#b5b2a8;">' . $t('pdf.sig_awaiting') . '</span>
              <button type="button" class="no-print" id="sig-btn"
                      style="background:#1D9E75;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">
-               Get signature
+               ' . $t('pdf.sig_get') . '
              </button>
            </div>
            <div id="sig-qr-wrap" class="no-print" style="display:none;align-items:center;gap:16px;padding:14px;background:#f4f4f0;border-radius:8px;margin:6px 0;">
@@ -283,7 +283,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
              <div style="flex:1;font-size:12px;color:#5f5e5a;line-height:1.5;">
                <div style="font-weight:600;color:#2c2c2a;margin-bottom:4px;">' . $t('pdf.scan_any_device') . '</div>
                <div id="sig-status">' . $t('pdf.waiting_customer') . '&hellip;</div>
-               <div style="color:#888780;margin-top:4px;font-size:11px;">If a signing tablet is active at this location, it will open automatically.</div>
+               <div style="color:#888780;margin-top:4px;font-size:11px;">' . $t('pdf.sig_station_hint') . '</div>
                <div style="margin-top:6px;word-break:break-all;" id="sig-url"></div>
              </div>
            </div>
@@ -314,7 +314,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
                  .then(function (r) { return r.json(); })
                  .then(function (res) {
                    if (!res.success) {
-                     btn.disabled = false; btn.textContent = "Get signature";
+                     btn.disabled = false; btn.textContent = "' . $t('pdf.sig_get') . '";
                      alert(res.error || "Could not generate signing link.");
                      return;
                    }
@@ -501,13 +501,13 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
           <table class="info" width="100%">
             ' . ($device ? '<tr><td>' . $t('pdf.model') . '</td><td><strong>' . htmlspecialchars($device) . '</strong></td></tr>' : '') . '
             ' . (!empty($rma['imei'])
-                  ? '<tr><td>IMEI</td><td>' . htmlspecialchars($rma['imei']) . '</td></tr>'
+                  ? '<tr><td>' . $t('pdf.sn_imei') . '</td><td>' . htmlspecialchars($rma['imei']) . '</td></tr>'
                   : (!empty($rma['serial_number'])
-                      ? '<tr><td>' . $t('pdf.serial') . '</td><td>' . htmlspecialchars($rma['serial_number']) . '</td></tr>'
+                      ? '<tr><td>' . $t('pdf.sn_imei') . '</td><td>' . htmlspecialchars($rma['serial_number']) . '</td></tr>'
                       : '')) . '
-            <tr><td>' . $t('pdf.status') . '</td><td>Received' . (
-                  !empty($rma['is_warranty']) ? ' · In Warranty'
-                : (!empty($rma['warranty_refusal']) ? ' · Warranty Refused' : '')
+            <tr><td>' . $t('pdf.status') . '</td><td>' . $t('pdf.status_received') . (
+                  !empty($rma['is_warranty']) ? ' · ' . $t('pdf.status_warranty')
+                : (!empty($rma['warranty_refusal']) ? ' · ' . $t('pdf.status_warranty_no') : '')
             ) . '</td></tr>
             ' . ($rma['estimated_completion']
               ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . (
@@ -536,7 +536,7 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
       <span style="font-size:10px;color:#888780;">' . $t('pdf.signature_consent') . '</span>
       ' . ($signature
           ? '<div style="margin:6px 0 2px;"><img src="' . ROOT . '/storage/' . htmlspecialchars($signature['filename']) . '" style="height:60px;"></div>
-             <div class="signature-line">Signed ' . format_datetime($signature['signed_at']) . '</div>'
+             <div class="signature-line">' . $t('pdf.sig_signed', ['date' => format_datetime($signature['signed_at'])]) . '</div>'
           : '<div class="signature-line" style="margin-top:36px;">' . $t('pdf.signature_date') . '</div>') . '
     </div>';
 }
