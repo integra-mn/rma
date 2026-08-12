@@ -175,6 +175,27 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .signature-box { border: 0.5px solid #d3d1c7; border-radius: 6px; padding: 11px 13px; margin-bottom: 16px; }
   .signature-box p { font-size: 10.5px; color: #888780; margin-bottom: 36px; }
   .signature-line { border-top: 0.5px solid #2c2c2a; width: 200px; font-size: 9.5px; color: #888780; padding-top: 3px; }
+  /* The button bar. These used to be inline on the element, where a media
+     query cannot reach them — inline styles win — so the bar could not be
+     moved anywhere. */
+  #toolbar { width: 210mm; max-width: 100%; height: 64px; margin: 0 auto;
+             display: flex; align-items: center; justify-content: flex-end;
+             gap: 10px; font-family: Montserrat, system-ui, sans-serif; }
+  /* Wide enough for a margin beside the paper: a fixed column in the grey.
+     Fixed matters — the sheet is taller than most windows, and sitting in the
+     flow above it the buttons scrolled out of reach the moment you read past
+     the header, so printing meant scrolling back to the top first. */
+  @media screen and (min-width: 1120px) {
+    #toolbar { position: fixed; top: 28px; right: 32px; z-index: 10;
+               width: auto; height: auto; margin: 0;
+               flex-direction: column; align-items: stretch; gap: 8px; }
+    .page { margin-top: 24px; }
+  }
+  /* Too narrow for a side margin: keep them on top, but stuck to the window
+     rather than to the document, so they are still reachable when scrolled. */
+  @media screen and (max-width: 1119px) {
+    #toolbar { position: sticky; top: 0; z-index: 10; background: #f4f4f0; }
+  }
   @media print {
     /* Browsers drop background colours when printing unless asked. Without this
        the grey blocks behind Dostavljena oprema and Opis reklamacije showed on
@@ -215,7 +236,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
 </head>
 <body>
 
-<div class="no-print" id="toolbar" style="width:210mm;max-width:100%;height:64px;margin:0 auto;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;gap:10px;font-family:Montserrat,system-ui,sans-serif;">
+<div class="no-print" id="toolbar">
   <a href="/rma/' . (int)$rma['id'] . '/receipt?engine=mpdf&mode=download"
      style="background:#1D9E75;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;text-decoration:none;">' . $t('pdf.btn_save') . '</a>
   <button onclick="window.print()" style="background:#2563EB;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;">' . $t('pdf.btn_print') . '</button>
@@ -388,7 +409,10 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
 
   function fit() {
     document.body.style.zoom = "";                 /* measure at 100% */
-    var natural = bar.offsetHeight + page.offsetHeight + 24;   /* 24 = .page bottom margin */
+    /* A fixed toolbar is out of the flow and takes up no height of its own. */
+    var inFlow = getComputedStyle(bar).position === "static" ? bar.offsetHeight : 0;
+    var above  = parseFloat(getComputedStyle(page).marginTop) || 0;
+    var natural = inFlow + above + page.offsetHeight + 24;   /* 24 = .page bottom margin */
     var z = window.innerHeight / natural;
     if (z > 1.005) document.body.style.zoom = z.toFixed(3);
   }
