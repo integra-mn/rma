@@ -181,19 +181,29 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   #toolbar { width: 210mm; max-width: 100%; height: 64px; margin: 0 auto;
              display: flex; align-items: center; justify-content: flex-end;
              gap: 10px; font-family: Montserrat, system-ui, sans-serif; }
-  /* Wide enough for a margin beside the paper: a fixed column in the grey.
-     Fixed matters — the sheet is taller than most windows, and sitting in the
-     flow above it the buttons scrolled out of reach the moment you read past
-     the header, so printing meant scrolling back to the top first. */
-  @media screen and (min-width: 1120px) {
-    #toolbar { position: fixed; top: 28px; right: 32px; z-index: 10;
-               width: auto; height: auto; margin: 0;
+  /* Wide enough for a margin beside the paper: a fixed column tucked against
+     the right edge of the sheet. Fixed matters — the sheet is taller than most
+     windows, and sitting in the flow above it the buttons scrolled out of
+     reach the moment you read past the header, so printing meant scrolling
+     back to the top first.
+
+     The sheet is centred, so its right edge is half the window plus half of
+     210mm; the 8px past that is the same gap the buttons keep between
+     themselves, and the 24px top lines the column up with the top of the
+     paper. Under the fit-to-height zoom both the sheet and this offset scale
+     together, so they stay tucked in.
+
+     1060px is where the sheet stops leaving room: (1060 - 794) / 2 is 133px a
+     side, just over the 8px gap plus the widest button. */
+  @media screen and (min-width: 1060px) {
+    #toolbar { position: fixed; top: 24px; left: calc(50% + 105mm + 8px);
+               z-index: 10; width: auto; height: auto; margin: 0;
                flex-direction: column; align-items: stretch; gap: 8px; }
     .page { margin-top: 24px; }
   }
   /* Too narrow for a side margin: keep them on top, but stuck to the window
      rather than to the document, so they are still reachable when scrolled. */
-  @media screen and (max-width: 1119px) {
+  @media screen and (max-width: 1059px) {
     #toolbar { position: sticky; top: 0; z-index: 10; background: #f4f4f0; }
   }
   @media print {
