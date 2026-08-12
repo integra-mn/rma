@@ -123,7 +123,7 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:#f4f4f0;color:#2c2
 .top .logo img{height:40px;vertical-align:middle;}
 .summary{padding:14px 20px;font-size:13px;flex-shrink:0;}
 .summary .row{display:flex;margin-bottom:4px;}
-.summary .k{color:#888780;width:64px;flex-shrink:0;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;}
+.summary .k{color:#888780;width:84px;flex-shrink:0;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;}
 .summary .v{color:#2c2c2a;font-weight:500;}
 .summary .note{font-size:12px;color:#5f5e5a;margin-top:10px;line-height:1.4;padding-top:10px;border-top:0.5px dashed #d3d1c7;}
 
@@ -135,7 +135,7 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:#f4f4f0;color:#2c2
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;}
 
 .baseline{position:absolute;left:24px;right:24px;bottom:28px;border-bottom:1px solid #d3d1c7;pointer-events:none;}
-.baseline::after{content:'Sign here';position:absolute;left:0;top:6px;font-size:11px;color:#b5b2a8;}
+.baseline::after{content:'<?= $st('sign.here') ?>';position:absolute;left:0;top:6px;font-size:11px;color:#b5b2a8;}
 
 .bottom{background:#fff;border-top:0.5px solid #e8e6e0;padding:12px 16px;
         padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0;
@@ -165,7 +165,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 </div>
 
 <div class="summary">
-  <?php if ($h_rma):  ?><div class="row"><span class="k">RMA</span><span class="v"><?= $h_rma ?></span></div><?php endif; ?>
+  <?php if ($h_rma):  ?><div class="row"><span class="k"><?= $st('sign.rma') ?></span><span class="v"><?= $h_rma ?></span></div><?php endif; ?>
   <?php if ($h_cust): ?><div class="row"><span class="k"><?= $st('sign.name') ?></span><span class="v"><?= $h_cust ?></span></div><?php endif; ?>
   <?php if ($h_dev):  ?><div class="row"><span class="k"><?= $st('sign.device') ?></span><span class="v"><?= $h_dev ?></span></div><?php endif; ?>
   <?php if ($h_ident):?><div class="row"><span class="k"><?= $st('pdf.sn_imei') ?></span><span class="v"><?= $h_ident ?></span></div><?php endif; ?>
