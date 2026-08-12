@@ -378,6 +378,8 @@ return [
     'pdf.sig_get'            => 'Uzmi potpis',
     'pdf.sig_station_hint'   => 'Ako je tablet za potpis aktivan na ovoj lokaciji, otvoriće se automatski.',
     'pdf.sn_imei'            => 'SN / IMEI',
+    'pdf.footer_phone'       => 'Telefon',
+    'pdf.footer_email'       => 'E-mail',
     'pdf.days_one'           => 'dan',
     'pdf.days_other'         => 'dana',
     'pdf.sig_opened'         => 'Korisnik je otvorio stranicu',

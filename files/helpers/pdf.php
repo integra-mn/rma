@@ -438,7 +438,8 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
     $mpdf->SetHTMLFooter(
         '<div style="border-top:0.5px solid #e8e6e0;padding-top:5px;font-size:8.5px;color:#888780;">'
       . '<table width="100%" cellpadding="0" cellspacing="0"><tr>'
-      . '<td style="text-align:left;">' . implode(' &nbsp;|&nbsp; ', $footer_parts) . '</td>'
+      . '<td style="text-align:left;">' . implode(' &nbsp;|&nbsp; ', $footer_parts)
+      . ($footer_contact ? '<br>' . implode(' &nbsp;|&nbsp; ', $footer_contact) : '') . '</td>'
       . '<td style="text-align:right;">Printed ' . format_datetime(time()) . ' &nbsp;·&nbsp; Page {PAGENO}/{nbpg}</td>'
       . '</tr></table>'
       . '</div>'

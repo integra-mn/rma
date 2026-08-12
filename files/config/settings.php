@@ -139,7 +139,7 @@ function setting_set(string $key, mixed $value, string $type = 'string', ?int $l
  */
 function company_legal_name(): string {
     $name = trim((string) setting('company_legal_name', ''));
-    return $name !== '' ? $name : 'Integra d.o.o.';
+    return $name !== '' ? $name : 'Integra';
 }
 
 function company_name(): string {
