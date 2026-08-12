@@ -94,6 +94,15 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
     // language of the employee at the counter.
     $t = fn(string $k): string => __in(customer_lang($rma['customer_lang'] ?? null), $k);
 
+    // Second footer line. Empty when the location has neither, so a bare
+    // "Telefon:" never prints.
+    $footer_contact = implode(' &nbsp;|&nbsp; ', array_filter([
+        trim((string)($rma['location_phone'] ?? '')) !== ''
+          ? $t('pdf.footer_phone') . ': ' . htmlspecialchars(trim((string)$rma['location_phone'])) : '',
+        trim((string)($rma['location_email'] ?? '')) !== ''
+          ? $t('pdf.footer_email') . ': ' . htmlspecialchars(trim((string)$rma['location_email'])) : '',
+    ], fn($v) => $v !== ''));
+
     $device = trim(($rma['brand_name'] ?? '') . ' ' . ($rma['model_name'] ?? ''));
     $date   = format_date($rma['created_at']);
     $app_name = setting('app_name', 'Integra RMA');
@@ -361,11 +370,14 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
       ) . '
   </div>
 
-  <div class="footer">' . implode(' &nbsp;|&nbsp; ', array_filter([
-        htmlspecialchars(company_legal_name()),
-        htmlspecialchars(trim((string)($rma['location_address'] ?? ''))),
-        htmlspecialchars(trim(trim((string)($rma['location_postal'] ?? '')) . ' ' . trim((string)($rma['location_city'] ?? '')))),
-      ], fn($v) => $v !== '')) . '</div>
+  <div class="footer">
+    <div>' . implode(' &nbsp;|&nbsp; ', array_filter([
+          htmlspecialchars(company_legal_name()),
+          htmlspecialchars(trim((string)($rma['location_address'] ?? ''))),
+          htmlspecialchars(trim(trim((string)($rma['location_postal'] ?? '')) . ' ' . trim((string)($rma['location_city'] ?? '')))),
+        ], fn($v) => $v !== '')) . '</div>' . ($footer_contact !== '' ? '
+    <div>' . $footer_contact . '</div>' : '') . '
+  </div>
 
 </div>
 </body>
@@ -429,6 +441,15 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
     // Page-bottom footer: app name + location contact details + print stamp.
     // Same three parts as the print view: legal entity, street, postcode+city.
     // Phone and email came off — the footer is stationery, not a contact card.
+    // Used by the left cell below; without this it was an undefined variable
+    // and the contact line simply never appeared.
+    $footer_contact = array_filter([
+        trim((string)($rma['location_phone'] ?? '')) !== ''
+          ? $t('pdf.footer_phone') . ': ' . htmlspecialchars(trim((string)$rma['location_phone'])) : '',
+        trim((string)($rma['location_email'] ?? '')) !== ''
+          ? $t('pdf.footer_email') . ': ' . htmlspecialchars(trim((string)$rma['location_email'])) : '',
+    ], fn($v) => $v !== '');
+
     $footer_parts = array_filter([
         htmlspecialchars(company_legal_name()),
         htmlspecialchars(trim((string)($rma['location_address'] ?? ''))),
