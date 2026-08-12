@@ -188,9 +188,10 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
      back to the top first.
 
      The sheet is centred, so its right edge is half the window plus half of
-     210mm; the 24px past that is the same gap the buttons keep between
-     themselves, and the 24px top lines the column up with the top of the
-     paper. Under the fit-to-height zoom both the sheet and this offset scale
+     210mm, plus 24px — the same gap the sheet keeps from the top of the
+     window, which the 24px top of this column lines up with. The buttons sit
+     12px apart, tighter than their distance from the paper so they read as
+     one group. Under the fit-to-height zoom both the sheet and this offset scale
      together, so they stay tucked in.
 
      1090px is where the sheet stops leaving room: (1090 - 794) / 2 is 148px a
@@ -198,7 +199,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   @media screen and (min-width: 1090px) {
     #toolbar { position: fixed; top: 24px; left: calc(50% + 105mm + 24px);
                z-index: 10; width: auto; height: auto; margin: 0;
-               flex-direction: column; align-items: stretch; gap: 24px; }
+               flex-direction: column; align-items: stretch; gap: 12px; }
     .page { margin-top: 24px; }
   }
   /* Too narrow for a side margin: keep them on top, but stuck to the window
