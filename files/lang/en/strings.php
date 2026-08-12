@@ -378,6 +378,10 @@ return [
     'pdf.sig_get'            => 'Get signature',
     'pdf.sig_station_hint'   => 'If a signing tablet is active at this location, it will open automatically.',
     'pdf.sn_imei'            => 'SN / IMEI',
+    'pdf.days_one'           => 'day',
+    'pdf.days_other'         => 'days',
+    'pdf.sig_opened'         => 'Customer has opened the page',
+    'pdf.sig_received'       => 'Signature received. Refreshing',
 
     // RMA receipt email (sent to the customer)
     'receipt.subject'        => 'Receipt — :number',

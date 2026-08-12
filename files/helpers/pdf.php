@@ -16,7 +16,7 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
                           d.serial_number, d.imei,
                           l.name as location_name, l.phone as location_phone,
                           l.email as location_email, l.address as location_address,
-                          l.city as location_city
+                          l.city as location_city, l.postal_code as location_postal
                    FROM rma_requests r
                    JOIN rma_statuses s ON s.id = r.status_id
                    LEFT JOIN customers c ON c.id = r.customer_id
@@ -39,6 +39,15 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
     } else {
         generate_rma_pdf_html($rma, $tracking_url, $qr_base64);
     }
+}
+
+/**
+ * "14 dana" / "1 dan" — Montenegrin uses the singular for numbers ending in 1
+ * except 11, and the same shape reads correctly in English (1 day / 14 days).
+ */
+function pdf_days(int $n, callable $t): string {
+    $singular = ($n % 10 === 1 && $n % 100 !== 11);
+    return $n . ' ' . ($t($singular ? 'pdf.days_one' : 'pdf.days_other'));
 }
 
 /**
@@ -142,12 +151,20 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .qr-text h3 { font-size: 11.5px; font-weight: 600; margin-bottom: 3px; }
   .qr-text p { font-size: 10.5px; color: #5f5e5a; line-height: 1.5; }
   .qr-text a { font-size: 9.5px; color: #1D9E75; word-break: break-all; }
-  .footer { border-top: 0.5px solid #e8e6e0; padding-top: 10px; margin-top: 18px; display: flex; justify-content: space-between; font-size: 9.5px; color: #888780; }
+  /* Company details live here rather than under the logo. Left-aligned, and
+     pinned to the foot of the sheet when printed so it reads as stationery
+     rather than as one more content block. */
+  .footer { border-top: 0.5px solid #e8e6e0; padding-top: 10px; margin-top: 28px;
+            text-align: left; font-size: 9.5px; color: #888780; }
   .signature-box { border: 0.5px solid #d3d1c7; border-radius: 6px; padding: 11px 13px; margin-bottom: 16px; }
   .signature-box p { font-size: 10.5px; color: #888780; margin-bottom: 36px; }
   .signature-line { border-top: 0.5px solid #2c2c2a; width: 200px; font-size: 9.5px; color: #888780; padding-top: 3px; }
   @media print {
     body { background: #fff; font-size: 14px; }
+    /* 10mm matches the print padding on .page, so the footer lines up with the
+       left edge of the content above it. */
+    .footer { position: fixed; bottom: 8mm; left: 10mm; right: 10mm;
+              margin-top: 0; background: #fff; }
     /* !important beats the inline display:flex on the toolbar */
     .no-print { display: none !important; }
     /* With @page margin:0, we rely on the page container padding
@@ -188,8 +205,6 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   <div class="header">
     <div class="company">
       <div class="logo"><img src="/assets/integra.svg" alt="' . htmlspecialchars($app_name) . '"></div>
-      ' . ($rma['location_address'] ? '<p>' . htmlspecialchars($rma['location_address']) . ', ' . htmlspecialchars($rma['location_city'] ?? '') . '</p>' : '') . '
-      ' . ($rma['location_phone'] ? '<p>' . htmlspecialchars($rma['location_phone']) . '</p>' : '') . '
     </div>
     <div class="doc-title">
       <h2>' . $t('pdf.receipt_title') . '</h2>
@@ -233,10 +248,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
             : (!empty($rma['warranty_refusal']) ? ' · ' . $t('pdf.status_warranty_no') : '')
         ) . '</td></tr>
         ' . ($rma['estimated_completion']
-              ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . (
-                    ($d = max(0, (int) round((strtotime($rma['estimated_completion']) - strtotime($rma['created_at'])) / 86400))) === 1
-                    ? '1 day' : $d . ' days'
-                ) . '</td></tr>'
+              ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . pdf_days(max(0, (int) round((strtotime($rma['estimated_completion']) - strtotime($rma['created_at'])) / 86400)), $t) . '</td></tr>'
               : '') . '
       </table>
     </div>
@@ -335,10 +347,10 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
                  fetch("/signature/status?token=" + encodeURIComponent(currentToken))
                    .then(function (r) { return r.json(); })
                    .then(function (s) {
-                     if (s.visited && !s.signed) statusEl.textContent = "Customer has opened the page\u2026";
+                     if (s.visited && !s.signed) statusEl.textContent = "' . $t('pdf.sig_opened') . '\u2026";
                      if (s.signed && s.url) {
                        clearInterval(poll); poll = null;
-                       statusEl.textContent = "Signature received. Refreshing\u2026";
+                       statusEl.textContent = "' . $t('pdf.sig_received') . '\u2026";
                        setTimeout(function () { location.reload(); }, 600);
                      }
                    });
@@ -348,6 +360,12 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
            </script>'
       ) . '
   </div>
+
+  <div class="footer">' . implode(' &nbsp;|&nbsp; ', array_filter([
+        htmlspecialchars(company_legal_name()),
+        htmlspecialchars(trim((string)($rma['location_address'] ?? ''))),
+        htmlspecialchars(trim(trim((string)($rma['location_postal'] ?? '')) . ' ' . trim((string)($rma['location_city'] ?? '')))),
+      ], fn($v) => $v !== '')) . '</div>
 
 </div>
 </body>
@@ -409,17 +427,18 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
     ]);
 
     // Page-bottom footer: app name + location contact details + print stamp.
+    // Same three parts as the print view: legal entity, street, postcode+city.
+    // Phone and email came off — the footer is stationery, not a contact card.
     $footer_parts = array_filter([
-        htmlspecialchars($app_name),
-        htmlspecialchars($rma['location_address'] ?? ''),
-        htmlspecialchars($rma['location_city']    ?? ''),
-        htmlspecialchars($rma['location_phone']   ?? ''),
-        htmlspecialchars($rma['location_email']   ?? ''),
-    ]);
+        htmlspecialchars(company_legal_name()),
+        htmlspecialchars(trim((string)($rma['location_address'] ?? ''))),
+        htmlspecialchars(trim(trim((string)($rma['location_postal'] ?? '')) . ' '
+                            . trim((string)($rma['location_city'] ?? '')))),
+    ], fn($v) => $v !== '');
     $mpdf->SetHTMLFooter(
         '<div style="border-top:0.5px solid #e8e6e0;padding-top:5px;font-size:8.5px;color:#888780;">'
       . '<table width="100%" cellpadding="0" cellspacing="0"><tr>'
-      . '<td style="text-align:left;">' . implode(' &nbsp;·&nbsp; ', $footer_parts) . '</td>'
+      . '<td style="text-align:left;">' . implode(' &nbsp;|&nbsp; ', $footer_parts) . '</td>'
       . '<td style="text-align:right;">Printed ' . format_datetime(time()) . ' &nbsp;·&nbsp; Page {PAGENO}/{nbpg}</td>'
       . '</tr></table>'
       . '</div>'
@@ -510,10 +529,7 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
                 : (!empty($rma['warranty_refusal']) ? ' · ' . $t('pdf.status_warranty_no') : '')
             ) . '</td></tr>
             ' . ($rma['estimated_completion']
-              ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . (
-                    ($d = max(0, (int) round((strtotime($rma['estimated_completion']) - strtotime($rma['created_at'])) / 86400))) === 1
-                    ? '1 day' : $d . ' days'
-                ) . '</td></tr>'
+              ? '<tr><td>' . $t('pdf.repair_time') . '</td><td>' . pdf_days(max(0, (int) round((strtotime($rma['estimated_completion']) - strtotime($rma['created_at'])) / 86400)), $t) . '</td></tr>'
               : '') . '
           </table>
         </td>

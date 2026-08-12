@@ -378,6 +378,10 @@ return [
     'pdf.sig_get'            => 'Uzmi potpis',
     'pdf.sig_station_hint'   => 'Ako je tablet za potpis aktivan na ovoj lokaciji, otvoriće se automatski.',
     'pdf.sn_imei'            => 'SN / IMEI',
+    'pdf.days_one'           => 'dan',
+    'pdf.days_other'         => 'dana',
+    'pdf.sig_opened'         => 'Korisnik je otvorio stranicu',
+    'pdf.sig_received'       => 'Potpis primljen. Osvježavanje',
 
     // Email potvrde o prijemu (šalje se kupcu)
     'receipt.subject'        => 'Potvrda o prijemu — :number',

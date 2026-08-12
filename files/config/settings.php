@@ -132,6 +132,16 @@ function setting_set(string $key, mixed $value, string $type = 'string', ?int $l
  * "Integra RMA" is the tool, "Integra Service" is who the customer dealt with.
  * Settings → General.
  */
+/**
+ * The legal entity, for the foot of printed documents. Separate from
+ * company_name(), which is the service brand customers see in emails
+ * ("Integra Service"); a receipt footer wants the registered name.
+ */
+function company_legal_name(): string {
+    $name = trim((string) setting('company_legal_name', ''));
+    return $name !== '' ? $name : 'Integra d.o.o.';
+}
+
 function company_name(): string {
     $name = trim((string) setting('company_name', ''));
     return $name !== '' ? $name : 'Integra Service';
