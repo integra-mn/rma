@@ -94,14 +94,18 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
     // language of the employee at the counter.
     $t = fn(string $k): string => __in(customer_lang($rma['customer_lang'] ?? null), $k);
 
-    // Second footer line. Empty when the location has neither, so a bare
-    // "Telefon:" never prints.
-    $footer_contact = implode(' &nbsp;|&nbsp; ', array_filter([
+    // The whole footer on one line. Any part a location has not filled in is
+    // dropped, so the separators never end up doubled or trailing.
+    $footer_parts = array_filter([
+        htmlspecialchars(company_legal_name()),
+        htmlspecialchars(trim((string)($rma['location_address'] ?? ''))),
+        htmlspecialchars(trim(trim((string)($rma['location_postal'] ?? '')) . ' '
+                            . trim((string)($rma['location_city'] ?? '')))),
         trim((string)($rma['location_phone'] ?? '')) !== ''
           ? $t('pdf.footer_phone') . ': ' . htmlspecialchars(trim((string)$rma['location_phone'])) : '',
         trim((string)($rma['location_email'] ?? '')) !== ''
           ? $t('pdf.footer_email') . ': ' . htmlspecialchars(trim((string)$rma['location_email'])) : '',
-    ], fn($v) => $v !== ''));
+    ], fn($v) => $v !== '');
 
     $device = trim(($rma['brand_name'] ?? '') . ' ' . ($rma['model_name'] ?? ''));
     $date   = format_date($rma['created_at']);
@@ -370,14 +374,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
       ) . '
   </div>
 
-  <div class="footer">
-    <div>' . implode(' &nbsp;|&nbsp; ', array_filter([
-          htmlspecialchars(company_legal_name()),
-          htmlspecialchars(trim((string)($rma['location_address'] ?? ''))),
-          htmlspecialchars(trim(trim((string)($rma['location_postal'] ?? '')) . ' ' . trim((string)($rma['location_city'] ?? '')))),
-        ], fn($v) => $v !== '')) . '</div>' . ($footer_contact !== '' ? '
-    <div>' . $footer_contact . '</div>' : '') . '
-  </div>
+  <div class="footer">' . implode(' &nbsp;|&nbsp; ', $footer_parts) . '</div>
 
 </div>
 </body>
@@ -441,26 +438,23 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
     // Page-bottom footer: app name + location contact details + print stamp.
     // Same three parts as the print view: legal entity, street, postcode+city.
     // Phone and email came off — the footer is stationery, not a contact card.
-    // Used by the left cell below; without this it was an undefined variable
-    // and the contact line simply never appeared.
-    $footer_contact = array_filter([
-        trim((string)($rma['location_phone'] ?? '')) !== ''
-          ? $t('pdf.footer_phone') . ': ' . htmlspecialchars(trim((string)$rma['location_phone'])) : '',
-        trim((string)($rma['location_email'] ?? '')) !== ''
-          ? $t('pdf.footer_email') . ': ' . htmlspecialchars(trim((string)$rma['location_email'])) : '',
-    ], fn($v) => $v !== '');
-
+    // One line: name, street, postcode+city, phone, email. Missing parts drop
+    // out so the separators never double up.
     $footer_parts = array_filter([
         htmlspecialchars(company_legal_name()),
         htmlspecialchars(trim((string)($rma['location_address'] ?? ''))),
         htmlspecialchars(trim(trim((string)($rma['location_postal'] ?? '')) . ' '
                             . trim((string)($rma['location_city'] ?? '')))),
+        trim((string)($rma['location_phone'] ?? '')) !== ''
+          ? $t('pdf.footer_phone') . ': ' . htmlspecialchars(trim((string)$rma['location_phone'])) : '',
+        trim((string)($rma['location_email'] ?? '')) !== ''
+          ? $t('pdf.footer_email') . ': ' . htmlspecialchars(trim((string)$rma['location_email'])) : '',
     ], fn($v) => $v !== '');
     $mpdf->SetHTMLFooter(
         '<div style="border-top:0.5px solid #e8e6e0;padding-top:5px;font-size:8.5px;color:#888780;">'
       . '<table width="100%" cellpadding="0" cellspacing="0"><tr>'
       . '<td style="text-align:left;">' . implode(' &nbsp;|&nbsp; ', $footer_parts)
-      . ($footer_contact ? '<br>' . implode(' &nbsp;|&nbsp; ', $footer_contact) : '') . '</td>'
+      . '</td>'
       . '<td style="text-align:right;">Printed ' . format_datetime(time()) . ' &nbsp;·&nbsp; Page {PAGENO}/{nbpg}</td>'
       . '</tr></table>'
       . '</div>'
