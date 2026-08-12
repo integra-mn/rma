@@ -28,7 +28,7 @@
       </p>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span class="badge" style="background:<?= htmlspecialchars($rma['status_color']) ?>22;color:<?= htmlspecialchars($rma['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($rma['status_color']) ?>66;">
-          <?= htmlspecialchars($rma['status_label']) ?>
+          <?= status_label((string)($rma['status_code'] ?? ''), $rma['status_label']) ?>
         </span>
         <?php if ($rma['is_warranty']): ?>
           <span class="badge" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('rma.warranty') ?></span>
@@ -203,7 +203,7 @@
       ?>
         <div style="position:relative;padding-bottom:18px;">
           <div style="position:absolute;left:-<?= $is_current ? 24 : 22 ?>px;top:<?= $is_current ? 1 : 3 ?>px;width:<?= $is_current ? 16 : 12 ?>px;height:<?= $is_current ? 16 : 12 ?>px;border-radius:50%;border:2px solid #fff;background:<?= $color ?>;box-shadow:0 0 0 1px <?= $is_current ? $color : '#d3d1c7' ?><?= $is_current ? ', 0 0 0 6px '.$color.'26' : '' ?>;"></div>
-          <div style="font-size:14px;font-weight:<?= $is_current ? 600 : 500 ?>;color:<?= $is_current ? $color : 'inherit' ?>;line-height:1.3;"><?= htmlspecialchars($h['status_label']) ?></div>
+          <div style="font-size:14px;font-weight:<?= $is_current ? 600 : 500 ?>;color:<?= $is_current ? $color : 'inherit' ?>;line-height:1.3;"><?= status_label((string)($h['status_code'] ?? ''), $h['status_label']) ?></div>
           <div style="font-size:12px;color:var(--text-muted);margin-top:2px;"><?= format_datetime($h['created_at']) ?></div>
           <?php if (trim((string)$h['note']) !== ''): ?>
             <div style="font-size:13px;color:#5f5e5a;margin-top:4px;line-height:1.5;"><?= htmlspecialchars($h['note']) ?></div>

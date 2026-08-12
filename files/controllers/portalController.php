@@ -205,7 +205,7 @@ class PortalController {
 
         // Same data loads as the public /track page.
         $history = db_rows(
-            "SELECT h.*, s.label AS status_label, s.color AS status_color
+            "SELECT h.*, s.code AS status_code, s.label AS status_label, s.color AS status_color
              FROM rma_status_history h
              JOIN rma_statuses s ON s.id = h.status_id
              WHERE h.rma_id = ? ORDER BY h.created_at ASC",

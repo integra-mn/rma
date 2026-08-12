@@ -463,8 +463,8 @@ return [
     'notif.otp.body'                  => "Vaš verifikacioni kod je: :code\n\nKod ističe za 10 minuta.\n\nAko niste zahtijevali ovaj kod, zanemarite ovu poruku.",
 
     // ── Full translation sweep (added) ──────────────────────
-    'rma.customer_details' => 'Podaci o kupcu',
-    'rma.search_customer' => 'Pretraga kupca',
+    'rma.customer_details' => 'Podaci o korisniku',
+    'rma.search_customer' => 'Pretraga korisnika',
     'rma.search_phone_email' => 'Pretraga po broju telefona ili email-u',
     'rma.select_partner' => 'Izaberite partnera',
     'rma.select_branch' => 'Izaberite poslovnicu',

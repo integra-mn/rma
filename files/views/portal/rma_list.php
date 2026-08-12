@@ -39,7 +39,7 @@
             </td>
             <td>
               <span class="badge" style="background:<?= htmlspecialchars($r['status_color']) ?>22;color:<?= htmlspecialchars($r['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($r['status_color']) ?>66;">
-                <?= htmlspecialchars($r['status_label']) ?>
+                <?= status_label((string)($r['status_code'] ?? ''), $r['status_label']) ?>
               </span>
             </td>
             <td style="color:var(--text-muted);"><?= format_date($r['created_at']) ?></td>

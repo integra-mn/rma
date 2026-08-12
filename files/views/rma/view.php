@@ -327,7 +327,7 @@
             <div style="display:flex;gap:10px;margin-bottom:10px;font-size:12px;">
               <div style="width:8px;height:8px;border-radius:50%;background:<?= htmlspecialchars($h['status_color']) ?>;margin-top:3px;flex-shrink:0;"></div>
               <div>
-                <span style="font-weight:500;"><?= htmlspecialchars($h['status_label']) ?></span>
+                <span style="font-weight:500;"><?= status_label((string)($h['status_code'] ?? ''), $h['status_label']) ?></span>
                 <?php if ($h['note']): ?>
                   <span style="color:#5f5e5a;"> — <?= htmlspecialchars($h['note']) ?></span>
                 <?php endif; ?>

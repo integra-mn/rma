@@ -312,7 +312,7 @@ class RmaController {
             http_response_code(403); include views_path('errors/403.php'); return;
         }
 
-        $history  = db_rows("SELECT h.*, s.label as status_label, s.color as status_color,
+        $history  = db_rows("SELECT h.*, s.code as status_code, s.label as status_label, s.color as status_color,
                                      u.name as changed_by_name
                               FROM rma_status_history h
                               JOIN rma_statuses s ON s.id = h.status_id
@@ -620,9 +620,15 @@ class RmaController {
         $q = trim($_GET['q'] ?? '');
         if (strlen($q) < 3) { echo json_encode([]); exit; }
 
-        // Strip to digits only for phone matching
+        // Phone matching on the LAST 8 DIGITS, which is the subscriber number.
+        // The same Montenegrin mobile is written +382 69 222 444, 069 222 444
+        // or 069222444; the trunk 0 replaces the 382, so the digit strings
+        // never overlap and a plain contains-search finds nothing. The last
+        // eight digits are identical in every form. phone_last_digits() is the
+        // same rule find_customer_match() already uses for duplicate detection.
         $digits = preg_replace('/\D/', '', $q);
-        $dlike  = strlen($digits) >= 3 ? "%{$digits}%" : null;
+        $tail   = strlen($digits) > 8 ? substr($digits, -8) : $digits;
+        $dlike  = strlen($tail) >= 3 ? "%{$tail}%" : null;
         $elike  = "%{$q}%";
 
         if ($dlike) {
