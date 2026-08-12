@@ -188,22 +188,22 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
      back to the top first.
 
      The sheet is centred, so its right edge is half the window plus half of
-     210mm; the 8px past that is the same gap the buttons keep between
+     210mm; the 24px past that is the same gap the buttons keep between
      themselves, and the 24px top lines the column up with the top of the
      paper. Under the fit-to-height zoom both the sheet and this offset scale
      together, so they stay tucked in.
 
-     1060px is where the sheet stops leaving room: (1060 - 794) / 2 is 133px a
-     side, just over the 8px gap plus the widest button. */
-  @media screen and (min-width: 1060px) {
-    #toolbar { position: fixed; top: 24px; left: calc(50% + 105mm + 8px);
+     1090px is where the sheet stops leaving room: (1090 - 794) / 2 is 148px a
+     side, just over the 24px gap plus the widest button. */
+  @media screen and (min-width: 1090px) {
+    #toolbar { position: fixed; top: 24px; left: calc(50% + 105mm + 24px);
                z-index: 10; width: auto; height: auto; margin: 0;
-               flex-direction: column; align-items: stretch; gap: 8px; }
+               flex-direction: column; align-items: stretch; gap: 24px; }
     .page { margin-top: 24px; }
   }
   /* Too narrow for a side margin: keep them on top, but stuck to the window
      rather than to the document, so they are still reachable when scrolled. */
-  @media screen and (max-width: 1059px) {
+  @media screen and (max-width: 1089px) {
     #toolbar { position: sticky; top: 0; z-index: 10; background: #f4f4f0; }
   }
   @media print {
