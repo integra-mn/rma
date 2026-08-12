@@ -83,7 +83,10 @@ function format_rma_accessories(array $rma, ?string $lang = null): ?string {
 function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base64): void {
     // Printed for the customer, so it follows THEIR language, not the
     // language of the employee at the counter.
-    $t = fn(string $k): string => __in(customer_lang($rma['customer_lang'] ?? null), $k);
+    // Takes replacements too — without the second argument, ':date' in
+    // pdf.sig_signed was never substituted and the receipt printed the
+    // placeholder verbatim.
+    $t = fn(string $k, array $r = []): string => __in(customer_lang($rma['customer_lang'] ?? null), $k, $r);
 
     // The whole footer on one line. Any part a location has not filled in is
     // dropped, so the separators never end up doubled or trailing.
@@ -363,7 +366,10 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
 function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base64, string $mode): void {
     // Printed for the customer, so it follows THEIR language, not the
     // language of the employee at the counter.
-    $t = fn(string $k): string => __in(customer_lang($rma['customer_lang'] ?? null), $k);
+    // Takes replacements too — without the second argument, ':date' in
+    // pdf.sig_signed was never substituted and the receipt printed the
+    // placeholder verbatim.
+    $t = fn(string $k, array $r = []): string => __in(customer_lang($rma['customer_lang'] ?? null), $k, $r);
 
     require_once ROOT . '/vendor/autoload.php';
 
@@ -449,7 +455,10 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
 function generate_rma_pdf_html_string(array $rma, string $device, string $date, string $app_name, string $tracking_url, string $qr_base64, ?array $signature = null): string {
     // Printed for the customer, so it follows THEIR language, not the
     // language of the employee at the counter.
-    $t = fn(string $k): string => __in(customer_lang($rma['customer_lang'] ?? null), $k);
+    // Takes replacements too — without the second argument, ':date' in
+    // pdf.sig_signed was never substituted and the receipt printed the
+    // placeholder verbatim.
+    $t = fn(string $k, array $r = []): string => __in(customer_lang($rma['customer_lang'] ?? null), $k, $r);
 
     // mPDF accepts local file paths in <img src>. Using absolute path so
     // relative URL resolution (which mPDF does poorly) doesn't bite us.

@@ -95,7 +95,7 @@ class SignatureController {
         // THEIR language — the same rule the printed receipt uses — not the
         // language of whoever is logged in at the counter.
         $lang = customer_lang($sig['customer_lang'] ?? null);
-        $st   = fn(string $k): string => htmlspecialchars(__in($lang, $k));
+        $st   = fn(string $k, array $r = []): string => htmlspecialchars(__in($lang, $k, $r));
 
         $device  = trim(($sig['brand_name'] ?? '') . ' ' . ($sig['model_name'] ?? ''));
         $ident   = $sig['imei'] ?: ($sig['serial_number'] ?? '');
@@ -510,7 +510,7 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:#1A1A1F;color:#fff
 
     // ── "Thank you" screen after the page auto-closes a signed token ──────
     private function render_done(string $rma_number, string $lang = 'me'): void {
-        $st = fn(string $k): string => htmlspecialchars(__in($lang, $k));
+        $st = fn(string $k, array $r = []): string => htmlspecialchars(__in($lang, $k, $r));
         ?><!DOCTYPE html>
 <html lang="<?= htmlspecialchars($lang) ?>"><head>
 <meta charset="UTF-8">
