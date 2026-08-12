@@ -329,7 +329,7 @@
               <div>
                 <span style="font-weight:500;"><?= status_label((string)($h['status_code'] ?? ''), $h['status_label']) ?></span>
                 <?php if ($h['note']): ?>
-                  <span style="color:#5f5e5a;"> — <?= htmlspecialchars($h['note']) ?></span>
+                  <span style="color:#5f5e5a;"> — <?= history_note((string)$h['note']) ?></span>
                 <?php endif; ?>
                 <div style="color:#888780;margin-top:2px;">
                   <?= format_datetime($h['created_at']) ?>

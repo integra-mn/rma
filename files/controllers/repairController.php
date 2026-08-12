@@ -568,7 +568,10 @@ class RepairController {
             'rma_id'     => $rma_id,
             'status_id'  => (int)$target['id'],
             'changed_by' => current_user_id(),
-            'note'       => 'Auto-updated from repair job (' . $repair_event . ')',
+            // The trigger code (job_created and friends) is dropped: it meant
+            // nothing to anyone reading the history, and the audit row below
+            // still records it for anyone who needs it.
+            'note'       => 'history.auto_sync',
         ]);
         audit('status_auto_sync', 'rma', $rma_id, [
             'new' => ['from' => $rma['cur_code'], 'to' => $target_code, 'trigger' => $repair_event],

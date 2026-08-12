@@ -191,6 +191,8 @@ return [
     'rma.customer_visible'   => 'Vidljivo kupcu',
     'rma.no_comments'        => 'Još nema komentara.',
     'rma.no_history'         => 'Još nema historije.',
+    'history.created'        => 'Reklamacija kreirana',
+    'history.auto_sync'      => 'Automatski ažurirano iz radnog naloga',
     'rma.created_msg'        => 'RMA kreiran.',
     'rma.est_completion'     => 'Predvidjeni završetak',
     'rma.serial_number'      => 'Serijski broj',

@@ -99,6 +99,26 @@ function status_label(string $code, string $fallback = '', ?string $lang_overrid
     return htmlspecialchars($fallback !== '' ? $fallback : $code, ENT_QUOTES, 'UTF-8');
 }
 
+/**
+ * Render a status-history note.
+ *
+ * Notes the app writes are stored as translation keys ("history.created"), so
+ * Istorija reads in the viewer's language rather than whatever language the
+ * clerk happened to be using. Anything a person typed is shown verbatim.
+ *
+ * $lang forces a language for pages with no logged-in user — the public
+ * tracking page follows the customer.
+ */
+function history_note(string $note, ?string $lang = null): string {
+    $note = trim($note);
+    if ($note === '') { return ''; }
+    if (str_starts_with($note, 'history.')) {
+        $text = $lang !== null ? __in($lang, $note) : __raw($note);
+        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    }
+    return htmlspecialchars($note, ENT_QUOTES, 'UTF-8');
+}
+
 function __raw(string $key, array $replace = []): string {
     $strings = load_lang();
     $text    = $strings[$key] ?? $key;

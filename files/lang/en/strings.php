@@ -191,6 +191,8 @@ return [
     'rma.customer_visible'   => 'Customer visible',
     'rma.no_comments'        => 'No comments yet.',
     'rma.no_history'         => 'No history yet.',
+    'history.created'        => 'RMA created',
+    'history.auto_sync'      => 'Updated automatically from the repair job',
     'rma.created_msg'        => 'RMA created.',
     'rma.est_completion'     => 'Est. completion',
     'rma.serial_number'      => 'Serial number',

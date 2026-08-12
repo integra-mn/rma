@@ -247,7 +247,9 @@ class RmaController {
             'rma_id'     => $rma_id,
             'status_id'  => $status_id,
             'changed_by' => current_user_id(),
-            'note'       => 'RMA created.',
+            // A key, not a sentence: Istorija then reads in the viewer's
+            // language rather than the clerk's.
+            'note'       => 'history.created',
         ]);
 
         audit('created', 'rma', $rma_id);

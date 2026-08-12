@@ -507,7 +507,7 @@
           <div class="tl-label"><?= status_label((string)($h['status_code'] ?? ''), $h['status_label'], $track_lang) ?></div>
           <div class="tl-date"><?= format_datetime($h['created_at']) ?></div>
           <?php if (trim((string)$h['note']) !== ''): ?>
-            <div class="tl-note"><?= htmlspecialchars($h['note']) ?></div>
+            <div class="tl-note"><?= history_note((string)$h['note'], $track_lang) ?></div>
           <?php endif; ?>
         </div>
       <?php endforeach; ?>

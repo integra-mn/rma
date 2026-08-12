@@ -206,7 +206,7 @@
           <div style="font-size:14px;font-weight:<?= $is_current ? 600 : 500 ?>;color:<?= $is_current ? $color : 'inherit' ?>;line-height:1.3;"><?= status_label((string)($h['status_code'] ?? ''), $h['status_label']) ?></div>
           <div style="font-size:12px;color:var(--text-muted);margin-top:2px;"><?= format_datetime($h['created_at']) ?></div>
           <?php if (trim((string)$h['note']) !== ''): ?>
-            <div style="font-size:13px;color:#5f5e5a;margin-top:4px;line-height:1.5;"><?= htmlspecialchars($h['note']) ?></div>
+            <div style="font-size:13px;color:#5f5e5a;margin-top:4px;line-height:1.5;"><?= history_note((string)$h['note']) ?></div>
           <?php endif; ?>
         </div>
       <?php endforeach; ?>
