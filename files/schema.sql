@@ -1128,11 +1128,11 @@ INSERT INTO repair_statuses (code, label, label_me, color, sort_order, is_termin
 INSERT INTO security_policies
   (role, require_2fa, allowed_2fa_channels, max_login_attempts, lockout_minutes, password_min_length, session_timeout_min, force_2fa_new_device)
 VALUES
-  ('super_admin', 1, 'email,whatsapp,sms', 5, 30, 12, 480,  1),
-  ('admin',       1, 'email,whatsapp,sms', 5, 30, 10, 480,  1),
-  ('reception',  0, 'email,sms',          5, 30, 10, 480,  0),
-  ('technician', 0, 'email',             5, 30, 8,  600,  0),
-  ('partner',    1, 'email,whatsapp,sms', 5, 30, 10, 480,  1);
+  ('super_admin', 1, 'totp,email,whatsapp,sms', 5, 30, 12, 480,  1),
+  ('admin',       1, 'totp,email,whatsapp,sms', 5, 30, 10, 480,  1),
+  ('reception',  0, 'totp,email,sms',          5, 30, 10, 480,  0),
+  ('technician', 0, 'totp,email,sms',             5, 30, 8,  600,  0),
+  ('partner',    1, 'totp,email,whatsapp,sms', 5, 30, 10, 480,  1);
 
 INSERT INTO settings (key_name, value, type, group_name) VALUES
   ('app_name',          'Integra RMS', 'string', 'general'),
