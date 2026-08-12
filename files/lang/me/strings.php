@@ -865,6 +865,8 @@ return [
     'admin.perm_none'        => 'Bez dozvola',
     'admin.perm_matrix'      => 'Matrica dozvola',
     'admin.perm_module_action' => 'Modul / Akcija',
+    'admin.perm_2fa_channels'  => '2FA kanali',
+    'admin.perm_2fa_note'      => 'Koje metode uloga smije koristiti. Autentifikator se prikazuje tek kada korisnik podesi aplikaciju; WhatsApp je potrebno i uključiti u Podešavanjima.',
     'admin.perm_action_view'   => 'pregled',
     'admin.perm_action_create' => 'kreiranje',
     'admin.perm_action_edit'   => 'izmjena',

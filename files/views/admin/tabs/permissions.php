@@ -88,6 +88,49 @@ $can_edit  = is_super_admin();
         </tr>
         <?php endforeach; ?>
       <?php endforeach; ?>
+
+      <?php
+        // 2FA channels. Same shape as the modules above — rows are channels,
+        // columns are roles — but stored in security_policies rather than
+        // role_permissions, so the save handler treats them separately.
+        //
+        // Super Admin IS editable here, unlike the permission matrix above: it
+        // has a real policy row and its channels matter.
+        $channel_labels = [
+          'totp'     => __('auth.channel_totp'),
+          'sms'      => 'SMS',
+          'email'    => 'Email',
+          'whatsapp' => 'WhatsApp',
+        ];
+        $role_channels = [];
+        foreach ($roles as $code => $r) { $role_channels[$code] = role_2fa_channels($code); }
+      ?>
+      <tr>
+        <td colspan="<?= count($roles) + 1 ?>"
+            style="background:var(--bg-subtle);font-size:11px;font-weight:600;color:var(--text-muted);
+                   text-transform:uppercase;letter-spacing:0.05em;padding:6px 12px;">
+          <?= __('admin.perm_2fa_channels') ?>
+        </td>
+      </tr>
+      <?php foreach ($channel_labels as $ch => $label): ?>
+      <tr>
+        <td style="color:var(--text-secondary);padding-left:1.5rem;"><?= $label ?></td>
+        <?php foreach ($roles as $code => $role): ?>
+          <td style="text-align:center;">
+            <input type="checkbox" name="chan[<?= $code ?>][<?= $ch ?>]" value="1"
+                   <?= in_array($ch, $role_channels[$code], true) ? 'checked' : '' ?>
+                   <?= $can_edit ? '' : 'disabled' ?>
+                   style="accent-color:var(--accent);cursor:<?= $can_edit ? 'pointer' : 'not-allowed' ?>;width:16px;height:16px;">
+          </td>
+        <?php endforeach; ?>
+      </tr>
+      <?php endforeach; ?>
+      <tr>
+        <td colspan="<?= count($roles) + 1 ?>"
+            style="font-size:11px;color:var(--text-muted);padding:4px 12px 10px 1.5rem;line-height:1.5;">
+          <?= __('admin.perm_2fa_note') ?>
+        </td>
+      </tr>
     </tbody>
   </table>
   </div>

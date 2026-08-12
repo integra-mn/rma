@@ -157,6 +157,18 @@ function order_channels(array $channels): array {
 }
 
 /**
+ * The 2FA channels a role is permitted to use, from security_policies.
+ *
+ * This is the policy — what the role MAY use. available_2fa_channels() then
+ * narrows it to what is actually switched on for this installation.
+ */
+function role_2fa_channels(string $role): array {
+    $raw = db_val('SELECT allowed_2fa_channels FROM security_policies WHERE role = ?', [$role]);
+    $list = array_filter(array_map('trim', explode(',', (string) $raw)));
+    return $list ? order_channels(array_values($list)) : ['email'];
+}
+
+/**
  * Channels switched on app-wide in Administracija → Sistem.
  *
  * The per-role policy says what a role *may* use; this says what is actually

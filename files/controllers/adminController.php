@@ -703,6 +703,26 @@ class AdminController {
                     }
                 }
             }
+
+            // 2FA channels live in security_policies, not role_permissions, so
+            // they are saved separately. Super Admin is included here — unlike
+            // the module matrix, its channels are a real setting.
+            $valid_channels = ['totp', 'email', 'sms', 'whatsapp'];
+            $posted_chan    = $_POST['chan'] ?? [];
+            foreach (array_merge($editable_roles, ['super_admin']) as $role) {
+                $picked = array_values(array_intersect(
+                    $valid_channels,
+                    array_keys(array_filter($posted_chan[$role] ?? []))
+                ));
+                // Never store an empty list: a role with 2FA required and no
+                // channel could not log in at all. Email is the fallback
+                // because it needs no hardware and no credit.
+                if (!$picked) { $picked = ['email']; }
+                db_update('security_policies',
+                    ['allowed_2fa_channels' => implode(',', $picked)],
+                    'role = ?', [$role]);
+            }
+
             $pdo->commit();
         } catch (\Throwable $e) {
             $pdo->rollBack();

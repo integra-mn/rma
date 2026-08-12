@@ -865,6 +865,8 @@ return [
     'admin.perm_none'        => 'No permissions',
     'admin.perm_matrix'      => 'Permissions Matrix',
     'admin.perm_module_action' => 'Module / Action',
+    'admin.perm_2fa_channels'  => '2FA channels',
+    'admin.perm_2fa_note'      => 'Which methods a role may use. The authenticator only appears once that user has set up the app; WhatsApp also needs switching on under Settings.',
     'admin.perm_action_view'   => 'view',
     'admin.perm_action_create' => 'create',
     'admin.perm_action_edit'   => 'edit',
