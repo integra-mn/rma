@@ -378,6 +378,7 @@ return [
     'pdf.sig_get'            => 'Pokreni potpisivanje',
     'pdf.sig_station_hint'   => 'Ako je tablet za potpis aktivan na ovoj lokaciji, otvoriće se automatski.',
     'pdf.sn_imei'            => 'SN / IMEI',
+    'pdf.printed'            => 'Odštampano :date',
     'sign.title'             => 'Potpis',
     'sign.here'              => 'Potpis',
     'sign.rma'               => 'Nalog',

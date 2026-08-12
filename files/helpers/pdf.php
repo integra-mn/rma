@@ -133,8 +133,11 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
          font-size: 13px; color: #2c2c2a; background: #f4f4f0; -webkit-font-smoothing: antialiased; }
   /* On-screen preview: 1080px wide card on a muted background.
      Print output: A4 (see @media print below) — same content, different container. */
-  .page { width: 1080px; max-width: 100%; margin: 0 auto 24px; padding: 40px 56px;
-          background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-radius: 8px; }
+  /* A real A4 sheet on screen — the same width, height and 10mm padding the
+     printer uses, so the view matches what comes out. */
+  .page { width: 210mm; min-height: 297mm; max-width: 100%; margin: 0 auto 24px;
+          padding: 10mm; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+          border-radius: 8px; }
   .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid #1D9E75; }
   .logo img { height: 36px; width: auto; display: block; margin-bottom: 6px; }
   .company p { font-size: 10.5px; color: #888780; margin-top: 1px; line-height: 1.5; }
@@ -167,6 +170,12 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .signature-box p { font-size: 10.5px; color: #888780; margin-bottom: 36px; }
   .signature-line { border-top: 0.5px solid #2c2c2a; width: 200px; font-size: 9.5px; color: #888780; padding-top: 3px; }
   @media print {
+    /* Browsers drop background colours when printing unless asked. Without this
+       the grey blocks behind Dostavljena oprema and Opis reklamacije showed on
+       screen and vanished on paper. */
+    body, .complaint-box, .status-badge, .qr-section, .signature-box {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
     body { background: #fff; font-size: 14px; }
     /* 10mm matches the print padding on .page, so the footer lines up with the
        left edge of the content above it. */
@@ -437,7 +446,7 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
       . '<table width="100%" cellpadding="0" cellspacing="0"><tr>'
       . '<td style="text-align:left;">' . implode(' &nbsp;|&nbsp; ', $footer_parts)
       . '</td>'
-      . '<td style="text-align:right;">Printed ' . format_datetime(time()) . ' &nbsp;·&nbsp; Page {PAGENO}/{nbpg}</td>'
+      . '<td style="text-align:right;">' . $t('pdf.printed', ['date' => format_datetime(time())]) . '</td>'
       . '</tr></table>'
       . '</div>'
     );
@@ -469,16 +478,16 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
 
     return '<style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: montserrat, dejavusans, sans-serif; font-size: 11.5px; color: #2c2c2a; }
+      body { font-family: montserrat, dejavusans, sans-serif; font-size: 14px; color: #2c2c2a; }
       .header { margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #1D9E75; }
       .header table { width: 100%; border-collapse: collapse; }
       .header td { vertical-align: top; padding: 0; }
       .rma-num { font-size: 22px; font-weight: 700; color: #1D9E75; }
-      .section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 6px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
-      table.info td { padding: 4px 0; font-size: 10.5px; border-bottom: 0.5px solid #f4f4f0; }
+      .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 6px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
+      table.info td { padding: 4px 0; font-size: 13px; border-bottom: 0.5px solid #f4f4f0; }
       table.info td:first-child { color: #888780; width: 95px; font-size: 10px; }
       .status-badge { font-weight: 500; color: #1A1A1F; }
-      .complaint-box { background: #f4f4f0; border-radius: 4px; padding: 10px; font-size: 10.5px; line-height: 1.5; margin: 12px 0; }
+      .complaint-box { background: #f4f4f0; border-radius: 4px; padding: 10px; font-size: 13px; line-height: 1.5; margin: 12px 0; }
       .signature-box { border: 0.5px solid #d3d1c7; border-radius: 4px; padding: 10px; margin-top: 16px; }
       .signature-line { border-top: 0.5px solid #2c2c2a; width: 180px; font-size: 9px; color: #888780; padding-top: 3px; margin-top: 36px; }
     </style>
@@ -532,7 +541,7 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
       <td style="vertical-align:top;padding-right:12px;width:100px;"><img src="' . $qr_base64 . '" width="90" height="90"></td>
       <td style="vertical-align:top;">
         <strong style="font-size:11px;">' . $t('pdf.track_title') . '</strong><br>
-        <span style="font-size:10px;color:#5f5e5a;">Scan QR code or visit:<br>' . htmlspecialchars($tracking_url) . '</span>
+        <span style="font-size:11px;color:#5f5e5a;">' . $t('pdf.track_hint') . '<br>' . htmlspecialchars($tracking_url) . '</span>
       </td>
     </tr></table>' : '') . '
 
