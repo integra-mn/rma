@@ -43,9 +43,17 @@ function find_customer_match(string $name, string $phone, string $email): array 
             }
         }
     }
+    // A name is not an identifier. Two people called Marko Petrovic are two
+    // people, and treating an exact name as an exact match silently filed the
+    // second one under the first — one customer row, two strangers, and any
+    // later correction to the name changing it for both.
+    //
+    // Only a phone number or an email address above can be 'exact', because
+    // only those pick out one person. A name match is reported so the operator
+    // can be asked, never acted on by itself.
     if ($name = trim($name)) {
         $c = db_row('SELECT * FROM customers WHERE LOWER(name) = LOWER(?) AND deleted_at IS NULL', [$name]);
-        if ($c) return ['customer' => $c, 'match_type' => 'name', 'confidence' => 'exact'];
+        if ($c) return ['customer' => $c, 'match_type' => 'name', 'confidence' => 'partial'];
         $c = db_row('SELECT * FROM customers WHERE name LIKE ? AND deleted_at IS NULL LIMIT 1', ['%'.$name.'%']);
         if ($c) return ['customer' => $c, 'match_type' => 'name', 'confidence' => 'partial'];
     }

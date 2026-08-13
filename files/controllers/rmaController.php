@@ -151,8 +151,20 @@ class RmaController {
             $match = find_customer_match($walkin_name, $walkin_phone, $walkin_email);
 
             if ($match['customer'] && $match['confidence'] === 'exact') {
-                // Auto-link to exact match
+                // Same phone or same email means the same person, so the RMA
+                // joins the existing record rather than creating a second one.
                 $customer_id = (int)$match['customer']['id'];
+
+                // But say so. Everything typed here is dropped in favour of
+                // what is already on file, and when the name differs that is
+                // invisible: the operator believes they entered a new customer
+                // and instead sees somebody else's name on the finished RMA.
+                if (strcasecmp(trim($match['customer']['name']), $walkin_name) !== 0) {
+                    $_SESSION['form_success'] = __('rma.customer_linked', [
+                        'name'  => $match['customer']['name'],
+                        'field' => __('rma.match_' . $match['match_type']),
+                    ]);
+                }
             } else {
                 // Create new customer
                 $customer_id = db_insert('customers', [
