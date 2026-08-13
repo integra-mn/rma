@@ -245,16 +245,17 @@ function role_2fa_channels(string $role): array {
 function enabled_2fa_channels(): array {
     // TOTP needs no provider or credit, so it is not part of the on/off
     // switches — enrolment alone decides whether a user sees it.
+    // A channel is available when it has a gateway behind it, and that is the
+    // whole test. There used to be a second set of switches in Komunikacija ->
+    // 2FA as well, which said nothing the provider dropdown does not already
+    // say: setting a provider to Iskljuceno takes the channel out of 2FA and
+    // out of customer notifications together, in one place. Two screens
+    // appearing to decide one thing is what made it worth removing.
+    //
+    // Which roles MAY use an available channel stays in Dozvole.
     $on = ['totp'];
     foreach (['email', 'sms', 'whatsapp'] as $c) {
-        $default = $c === 'whatsapp' ? '0' : '1';
-        if (setting("twofa_{$c}_enabled", $default) !== '1') continue;
-        // Switched on is not the same as able to send. A channel with no
-        // gateway behind it would be offered at the login screen and then
-        // silently fail to deliver the code, which looks to the user like the
-        // password being wrong.
-        if (!channel_can_send($c)) continue;
-        $on[] = $c;
+        if (channel_can_send($c)) $on[] = $c;
     }
     return $on;
 }
