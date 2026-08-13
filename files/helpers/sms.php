@@ -249,10 +249,16 @@ function rma_sms_recipients(array $rma): array {
     if (!empty($rma['partner_id']) && (int) ($rma['partner_notify_customer'] ?? 1) === 0) {
         return [];
     }
-    $phone = normalize_phone(trim((string) ($rma['customer_phone'] ?? '')));
-    // Six digits is the shortest thing that could be a subscriber number; below
-    // that it is a typo or a placeholder, and a gateway charges either way.
-    return strlen(preg_replace('/\D/', '', $phone)) >= 6 ? [$phone] : [];
+    // Count the digits BEFORE normalising. normalize_phone() prepends the
+    // country code, so "123" became "+382123" — six digits, and it passed a
+    // six-digit test while being obvious rubbish. A real number here is a
+    // Montenegrin mobile: eight subscriber digits, so nine as typed with the
+    // trunk zero and eleven in full international form. Eight is the floor
+    // that rejects the typo and keeps every genuine format.
+    $raw = preg_replace('/\D/', '', (string) ($rma['customer_phone'] ?? ''));
+    if (strlen($raw) < 8) return [];
+
+    return [normalize_phone(trim((string) $rma['customer_phone']))];
 }
 
 /**
