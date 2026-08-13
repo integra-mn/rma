@@ -114,6 +114,26 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
         [(int)$rma['id']]
     );
 
+    // Button labels, escaped once — each is used in the visible span and again
+    // in title/aria-label, which is what a screen reader and a hover tooltip
+    // read when the label itself is collapsed to an icon.
+    $esc = fn(string $k): string => htmlspecialchars($t($k), ENT_QUOTES, 'UTF-8');
+    $lbl_save  = $esc('pdf.btn_save');
+    $lbl_print = $esc('pdf.btn_print');
+    $lbl_close = $esc('pdf.btn_close');
+
+    // Inline SVG, not an icon font: this page loads nothing but fonts.css and
+    // has to render the same when it is printed or saved offline.
+    $svg = fn(string $d): string =>
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+      . 'stroke-linecap="round" stroke-linejoin="round">' . $d . '</svg>';
+    $icon_save  = $svg('<path d="M12 3v10"/><path d="M8 11l4 4 4-4"/>'
+                     . '<path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>');
+    $icon_print = $svg('<path d="M7 9V3h10v6"/>'
+                     . '<path d="M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/>'
+                     . '<rect x="7" y="14" width="10" height="7" rx="1"/>');
+    $icon_close = $svg('<path d="M6 6l12 12"/><path d="M18 6L6 18"/>');
+
     header('Content-Type: text/html; charset=UTF-8');
     $csrf = htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8');
     echo '<!DOCTYPE html>
@@ -180,7 +200,18 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
      moved anywhere. */
   #toolbar { width: 210mm; max-width: 100%; height: 64px; margin: 0 auto;
              display: flex; align-items: center; justify-content: flex-end;
-             gap: 10px; font-family: Montserrat, system-ui, sans-serif; }
+             gap: 12px; font-family: Montserrat, system-ui, sans-serif; }
+  #toolbar .tb { display: inline-flex; align-items: center; height: 40px;
+                 padding: 0; border: none; border-radius: 8px; color: #fff;
+                 cursor: pointer; text-decoration: none; font-family: inherit;
+                 font-size: 13px; font-weight: 500; overflow: hidden;
+                 white-space: nowrap; transition: box-shadow .15s ease; }
+  #toolbar .tb svg  { width: 40px; height: 40px; padding: 10px; flex: 0 0 40px; display: block; }
+  #toolbar .tb span { padding-right: 14px; }
+  #toolbar .tb:hover, #toolbar .tb:focus-visible { box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+  #toolbar .tb-save  { background: #1D9E75; }
+  #toolbar .tb-print { background: #2563EB; }
+  #toolbar .tb-close { background: #DC2626; }
   /* Wide enough for a margin beside the paper: a fixed column tucked against
      the right edge of the sheet. Fixed matters — the sheet is taller than most
      windows, and sitting in the flow above it the buttons scrolled out of
@@ -194,17 +225,36 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
      one group. Under the fit-to-height zoom both the sheet and this offset scale
      together, so they stay tucked in.
 
-     1090px is where the sheet stops leaving room: (1090 - 794) / 2 is 148px a
-     side, just over the 24px gap plus the widest button. */
-  @media screen and (min-width: 1090px) {
+     Beside the sheet the three shrink to 40px squares and open their label on
+     hover. They open to the RIGHT, into empty margin: opening leftwards would
+     slide the label over the paper. The square itself never moves, so nothing
+     shifts under the pointer.
+
+     1120px is where the sheet stops leaving room, and it is the OPEN width
+     that sets it, not the square: (1120 - 794) / 2 is 163px a side, just over
+     the 24px gap plus the 136px of an open "Sacuvaj PDF". Sized to the square
+     instead, the label would be clipped by the window edge on any screen
+     between about 920 and 1114px. */
+  @media screen and (min-width: 1120px) {
     #toolbar { position: fixed; top: 24px; left: calc(50% + 105mm + 24px);
                z-index: 10; width: auto; height: auto; margin: 0;
-               flex-direction: column; align-items: stretch; gap: 12px; }
+               flex-direction: column; align-items: flex-start; gap: 12px; }
     .page { margin-top: 24px; }
+    #toolbar .tb span { max-width: 0; opacity: 0; padding-right: 0; overflow: hidden;
+                        transition: max-width .18s ease, opacity .12s ease,
+                                    padding-right .18s ease; }
+    #toolbar .tb:hover span,
+    #toolbar .tb:focus-visible span { max-width: 160px; opacity: 1; padding-right: 14px; }
+    /* A tablet at the counter has no pointer to hover with, and would be left
+       with three coloured squares and no way to find out what they are. */
+    @media (hover: none) {
+      #toolbar .tb span { max-width: 160px; opacity: 1; padding-right: 14px; }
+    }
   }
   /* Too narrow for a side margin: keep them on top, but stuck to the window
-     rather than to the document, so they are still reachable when scrolled. */
-  @media screen and (max-width: 1089px) {
+     rather than to the document, so they are still reachable when scrolled.
+     There is room across a row, so the labels stay out. */
+  @media screen and (max-width: 1119px) {
     #toolbar { position: sticky; top: 0; z-index: 10; background: #f4f4f0; }
   }
   @media print {
@@ -249,9 +299,11 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
 
 <div class="no-print" id="toolbar">
   <a href="/rma/' . (int)$rma['id'] . '/receipt?engine=mpdf&mode=download"
-     style="background:#1D9E75;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;text-decoration:none;">' . $t('pdf.btn_save') . '</a>
-  <button onclick="window.print()" style="background:#2563EB;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;">' . $t('pdf.btn_print') . '</button>
-  <button onclick="window.close()" style="background:#DC2626;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-weight:500;font-family:inherit;font-size:13px;">' . $t('pdf.btn_close') . '</button>
+     class="tb tb-save" title="' . $lbl_save . '" aria-label="' . $lbl_save . '">' . $icon_save . '<span>' . $lbl_save . '</span></a>
+  <button onclick="window.print()"
+     class="tb tb-print" title="' . $lbl_print . '" aria-label="' . $lbl_print . '">' . $icon_print . '<span>' . $lbl_print . '</span></button>
+  <button onclick="window.close()"
+     class="tb tb-close" title="' . $lbl_close . '" aria-label="' . $lbl_close . '">' . $icon_close . '<span>' . $lbl_close . '</span></button>
 </div>
 
 <div class="page">
