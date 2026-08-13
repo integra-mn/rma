@@ -144,17 +144,12 @@
       </tbody>
     </table>
 
-    <?php if ($total > $per_page): ?>
-      <div style="margin-top:1rem;display:flex;gap:6px;font-size:13px;">
-        <?php $pages = ceil($total / $per_page); ?>
-        <?php for ($i = 1; $i <= $pages; $i++): ?>
-          <a href="?tab=parts&page=<?= $i ?><?= $search ? '&q='.urlencode($search) : '' ?>"
-             style="padding:5px 10px;border:0.5px solid <?= $i === $page ? 'var(--accent)' : 'var(--border)' ?>;border-radius:6px;color:<?= $i === $page ? 'var(--accent)' : 'var(--text-primary)' ?>;text-decoration:none;">
-            <?= $i ?>
-          </a>
-        <?php endfor; ?>
-      </div>
-    <?php endif; ?>
+    <?php
+      // Shared pager — see views/_partials/pager.php.
+      $pg_page = $page; $pg_total = $total; $pg_per_page = $per_page;
+      $pg_query = ['tab'=>'parts','q'=>$search];
+      include views_path('_partials/pager.php');
+    ?>
   <?php endif; ?>
 </div>
 
