@@ -4,7 +4,7 @@
 <?php else: ?>
   <table class="data-table">
     <thead><tr>
-      <th><?= __('rma.number') ?></th>
+      <th><?= __('label.rma') ?></th>
       <th><?= __('ship.direction') ?></th>
       <th><?= __('ship.courier') ?></th>
       <th><?= __('ship.tracking') ?></th>
