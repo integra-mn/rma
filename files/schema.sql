@@ -163,6 +163,11 @@ CREATE TABLE partners (
   contact_person VARCHAR(150),
   notes          TEXT,
   default_courier_id INT UNSIGNED DEFAULT NULL,   -- preferred courier (FK added after couriers table)
+  -- An RMA with a partner always notifies the partner. This says whether the
+  -- end user is told as well, or whether the partner is the single point of
+  -- contact with their own customer. Walk-ins have no partner and are never
+  -- affected by it.
+  notify_customer TINYINT(1) NOT NULL DEFAULT 1,
   is_active      TINYINT(1) DEFAULT 1,
   created_at     DATETIME DEFAULT NOW(),
   updated_at     DATETIME DEFAULT NOW() ON UPDATE NOW(),

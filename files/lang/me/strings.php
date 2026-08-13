@@ -261,6 +261,8 @@ return [
     'partners.company'       => 'Naziv firme',
     'partners.tax_id'        => 'PIB',
     'partners.contact_person'=> 'Kontakt osoba',
+    'partners.notify_customer'      => 'Obavijesti i krajnjeg korisnika',
+    'partners.notify_customer_hint' => 'Partner se uvijek obavještava o svojim reklamacijama. Isključite ovo ako partner želi da bude jedini kontakt prema svom korisniku.',
     'partners.users'         => 'Korisnici portala',
     'partners.no_users'      => 'Još nema korisnika portala.',
     'partners.rma_count'     => ':count RMA nalog(a) vezan za ovog partnera.',

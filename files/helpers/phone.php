@@ -32,13 +32,17 @@ function phone_last_digits(string $phone, int $n = 8): string {
  * Is this a stand-in address rather than a real one?
  *
  * When a customer will not or cannot give an email, reception records
- * refused@<brand>.com. Those are markers, not addresses: the same one is on
+ * refused@integra.rma. It is a marker, not an address: the same one sits on
  * dozens of unrelated people, so matching on it would file strangers under one
  * customer — which is how a new customer on 50152 ended up as the customer
  * from 50151.
  *
- * Matched on the local part, so refused@apple.com and refused@tcl.com are
- * covered along with any brand added later, with no list to maintain.
+ * .rma is not a real top-level domain, deliberately. The older refused@apple.com
+ * and refused@tcl.com pointed at real companies, so a slip anywhere in the send
+ * path posted a customer's repair details to Apple or TCL.
+ *
+ * Matched on the local part, so every form of it is covered with no list to
+ * maintain.
  */
 function is_placeholder_email(?string $email): bool {
     $email = strtolower(trim((string) $email));

@@ -154,6 +154,9 @@ class PartnersController {
             'contact_person' => trim($_POST['contact_person'] ?? ''),
             'notes'          => trim($_POST['notes'] ?? ''),
             'default_courier_id' => (int)($_POST['default_courier_id'] ?? 0) ?: null,
+            // An RMA with this partner always notifies the partner; this says
+            // whether the end user hears from us as well.
+            'notify_customer' => isset($_POST['notify_customer']) ? 1 : 0,
             'is_active'      => isset($_POST['is_active']) ? 1 : 0,
         ];
 

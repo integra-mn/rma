@@ -261,6 +261,8 @@ return [
     'partners.company'       => 'Company name',
     'partners.tax_id'        => 'Tax ID / PIB',
     'partners.contact_person'=> 'Contact person',
+    'partners.notify_customer'      => 'Notify the end customer as well',
+    'partners.notify_customer_hint' => 'This partner is always notified about their RMAs. Turn this off if they prefer to be the only point of contact with their own customer.',
     'partners.users'         => 'Portal users',
     'partners.no_users'      => 'No portal users yet.',
     'partners.rma_count'     => ':count RMA(s) linked to this partner.',

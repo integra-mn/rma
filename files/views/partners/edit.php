@@ -51,6 +51,13 @@
                     style="height:40px;min-height:40px;padding:10px;line-height:18px;resize:none;overflow:auto;"><?= htmlspecialchars($partner['notes'] ?? '') ?></textarea>
         </div>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <input type="checkbox" id="notify_customer" name="notify_customer" value="1"
+               <?= ($partner['notify_customer'] ?? 1) ? 'checked' : '' ?>>
+        <label for="notify_customer" style="font-size:13px;margin-bottom:0;"><?= __('partners.notify_customer') ?></label>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin:0 0 16px 24px;"><?= __('partners.notify_customer_hint') ?></p>
+
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
         <input type="checkbox" id="is_active" name="is_active" value="1" <?= $partner['is_active'] ? 'checked' : '' ?>>
         <label for="is_active" style="font-size:13px;margin-bottom:0;"><?= __('label.active') ?></label>

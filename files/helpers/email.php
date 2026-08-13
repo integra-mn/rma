@@ -10,7 +10,9 @@ function send_rma_receipt(int $rma_id): bool {
                           s.label as status_label,
                           dm.name as model_name, db2.name as brand_name,
                           d.serial_number,
-                          l.name as location_name, l.phone as location_phone, l.email as location_email
+                          l.name as location_name, l.phone as location_phone, l.email as location_email,
+                          pa.name as partner_name, pa.email as partner_email,
+                          pa.contact_person as partner_contact, pa.notify_customer as partner_notify_customer
                    FROM rma_requests r
                    JOIN rma_statuses s ON s.id = r.status_id
                    LEFT JOIN customers c ON c.id = r.customer_id
@@ -18,9 +20,10 @@ function send_rma_receipt(int $rma_id): bool {
                    LEFT JOIN device_models dm ON dm.id = d.model_id
                    LEFT JOIN device_brands db2 ON db2.id = dm.brand_id
                    LEFT JOIN locations l ON l.id = r.location_id
+                   LEFT JOIN partners pa ON pa.id = r.partner_id
                    WHERE r.id = ?", [$rma_id]);
 
-    if (!$rma || empty($rma['customer_email'])) return false;
+    if (!$rma) return false;
 
     // Get tracking token
     $token = db_val('SELECT token FROM rma_tracking_tokens WHERE rma_id = ?', [$rma_id]);
@@ -35,7 +38,49 @@ function send_rma_receipt(int $rma_id): bool {
     $subject = __in($lang, 'receipt.subject', ['number' => $rma['rma_number']]);
     $body    = build_receipt_html($rma, $tracking_url, $qr_base64, $lang);
 
-    return send_email($rma['customer_email'], $rma['customer_name'], $subject, $body);
+    $sent = false;
+    foreach (rma_receipt_recipients($rma) as [$to, $name]) {
+        if (send_email($to, $name, $subject, $body)) $sent = true;
+    }
+    return $sent;
+}
+
+/**
+ * Who hears about this RMA, as [address, name] pairs.
+ *
+ * A device brought in by a partner has two interested parties. The partner is
+ * always told — their own email was on the table all along and never used for
+ * this. The end user is told as well unless that partner is set to be the
+ * single point of contact with their own customer.
+ *
+ * No partner means a walk-in: one party, the customer, exactly as before.
+ *
+ * A refused@ address is not an address. It is what reception records when
+ * someone will not give an email, and until now the only guard here was
+ * "is it empty" — so a receipt for a customer marked refused@apple.com was
+ * addressed to apple.com, a real company, carrying that customer's repair
+ * details. Placeholders are dropped, whoever holds them.
+ */
+function rma_receipt_recipients(array $rma): array {
+    $out = [];
+    $add = function (?string $email, ?string $name) use (&$out): void {
+        $email = trim((string) $email);
+        if ($email === '' || is_placeholder_email($email)) return;
+        foreach ($out as [$have]) if (strcasecmp($have, $email) === 0) return;
+        $out[] = [$email, $name ?: $email];
+    };
+
+    $has_partner = !empty($rma['partner_id']) && !empty($rma['partner_email']);
+    if ($has_partner) {
+        $add($rma['partner_email'], $rma['partner_contact'] ?: $rma['partner_name']);
+    }
+
+    // Walk-in, or a partner who wants their customer kept in the loop.
+    if (empty($rma['partner_id']) || (int) ($rma['partner_notify_customer'] ?? 1) === 1) {
+        $add($rma['customer_email'], $rma['customer_name']);
+    }
+
+    return $out;
 }
 
 /**
