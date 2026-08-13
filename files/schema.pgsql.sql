@@ -285,6 +285,7 @@ CREATE TABLE rma_statuses (
   label_me VARCHAR(100) NULL,
   color VARCHAR(20),
   sort_order SMALLINT DEFAULT 0,
+  notify SMALLINT NOT NULL DEFAULT 0,
   is_terminal SMALLINT DEFAULT 0,
   is_system SMALLINT DEFAULT 1
 );
@@ -408,6 +409,7 @@ CREATE TABLE repair_statuses (
   label_me VARCHAR(100) NULL,
   color VARCHAR(20),
   sort_order SMALLINT DEFAULT 0,
+  notify SMALLINT NOT NULL DEFAULT 0,
   is_terminal SMALLINT DEFAULT 0
 );
 

@@ -32,6 +32,7 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         <th style="width:280px;"><?= __('admin.status_label') ?></th>
         <th style="width:280px;"><?= __('admin.status_label_me') ?></th>
         <th style="width:180px;"><?= __('label.code') ?></th>
+        <th style="width:110px;text-align:center;"><?= __('admin.status_notify') ?></th>
         <th style="width:100px;text-align:center;"><?= __('label.sort_order') ?></th>
         <th style="text-align:right;"><?= __('label.actions') ?></th>
       </tr>
@@ -45,6 +46,13 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
           <td style="font-weight:500;"><?= htmlspecialchars($s['label']) ?></td>
           <td style="color:var(--text-secondary);"><?= htmlspecialchars($s['label_me'] ?? '') ?: '—' ?></td>
           <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars($s['code']) ?></td>
+          <td style="text-align:center;">
+            <?php if (!empty($s['notify'])): ?>
+              <span class="badge" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('label.yes') ?></span>
+            <?php else: ?>
+              <span style="color:var(--text-muted);">&mdash;</span>
+            <?php endif; ?>
+          </td>
           <td style="text-align:center;color:var(--text-muted);"><?= (int)$s['sort_order'] ?></td>
           <td style="text-align:right;">
             <button type="button" class="btn-link"
@@ -98,6 +106,14 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
           <?= $sub === 'repair' ? __('admin.status_terminal_repair') : __('admin.status_terminal') ?>
         </label>
       </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+          <input type="checkbox" name="notify" id="f-notify" value="1"
+                 style="width:auto;height:auto;">
+          <?= __('admin.status_notify_label') ?>
+        </label>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_notify_hint') ?></p>
+      </div>
       <div style="display:flex;gap:8px;margin-top:1rem;">
         <button type="submit" class="btn btn-primary" style="min-width:100px;" id="modal-save"><?= __('btn.save') ?></button>
         <button type="button" class="btn" style="min-width:100px;" onclick="closeModal()"><?= __('btn.cancel') ?></button>
@@ -127,6 +143,7 @@ function openModal(type) {
   document.getElementById('f-color-hex').value = '#888780';
   document.getElementById('f-sort').value  = '10';
   document.getElementById('f-terminal').checked = false;
+  document.getElementById('f-notify').checked = false;
   document.getElementById('modal-save').textContent = SAVE_LABEL;
   document.getElementById('status-modal').style.display = 'flex';
   document.getElementById('f-label').focus();
@@ -144,6 +161,7 @@ function editStatus(type, s) {
   document.getElementById('f-color-hex').value = s.color;
   document.getElementById('f-sort').value  = s.sort_order;
   document.getElementById('f-terminal').checked = !!parseInt(s.is_terminal);
+  document.getElementById('f-notify').checked = !!parseInt(s.notify);
   document.getElementById('modal-save').textContent = SAVE_CHANGES_LABEL;
   document.getElementById('status-modal').style.display = 'flex';
   document.getElementById('f-label').focus();

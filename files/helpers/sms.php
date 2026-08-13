@@ -293,7 +293,10 @@ function rma_sms_recipients(array $rma): array {
  * a decision with a bill attached, so it is not one a deploy should make.
  */
 function send_rma_sms(int $rma_id): bool {
-    if (setting('rma_sms_enabled', '0') !== '1') return false;
+    // The grid in Podesavanja -> Komunikacija -> Obavjestenja decides whether
+    // customers are reachable by SMS at all. Partners are handled there too and
+    // never end up here — see rma_sms_recipients().
+    if (setting('notify_customer_sms', '1') !== '1') return false;
 
     $rma = db_row("SELECT r.rma_number, r.partner_id,
                           c.phone as customer_phone, c.lang as customer_lang,

@@ -952,8 +952,20 @@ return [
     'settings.sidebar'       => 'Bočna traka',
     'settings.sidebar_collapse' => 'Podrazumijevano skupi bočnu traku (samo ikone)',
     'sms.rma_received'       => 'Uredjaj primljen na servis. Pratite status popravke: :url',
-    'settings.rma_sms'       => 'Pošalji SMS korisniku kada se otvori reklamacija',
-    'settings.rma_sms_hint'  => 'Svaka poruka se naplaćuje. Partneri se obavještavaju email-om, nikada SMS-om, a ako je partner jedini kontakt onda se ni njegovom korisniku ne šalje SMS.',
+    'notify.status_subject'  => 'Reklamacija :number — :status',
+    'notify.status_body'     => "Vaša reklamacija :number je sada: :status.
+
+Status popravke pratite ovdje:
+:url",
+    'notify.status_sms'      => ':status. Pratite status popravke: :url',
+    'settings.notify_tab'       => 'Obavještenja',
+    'settings.notify_hint'      => 'Koji kanali koga obavještavaju. Šta se šalje odredjuje se po statusu u Administracija → Statusi; ovdje se odredjuje kako stiže.',
+    'settings.notify_customers' => 'Korisnici',
+    'settings.notify_partners'  => 'Partneri',
+    'settings.notify_note'      => 'Ako je partner jedini kontakt prema svom korisniku, to ima prednost — taj korisnik se ne obavještava nijednim kanalom.',
+    'admin.status_notify'       => 'Obavještenje',
+    'admin.status_notify_label' => 'Obavijesti kada reklamacija dodje u ovaj status',
+    'admin.status_notify_hint'  => 'Koji kanali se koriste i da li se obavještavaju partneri ili korisnici podešava se u Podešavanja → Komunikacija → Obavještenja.',
     'settings.sessions'          => 'Trajanje prijave',
     'settings.session_idle'      => 'Neaktivnost (minuta)',
     'settings.session_idle_hint' => 'Odjava nakon ovoliko vremena bez aktivnosti. 120 = dva sata',

@@ -305,6 +305,9 @@ CREATE TABLE rma_statuses (
   label_me    VARCHAR(100) NULL,
   color       VARCHAR(20),
   sort_order  TINYINT UNSIGNED DEFAULT 0,
+  -- Is this step worth telling the customer or partner about? How it is
+  -- delivered is decided in Podesavanja -> Komunikacija.
+  notify         TINYINT(1) NOT NULL DEFAULT 0,
   is_terminal TINYINT(1) DEFAULT 0,
   is_system   TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -431,6 +434,9 @@ CREATE TABLE repair_statuses (
   label_me    VARCHAR(100) NULL,
   color       VARCHAR(20),
   sort_order  TINYINT UNSIGNED DEFAULT 0,
+  -- Is this step worth telling the customer or partner about? How it is
+  -- delivered is decided in Podesavanja -> Komunikacija.
+  notify         TINYINT(1) NOT NULL DEFAULT 0,
   is_terminal TINYINT(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

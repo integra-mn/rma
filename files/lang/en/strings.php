@@ -952,8 +952,20 @@ return [
     'settings.sidebar'       => 'Sidebar',
     'settings.sidebar_collapse' => 'Collapse sidebar by default (icon-only mode)',
     'sms.rma_received'       => 'Device received for service. Track the repair: :url',
-    'settings.rma_sms'       => 'Text the customer when an RMA is created',
-    'settings.rma_sms_hint'  => 'Every message is charged. Partners are notified by email, never by SMS, and a partner who is the sole contact means their customer is not texted either.',
+    'notify.status_subject'  => 'RMA :number — :status',
+    'notify.status_body'     => "Your RMA :number is now: :status.
+
+Track the repair here:
+:url",
+    'notify.status_sms'      => ':status. Track the repair: :url',
+    'settings.notify_tab'       => 'Notifications',
+    'settings.notify_hint'      => 'Which channels reach whom. What is worth sending is decided per status in Administration → Statuses; this decides how it gets there.',
+    'settings.notify_customers' => 'Customers',
+    'settings.notify_partners'  => 'Partners',
+    'settings.notify_note'      => 'A partner set as the sole contact with their own customer overrides this — that customer is not contacted on any channel.',
+    'admin.status_notify'       => 'Notify',
+    'admin.status_notify_label' => 'Notify when an RMA reaches this status',
+    'admin.status_notify_hint'  => 'Which channels are used, and whether partners or customers are reached, is set in Settings → Communications → Notifications.',
     'settings.sessions'          => 'Login sessions',
     'settings.session_idle'      => 'Idle timeout (minutes)',
     'settings.session_idle_hint' => 'Logged out after this long with no activity. 120 = two hours',

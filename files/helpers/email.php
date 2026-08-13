@@ -262,3 +262,77 @@ function send_email_result(string $to, string $to_name, string $subject, string 
         return ['ok' => false, 'error' => $detail];
     }
 }
+
+/**
+ * Tell whoever should hear that an RMA has moved to a new status.
+ *
+ * Three separate decisions, each answered where it belongs:
+ *   - the status says WHETHER this step is worth a message (rma_statuses.notify)
+ *   - the grid in Podesavanja says WHICH CHANNELS reach customers and partners
+ *   - the partner switch says whether that partner's customer hears anything
+ *
+ * Called after the status has been written, so a failure to notify can never
+ * roll back the status change itself.
+ */
+function notify_rma_status(int $rma_id): void {
+    $rma = db_row("SELECT r.rma_number, r.partner_id,
+                          s.code as status_code, s.label as status_label,
+                          s.label_me as status_label_me, s.notify as status_notify,
+                          c.name as customer_name, c.email as customer_email,
+                          c.phone as customer_phone, c.lang as customer_lang,
+                          pa.name as partner_name, pa.email as partner_email,
+                          pa.contact_person as partner_contact,
+                          pa.notify_customer as partner_notify_customer
+                   FROM rma_requests r
+                   JOIN rma_statuses s ON s.id = r.status_id
+                   LEFT JOIN customers c ON c.id = r.customer_id
+                   LEFT JOIN partners pa ON pa.id = r.partner_id
+                   WHERE r.id = ?", [$rma_id]);
+
+    if (!$rma || empty($rma['status_notify'])) return;
+
+    $token = db_val('SELECT token FROM rma_tracking_tokens WHERE rma_id = ?', [$rma_id]);
+    $url   = $token ? 'https://rma.integra.mn/track/' . $token : '';
+
+    // The customer reads their own language; a partner reads the app default.
+    $for = function (string $lang) use ($rma, $url): array {
+        $status = status_label((string) $rma['status_code'], (string) $rma['status_label'], $lang);
+        return [
+            __in($lang, 'notify.status_subject', ['number' => $rma['rma_number'], 'status' => $status]),
+            __in($lang, 'notify.status_body',    ['number' => $rma['rma_number'], 'status' => $status, 'url' => $url]),
+            __in($lang, 'notify.status_sms',     ['status' => $status, 'url' => $url]),
+        ];
+    };
+
+    $customer_lang = customer_lang($rma['customer_lang'] ?? null);
+    $partner_lang  = setting('default_lang', 'me');
+
+    // Partner, by whichever channels the grid allows for partners.
+    if (!empty($rma['partner_id'])) {
+        [$subject, $body, $sms] = $for($partner_lang);
+        if (setting('notify_partner_email', '1') === '1'
+            && !empty($rma['partner_email']) && !is_placeholder_email($rma['partner_email'])) {
+            send_email($rma['partner_email'],
+                       ($rma['partner_contact'] ?? '') ?: ($rma['partner_name'] ?? ''),
+                       $subject, nl2br(htmlspecialchars($body)));
+        }
+    }
+
+    // Customer — unless this partner is the sole point of contact.
+    $tell_customer = empty($rma['partner_id'])
+                  || (int) ($rma['partner_notify_customer'] ?? 1) === 1;
+    if (!$tell_customer) return;
+
+    [$subject, $body, $sms] = $for($customer_lang);
+
+    if (setting('notify_customer_email', '1') === '1'
+        && !empty($rma['customer_email']) && !is_placeholder_email($rma['customer_email'])) {
+        send_email($rma['customer_email'], $rma['customer_name'], $subject, nl2br(htmlspecialchars($body)));
+    }
+
+    if (setting('notify_customer_sms', '1') === '1') {
+        foreach (rma_sms_recipients($rma) as $number) {
+            sms_send($number, $sms);
+        }
+    }
+}

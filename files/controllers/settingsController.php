@@ -22,6 +22,7 @@ class SettingsController {
             'whatsapp'   => $this->save_whatsapp(),
             'sms'        => $this->save_sms(),
             'twofa'      => $this->save_twofa(),
+            'notify'     => $this->save_notify(),
             'gsx'        => $this->save_gsx(),
             'tcl'        => $this->save_tcl(),
             'fiscal'     => $this->save_fiscal(),
@@ -34,7 +35,7 @@ class SettingsController {
         $stab = match($tab) {
             'general'    => 'general',
             'appearance' => 'appearance',
-            'smtp', 'whatsapp', 'sms', 'twofa' => 'smtp',
+            'smtp', 'whatsapp', 'sms', 'twofa', 'notify' => 'smtp',
             'gsx', 'tcl' => 'integrations',
             'fiscal'     => 'fiscal',
             'image'      => 'image',
@@ -210,13 +211,25 @@ class SettingsController {
 
     // ── SMS gateway (Infobip / Vonage / Clickatell / custom) ────────────
 
+    /**
+     * Which channels reach which audience.
+     *
+     * Statuses say WHETHER a step is worth a message; this says HOW it gets
+     * there. Six switches rather than one per status per channel per audience,
+     * and a status added later inherits the whole scheme.
+     */
+    private function save_notify(): void {
+        foreach (['customer', 'partner'] as $who) {
+            foreach (['email', 'sms', 'whatsapp'] as $ch) {
+                $key = "notify_{$who}_{$ch}";
+                $this->set($key, isset($_POST[$key]) ? '1' : '0', 'bool', 'integrations');
+            }
+        }
+    }
+
     private function save_sms(): void {
         $this->save_provider_channel('sms');
 
-        // Whether a customer is texted when their RMA is created. Every message
-        // costs money, so this is off until somebody decides otherwise.
-        $this->set('rma_sms_enabled', ($_POST['rma_sms_enabled'] ?? '0') === '1' ? '1' : '0',
-                   'bool', 'integrations');
 
         // Custom HTTP gateway
     }

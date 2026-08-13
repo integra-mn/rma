@@ -555,6 +555,9 @@ class AdminController {
         $color   = trim($_POST['color'] ?? '#888780');
         $sort    = (int)($_POST['sort_order'] ?? 10);
         $term    = isset($_POST['is_terminal']) ? 1 : 0;
+        // Whether reaching this status is worth a message. Which channel and
+        // which audience is decided in Podesavanja -> Komunikacija.
+        $notify  = isset($_POST['notify']) ? 1 : 0;
 
         if (!$label || !$code || !in_array($type, ['rma', 'repair'])) {
             $_SESSION['flash'] = ['type'=>'danger','message'=>__('admin.status_label_code_required')];
@@ -570,6 +573,7 @@ class AdminController {
             'color'       => $color,
             'sort_order'  => $sort,
             'is_terminal' => $term,
+            'notify'      => $notify,
         ]);
 
         $_SESSION['flash'] = ['type'=>'success','message'=>__('admin.status_added')];
@@ -591,6 +595,9 @@ class AdminController {
         $color   = trim($_POST['color'] ?? '#888780');
         $sort    = (int)($_POST['sort_order'] ?? 10);
         $term    = isset($_POST['is_terminal']) ? 1 : 0;
+        // Whether reaching this status is worth a message. Which channel and
+        // which audience is decided in Podesavanja -> Komunikacija.
+        $notify  = isset($_POST['notify']) ? 1 : 0;
 
         if (!$id || !$label || !$code || !in_array($type, ['rma', 'repair'])) {
             $_SESSION['flash'] = ['type'=>'danger','message'=>__('admin.invalid_request')];
@@ -606,6 +613,7 @@ class AdminController {
             'color'       => $color,
             'sort_order'  => $sort,
             'is_terminal' => $term,
+            'notify'      => $notify,
         ], 'id = ?', [$id]);
 
         $_SESSION['flash'] = ['type'=>'success','message'=>__('admin.status_updated')];

@@ -407,6 +407,11 @@ class RmaController {
                     'note'       => trim($_POST['note'] ?? ''),
                 ]);
                 audit_change('rma', (int)$id, ['status_id' => $rma['status_id']], ['status_id' => $status_id]);
+
+                // After the write, never before: a gateway refusing a message
+                // must not undo a status the technician has already set.
+                notify_rma_status((int)$id);
+
                 $_SESSION['form_success'] = __('rma.status_updated');
             }
         }
