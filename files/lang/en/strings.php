@@ -325,6 +325,7 @@ return [
     'users.totp_reset'          => 'Reset authenticator app',
     'users.totp_reset_done'     => 'Authenticator app reset — the user can enrol again.',
     'auth.choose_channel'    => 'Verification code delivery method',
+    'auth.send_failed'       => 'Could not send the code. Please choose another method.',
     'auth.sending_code'      => 'Sending code…',
     'auth.sending_wait'      => 'This takes a few seconds. Please do not close or go back.',
     'auth.channel_email'     => 'Email',

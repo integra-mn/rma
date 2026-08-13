@@ -197,6 +197,27 @@ function available_2fa_channels(array $allowed): array {
     return $channels ?: ['email'];
 }
 
+/**
+ * Which channel a login starts on, so nobody has to be asked.
+ *
+ * The authenticator wins whenever it is available. It only appears at all for
+ * someone who finished enrolling, it is the strongest of the four, and it
+ * needs nothing sent — so it is right even for a profile that still names
+ * email from before they enrolled.
+ *
+ * Otherwise the channel chosen in Moj profil, provided the role still allows
+ * it and it is switched on app-wide; failing that the first available, rather
+ * than assuming email exists.
+ *
+ * Both the login and the chooser screen call this. They used to work it out
+ * separately, which is the kind of duplication that quietly drifts apart.
+ */
+function default_2fa_channel(array $channels, ?string $preferred): string {
+    if (in_array('totp', $channels, true)) return 'totp';
+    if ($preferred !== null && in_array($preferred, $channels, true)) return $preferred;
+    return $channels[0] ?? 'email';
+}
+
 // ── 2FA ──────────────────────────────────────────────────────
 
 function otp_send(int $user_id, string $channel): bool {

@@ -325,6 +325,7 @@ return [
     'users.totp_reset'          => 'Resetuj aplikaciju za autentifikaciju',
     'users.totp_reset_done'     => 'Aplikacija resetovana — korisnik može ponovo da je podesi.',
     'auth.choose_channel'    => 'Način dostave verifikacionog koda',
+    'auth.send_failed'       => 'Slanje koda nije uspjelo. Izaberite drugi način.',
     'auth.sending_code'      => 'Slanje koda…',
     'auth.sending_wait'      => 'Potrebno je nekoliko sekundi. Nemojte zatvarati ili se vraćati nazad.',
     'auth.channel_email'     => 'Email',

@@ -38,6 +38,32 @@ class AuthController {
 
             case '2fa_required':
                 $_SESSION['2fa_channels'] = $result['channels'];
+
+                // Nobody is asked which method to use: the profile already
+                // says, so go straight to the code. "Promijeni nacin" on that
+                // screen is still there for the login where the phone is flat.
+                $channel = default_2fa_channel(
+                    $result['channels'],
+                    $_SESSION['2fa_preferred'] ?? null
+                );
+
+                // The authenticator app is already generating codes, so there
+                // is nothing to send. Emailing one as well would defeat the
+                // point of using the app.
+                $sent = $channel === 'totp'
+                     || otp_send((int) $_SESSION['pending_user_id'], $channel);
+
+                if ($sent) {
+                    $_SESSION['2fa_channel'] = $channel;
+                    $_SESSION['2fa_sent']    = true;
+                } else {
+                    // Gateway down. Choosing for someone and then stranding
+                    // them on an empty code screen is worse than asking, so
+                    // fall back to the chooser with another method to try.
+                    $_SESSION['2fa_sent'] = false;
+                    $error = __('auth.send_failed');
+                }
+
                 // Same view handles both steps (choose channel / enter code);
                 // it branches on $_SESSION['2fa_sent'].
                 include views_path('auth/2fa.php');

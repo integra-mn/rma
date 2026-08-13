@@ -108,18 +108,11 @@
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="send">
       <?php
-        // The authenticator wins when it is available. It only ever appears in
-        // $channels for someone who finished enrolling, and for them it is the
-        // strongest option and needs nothing sent — so it is the default even
-        // if their profile still names email from before they enrolled.
-        //
-        // Otherwise: the channel chosen in Moj profil, provided the role still
-        // allows it and it is switched on app-wide; failing that the first
-        // available, rather than assuming email exists.
-        $preferred = $_SESSION['2fa_preferred'] ?? null;
-        $default   = in_array('totp', $channels, true)
-                   ? 'totp'
-                   : (in_array($preferred, $channels, true) ? $preferred : ($channels[0] ?? 'email'));
+        // Same rule the login itself uses to skip this screen — see
+        // default_2fa_channel(). Reaching this screen means someone pressed
+        // "Promijeni nacin", so their usual channel is pre-selected and they
+        // only have to pick the one they actually want instead.
+        $default = default_2fa_channel($channels, $_SESSION['2fa_preferred'] ?? null);
       ?>
       <?php foreach ($channels as $ch): ?>
         <label class="channel-label">
