@@ -923,7 +923,7 @@ return [
     'settings.app_name'      => 'Naziv aplikacije',
     'settings.app_name_hint' => 'Prikazuje se zaposlenima unutar aplikacije.',
     'settings.company_name'  => 'Naziv firme',
-    'settings.company_name_hint' => 'Prikazuje se kupcima — email, stranica za praćenje i štampani dokumenti.',
+    'settings.company_name_hint' => 'Prikazuje se kupcima',
     'settings.logo'          => 'Logo (PNG ili SVG)',
     'settings.current_label' => 'Trenutno:',
     'settings.defaults_new_users' => 'Podrazumijevane postavke',

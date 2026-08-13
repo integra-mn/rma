@@ -170,14 +170,14 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .col { flex: 1; }
   .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 7px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
   table.info { width: 100%; border-collapse: collapse; }
-  table.info td { padding: 4px 0; vertical-align: top; font-size: 13px; border-bottom: 0.5px solid #f4f4f0; }
+  table.info td { padding: 4px 0; vertical-align: top; font-size: 13px; border-bottom: 0.5px solid #F4F4F4; }
   table.info td:first-child { color: #888780; width: 95px; font-size: 12px; }
   /* Plain-text presentation for status & warranty (cleaner look). */
   .status-badge   { font-weight: 500; color: #1A1A1F; }
   .warranty-badge { font-weight: 500; color: #1A1A1F; }
   .warranty-badge::before { content: " · "; color: #888780; font-weight: 400; }
-  .complaint-box { background: #f4f4f0; border-radius: 6px; padding: 11px 13px; font-size: 13px; line-height: 1.6; margin-bottom: 18px; }
-  .qr-section { display: flex; align-items: flex-start; gap: 14px; background: #f4f4f0; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
+  .complaint-box { background: #F4F4F4; border-radius: 6px; padding: 11px 13px; font-size: 13px; line-height: 1.6; margin-bottom: 18px; }
+  .qr-section { display: flex; align-items: flex-start; gap: 14px; background: #F4F4F4; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
   .qr-section img { width: 88px; height: 88px; flex-shrink: 0; }
   .qr-text h3 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
   .qr-text p { font-size: 12px; color: #5f5e5a; line-height: 1.5; }
@@ -362,7 +362,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
                ' . $t('pdf.sig_get') . '
              </button>
            </div>
-           <div id="sig-qr-wrap" class="no-print" style="display:none;align-items:center;gap:16px;padding:14px;background:#f4f4f0;border-radius:8px;margin:6px 0;">
+           <div id="sig-qr-wrap" class="no-print" style="display:none;align-items:center;gap:16px;padding:14px;background:#F4F4F4;border-radius:8px;margin:6px 0;">
              <div id="sig-qr" style="background:#fff;padding:8px;border-radius:6px;"></div>
              <div style="flex:1;font-size:12px;color:#5f5e5a;line-height:1.5;">
                <div style="font-weight:600;color:#2c2c2a;margin-bottom:4px;">' . $t('pdf.scan_any_device') . '</div>
@@ -612,10 +612,10 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
       .header td { vertical-align: top; padding: 0; }
       .rma-num { font-size: 22px; font-weight: 700; color: #1D9E75; }
       .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 6px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
-      table.info td { padding: 4px 0; font-size: 13px; border-bottom: 0.5px solid #f4f4f0; }
+      table.info td { padding: 4px 0; font-size: 13px; border-bottom: 0.5px solid #F4F4F4; }
       table.info td:first-child { color: #888780; width: 95px; font-size: 10px; }
       .status-badge { font-weight: 500; color: #1A1A1F; }
-      .complaint-box { background: #f4f4f0; border-radius: 4px; padding: 10px; font-size: 13px; line-height: 1.5; margin: 12px 0; }
+      .complaint-box { background: #F4F4F4; border-radius: 4px; padding: 10px; font-size: 13px; line-height: 1.5; margin: 12px 0; }
       .signature-box { border: 0.5px solid #d3d1c7; border-radius: 4px; padding: 10px; margin-top: 16px; }
       .signature-line { border-top: 0.5px solid #2c2c2a; width: 180px; font-size: 9px; color: #888780; padding-top: 3px; margin-top: 36px; }
     </style>

@@ -923,7 +923,7 @@ return [
     'settings.app_name'      => 'App name',
     'settings.app_name_hint' => 'Shown to staff inside the app.',
     'settings.company_name'  => 'Company name',
-    'settings.company_name_hint' => 'Shown to customers — emails, tracking page and printed documents.',
+    'settings.company_name_hint' => 'Shown to customers',
     'settings.logo'          => 'Logo (PNG or SVG)',
     'settings.current_label' => 'Current:',
     'settings.defaults_new_users' => 'Defaults for new users',
