@@ -958,8 +958,7 @@ return [
 Track the repair here:
 :url",
     'notify.status_sms'      => ':status. Track the repair: :url',
-    'settings.notify_tab'       => 'Notifications',
-    'settings.notify_hint'      => 'Which channels reach whom. What is worth sending is decided per status in Administration → Statuses; this decides how it gets there.',
+    'settings.notify_use_for'   => 'Use for these notifications',
     'settings.notify_customers' => 'Customers',
     'settings.notify_partners'  => 'Partners',
     'settings.notify_note'      => 'A partner set as the sole contact with their own customer overrides this — that customer is not contacted on any channel.',

@@ -958,8 +958,7 @@ return [
 Status popravke pratite ovdje:
 :url",
     'notify.status_sms'      => ':status. Pratite status popravke: :url',
-    'settings.notify_tab'       => 'Obavještenja',
-    'settings.notify_hint'      => 'Koji kanali koga obavještavaju. Šta se šalje odredjuje se po statusu u Administracija → Statusi; ovdje se odredjuje kako stiže.',
+    'settings.notify_use_for'   => 'Koristi za ova obavještenja',
     'settings.notify_customers' => 'Korisnici',
     'settings.notify_partners'  => 'Partneri',
     'settings.notify_note'      => 'Ako je partner jedini kontakt prema svom korisniku, to ima prednost — taj korisnik se ne obavještava nijednim kanalom.',

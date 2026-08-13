@@ -340,6 +340,30 @@
 
   <!-- ── COMMUNICATIONS (sub-tabbed) ── -->
   <?php elseif ($stab === 'smtp'): ?>
+  <?php
+    // Who this channel is used to notify. The same two settings per channel as
+    // the grid had, but sitting under the gateway they belong to — configure
+    // how a channel connects, then say who it serves, without leaving the pane.
+    $notify_audiences = function (string $ch): void {
+        echo '<div style="margin:1.25rem 0;">';
+        echo '<h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:0.75rem;">'
+           . __('settings.notify_use_for') . '</h2>';
+        foreach (['customer' => __('settings.notify_customers'),
+                  'partner'  => __('settings.notify_partners')] as $who => $label) {
+            // Email reaches both today; SMS reaches customers only, the rule
+            // agreed for partners, who prefer email. WhatsApp ships off.
+            $default = $ch === 'email' ? '1' : (($ch === 'sms' && $who === 'customer') ? '1' : '0');
+            $key     = "notify_{$who}_{$ch}";
+            printf('<div style="display:flex;align-items:center;gap:8px;margin-bottom:0.5rem;">'
+                 . '<input type="checkbox" id="%1$s" name="%1$s" value="1"%2$s>'
+                 . '<label for="%1$s" style="font-size:13px;margin-bottom:0;">%3$s</label></div>',
+                 $key, setting($key, $default) === '1' ? ' checked' : '', htmlspecialchars($label));
+        }
+        echo '<p style="font-size:12px;color:var(--text-muted);margin-top:4px;">'
+           . __('settings.notify_note') . '</p>';
+        echo '</div>';
+    };
+  ?>
   <?php $csub = $_GET['csub'] ?? 'smtp'; if (!in_array($csub, ['smtp','whatsapp','sms','twofa'], true)) $csub = 'smtp'; ?>
   <?php
   // Messaging providers shared by SMS and WhatsApp. Each provider stores its
@@ -407,7 +431,7 @@
   };
   ?>
   <div class="tab-bar">
-    <?php foreach (['smtp'=>'Email','sms'=>'SMS','whatsapp'=>'WhatsApp','twofa'=>__('settings.twofa'),'notify'=>__('settings.notify_tab')] as $k => $l): ?>
+    <?php foreach (['smtp'=>'Email','sms'=>'SMS','whatsapp'=>'WhatsApp','twofa'=>__('settings.twofa')] as $k => $l): ?>
       <a href="/settings?stab=smtp&csub=<?= $k ?>" class="tab<?= $csub === $k ? ' active' : '' ?>"><?= $l ?></a>
     <?php endforeach; ?>
   </div>
@@ -456,6 +480,7 @@
         </div>
       </div>
 
+      <?php $notify_audiences('email'); ?>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
         <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
         <div style="display:flex;gap:8px;align-items:center;">
@@ -476,6 +501,7 @@
 
       <?php $render_provider_select('whatsapp', ['infobip', 'vonage', 'clickatell']); ?>
 
+      <?php $notify_audiences('whatsapp'); ?>
       <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
     </form>
   </div>
@@ -489,6 +515,7 @@
 
       <?php $render_provider_select('sms', ['mtel', 'infobip', 'vonage', 'clickatell']); ?>
 
+      <?php $notify_audiences('sms'); ?>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
         <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
         <div style="display:flex;gap:8px;align-items:center;">
@@ -497,52 +524,6 @@
         </div>
       </div>
       <p id="sms-result" style="font-size:13px;margin-top:10px;"></p>
-    </form>
-  </div>
-
-  <?php elseif ($csub === 'notify'): ?>
-  <div class="card">
-    <form method="POST" action="/admin/settings/save">
-      <?= csrf_field() ?>
-      <input type="hidden" name="tab" value="notify">
-
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:1.25rem;"><?= __('settings.notify_hint') ?></p>
-
-      <table class="data-table" style="max-width:520px;">
-        <thead>
-          <tr>
-            <th></th>
-            <?php foreach (['email' => 'Email', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp'] as $ch => $label): ?>
-              <th style="width:110px;text-align:center;"><?= $label ?></th>
-            <?php endforeach; ?>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach (['customer' => __('settings.notify_customers'),
-                          'partner'  => __('settings.notify_partners')] as $who => $who_label): ?>
-            <tr>
-              <td style="font-weight:500;"><?= $who_label ?></td>
-              <?php foreach (['email', 'sms', 'whatsapp'] as $ch): ?>
-                <?php
-                  // Email to both is what the app already does. SMS to
-                  // customers only — the rule agreed for partners, who prefer
-                  // email. WhatsApp ships off: it needs a Meta account most
-                  // installs do not have.
-                  $default = $ch === 'email' ? '1' : (($ch === 'sms' && $who === 'customer') ? '1' : '0');
-                ?>
-                <td style="text-align:center;">
-                  <input type="checkbox" name="notify_<?= $who ?>_<?= $ch ?>" value="1"
-                         <?= setting("notify_{$who}_{$ch}", $default) === '1' ? 'checked' : '' ?>>
-                </td>
-              <?php endforeach; ?>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-
-      <p style="font-size:12px;color:var(--text-muted);margin:1rem 0 1.25rem;"><?= __('settings.notify_note') ?></p>
-
-      <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
     </form>
   </div>
 

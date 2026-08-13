@@ -22,7 +22,6 @@ class SettingsController {
             'whatsapp'   => $this->save_whatsapp(),
             'sms'        => $this->save_sms(),
             'twofa'      => $this->save_twofa(),
-            'notify'     => $this->save_notify(),
             'gsx'        => $this->save_gsx(),
             'tcl'        => $this->save_tcl(),
             'fiscal'     => $this->save_fiscal(),
@@ -35,7 +34,7 @@ class SettingsController {
         $stab = match($tab) {
             'general'    => 'general',
             'appearance' => 'appearance',
-            'smtp', 'whatsapp', 'sms', 'twofa', 'notify' => 'smtp',
+            'smtp', 'whatsapp', 'sms', 'twofa' => 'smtp',
             'gsx', 'tcl' => 'integrations',
             'fiscal'     => 'fiscal',
             'image'      => 'image',
@@ -130,6 +129,7 @@ class SettingsController {
     // ── SMTP ──────────────────────────────────────────────────
 
     private function save_smtp(): void {
+        $this->save_notify_audiences('email');
         $fields = [
             'smtp_host'       => trim($_POST['smtp_host'] ?? ''),
             'smtp_port'       => (string)(int)($_POST['smtp_port'] ?? 587),
@@ -206,28 +206,28 @@ class SettingsController {
     }
 
     private function save_whatsapp(): void {
+        $this->save_notify_audiences('whatsapp');
         $this->save_provider_channel('whatsapp');
     }
 
     // ── SMS gateway (Infobip / Vonage / Clickatell / custom) ────────────
 
     /**
-     * Which channels reach which audience.
+     * Who this channel is used to notify.
      *
-     * Statuses say WHETHER a step is worth a message; this says HOW it gets
-     * there. Six switches rather than one per status per channel per audience,
-     * and a status added later inherits the whole scheme.
+     * Statuses say WHETHER a step is worth a message; this says who hears it
+     * on this channel. Saved by whichever channel form was submitted, so the
+     * switches sit under the gateway they belong to.
      */
-    private function save_notify(): void {
+    private function save_notify_audiences(string $channel): void {
         foreach (['customer', 'partner'] as $who) {
-            foreach (['email', 'sms', 'whatsapp'] as $ch) {
-                $key = "notify_{$who}_{$ch}";
-                $this->set($key, isset($_POST[$key]) ? '1' : '0', 'bool', 'integrations');
-            }
+            $key = "notify_{$who}_{$channel}";
+            $this->set($key, isset($_POST[$key]) ? '1' : '0', 'bool', 'integrations');
         }
     }
 
     private function save_sms(): void {
+        $this->save_notify_audiences('sms');
         $this->save_provider_channel('sms');
 
 
