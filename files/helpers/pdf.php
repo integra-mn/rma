@@ -150,9 +150,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-         font-size: 13px; color: #2c2c2a; background: #f4f4f0; -webkit-font-smoothing: antialiased; }
-  /* On-screen preview: 1080px wide card on a muted background.
-     Print output: A4 (see @media print below) — same content, different container. */
+         font-size: 14px; color: #2c2c2a; background: #f4f4f0; -webkit-font-smoothing: antialiased; }
   /* A real A4 sheet on screen — the same width, height and 10mm padding the
      printer uses, so the view matches what comes out.
      The column layout is what lets .footer sit on the bottom edge of the sheet
@@ -163,27 +161,27 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
           border-radius: 8px; display: flex; flex-direction: column; }
   .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid #1D9E75; }
   .logo img { height: 36px; width: auto; display: block; margin-bottom: 6px; }
-  .company p { font-size: 10.5px; color: #888780; margin-top: 1px; line-height: 1.5; }
+  .company p { font-size: 12px; color: #888780; margin-top: 1px; line-height: 1.5; }
   .doc-title { text-align: right; }
-  .doc-title h2 { font-size: 11px; font-weight: 600; color: #888780; text-transform: uppercase; letter-spacing: 0.08em; }
-  .doc-title .rma-num { font-size: 24px; font-weight: 700; color: #1D9E75; line-height: 1.1; margin-top: 2px; }
-  .doc-title .date { font-size: 10.5px; color: #888780; margin-top: 2px; }
+  .doc-title h2 { font-size: 12.5px; font-weight: 600; color: #888780; text-transform: uppercase; letter-spacing: 0.08em; }
+  .doc-title .rma-num { font-size: 26px; font-weight: 700; color: #1D9E75; line-height: 1.1; margin-top: 2px; }
+  .doc-title .date { font-size: 12px; color: #888780; margin-top: 2px; }
   .two-col { display: flex; gap: 24px; margin-bottom: 18px; }
   .col { flex: 1; }
-  .section-title { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 7px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 7px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
   table.info { width: 100%; border-collapse: collapse; }
-  table.info td { padding: 4px 0; vertical-align: top; font-size: 11.5px; border-bottom: 0.5px solid #f4f4f0; }
-  table.info td:first-child { color: #888780; width: 95px; font-size: 10.5px; }
+  table.info td { padding: 4px 0; vertical-align: top; font-size: 13px; border-bottom: 0.5px solid #f4f4f0; }
+  table.info td:first-child { color: #888780; width: 95px; font-size: 12px; }
   /* Plain-text presentation for status & warranty (cleaner look). */
   .status-badge   { font-weight: 500; color: #1A1A1F; }
   .warranty-badge { font-weight: 500; color: #1A1A1F; }
   .warranty-badge::before { content: " · "; color: #888780; font-weight: 400; }
-  .complaint-box { background: #f4f4f0; border-radius: 6px; padding: 11px 13px; font-size: 11.5px; line-height: 1.55; margin-bottom: 18px; }
+  .complaint-box { background: #f4f4f0; border-radius: 6px; padding: 11px 13px; font-size: 13px; line-height: 1.6; margin-bottom: 18px; }
   .qr-section { display: flex; align-items: flex-start; gap: 14px; background: #f4f4f0; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
   .qr-section img { width: 88px; height: 88px; flex-shrink: 0; }
-  .qr-text h3 { font-size: 11.5px; font-weight: 600; margin-bottom: 3px; }
-  .qr-text p { font-size: 10.5px; color: #5f5e5a; line-height: 1.5; }
-  .qr-text a { font-size: 9.5px; color: #1D9E75; word-break: break-all; }
+  .qr-text h3 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .qr-text p { font-size: 12px; color: #5f5e5a; line-height: 1.5; }
+  .qr-text a { font-size: 11px; color: #1D9E75; word-break: break-all; }
   /* Company details live here rather than under the logo. Left-aligned, and
      pinned to the foot of the sheet when printed so it reads as stationery
      rather than as one more content block. */
@@ -193,8 +191,8 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .footer { border-top: 0.5px solid #e8e6e0; padding-top: 10px;
             margin-top: auto; text-align: left; font-size: 9.5px; color: #888780; }
   .signature-box { border: 0.5px solid #d3d1c7; border-radius: 6px; padding: 11px 13px; margin-bottom: 16px; }
-  .signature-box p { font-size: 10.5px; color: #888780; margin-bottom: 36px; }
-  .signature-line { border-top: 0.5px solid #2c2c2a; width: 200px; font-size: 9.5px; color: #888780; padding-top: 3px; }
+  .signature-box p { font-size: 12px; color: #888780; margin-bottom: 36px; }
+  .signature-line { border-top: 0.5px solid #2c2c2a; width: 200px; font-size: 11px; color: #888780; padding-top: 3px; }
   /* The button bar. These used to be inline on the element, where a media
      query cannot reach them — inline styles win — so the bar could not be
      moved anywhere. */
@@ -264,7 +262,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
     body, .complaint-box, .status-badge, .qr-section, .signature-box {
       -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
-    body { background: #fff; font-size: 14px; }
+    body { background: #fff; }
     /* 10mm matches the print padding on .page, so the footer lines up with the
        left edge of the content above it. */
     .footer { position: fixed; bottom: 8mm; left: 10mm; right: 10mm;
@@ -275,23 +273,6 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
        to keep content away from the sheet edges. */
     .page { width: auto; max-width: none; margin: 0; padding: 10mm;
             background: transparent; box-shadow: none; border-radius: 0; }
-    /* Scale up all the fine print for readability on paper. */
-    .doc-title h2            { font-size: 12.5px; }
-    .doc-title .rma-num      { font-size: 26px; }
-    .doc-title .date         { font-size: 12px; }
-    .company p               { font-size: 12px; }
-    .section-title           { font-size: 11px; }
-    table.info td            { font-size: 13px; }
-    table.info td:first-child{ font-size: 12px; }
-    /* Base already flattened the pills; just bump type size on print. */
-    .status-badge,
-    .warranty-badge { font-size: 13px; }
-    .complaint-box           { font-size: 13px; line-height: 1.6; }
-    .qr-text h3              { font-size: 13px; }
-    .qr-text p               { font-size: 12px; }
-    .qr-text a               { font-size: 11px; }
-    .signature-box p         { font-size: 12px; }
-    .signature-line          { font-size: 11px; }
   }
 </style>
 </head>
