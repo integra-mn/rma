@@ -489,6 +489,12 @@
 
       <?php $render_provider_select('sms', ['mtel', 'infobip', 'vonage', 'clickatell']); ?>
 
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <input type="checkbox" id="rma_sms_enabled" name="rma_sms_enabled" value="1"
+               <?= setting('rma_sms_enabled', '0') === '1' ? 'checked' : '' ?>>
+        <label for="rma_sms_enabled" style="font-size:13px;margin-bottom:0;"><?= __('settings.rma_sms') ?></label>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin:0 0 16px 24px;"><?= __('settings.rma_sms_hint') ?></p>
 
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
         <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>

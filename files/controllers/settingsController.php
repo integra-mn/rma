@@ -213,6 +213,11 @@ class SettingsController {
     private function save_sms(): void {
         $this->save_provider_channel('sms');
 
+        // Whether a customer is texted when their RMA is created. Every message
+        // costs money, so this is off until somebody decides otherwise.
+        $this->set('rma_sms_enabled', ($_POST['rma_sms_enabled'] ?? '0') === '1' ? '1' : '0',
+                   'bool', 'integrations');
+
         // Custom HTTP gateway
     }
 

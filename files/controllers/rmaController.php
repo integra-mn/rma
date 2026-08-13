@@ -268,6 +268,9 @@ class RmaController {
 
         // Send receipt email to customer
         send_rma_receipt($rma_id);
+        // Same trigger as the email. Does nothing until Podesavanja turns SMS
+        // on, and never texts a partner — they are contacted by email.
+        send_rma_sms($rma_id);
 
         $_SESSION['form_success'] = __('rma.created_with_number', ['number'=>$rma_number]);
         header("Location: /rma/{$rma_id}");

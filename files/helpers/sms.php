@@ -228,3 +228,68 @@ function http_post(string $url, string $body, array $headers = [], int $timeout 
     }
     return [$status >= 200 && $status < 300, (string) $resp];
 }
+
+// ── RMA notifications ────────────────────────────────────────
+
+/**
+ * Who gets a text about this RMA.
+ *
+ * The email counterpart, rma_receipt_recipients(), notifies the partner and
+ * — depending on their switch — the end user as well. SMS is deliberately
+ * narrower: partners are contacted by email, not text, so this only ever
+ * returns the end user.
+ *
+ * The partner switch still governs. A partner set as the single point of
+ * contact with their own customer means that customer hears nothing from us
+ * at all, by any channel; the partner has already been emailed.
+ *
+ * A walk-in has no partner and is simply the customer.
+ */
+function rma_sms_recipients(array $rma): array {
+    if (!empty($rma['partner_id']) && (int) ($rma['partner_notify_customer'] ?? 1) === 0) {
+        return [];
+    }
+    $phone = normalize_phone(trim((string) ($rma['customer_phone'] ?? '')));
+    // Six digits is the shortest thing that could be a subscriber number; below
+    // that it is a typo or a placeholder, and a gateway charges either way.
+    return strlen(preg_replace('/\D/', '', $phone)) >= 6 ? [$phone] : [];
+}
+
+/**
+ * Text the customer that we have their device, with the tracking link.
+ *
+ * Off unless Podesavanja turns it on, because every message costs money and
+ * this app is still being tested against real phone numbers. Turning it on is
+ * a decision with a bill attached, so it is not one a deploy should make.
+ */
+function send_rma_sms(int $rma_id): bool {
+    if (setting('rma_sms_enabled', '0') !== '1') return false;
+
+    $rma = db_row("SELECT r.rma_number, r.partner_id,
+                          c.phone as customer_phone, c.lang as customer_lang,
+                          pa.notify_customer as partner_notify_customer
+                   FROM rma_requests r
+                   LEFT JOIN customers c ON c.id = r.customer_id
+                   LEFT JOIN partners pa ON pa.id = r.partner_id
+                   WHERE r.id = ?", [$rma_id]);
+    if (!$rma) return false;
+
+    $to = rma_sms_recipients($rma);
+    if (!$to) return false;
+
+    $token = db_val('SELECT token FROM rma_tracking_tokens WHERE rma_id = ?', [$rma_id]);
+    if (!$token) return false;
+
+    // The customer's own language, like every other thing they receive.
+    $lang = customer_lang($rma['customer_lang'] ?? null);
+    $text = __in($lang, 'sms.rma_received', [
+        'number' => $rma['rma_number'],
+        'url'    => 'https://rma.integra.mn/track/' . $token,
+    ]);
+
+    $sent = false;
+    foreach ($to as $number) {
+        if (sms_send($number, $text)) $sent = true;
+    }
+    return $sent;
+}
