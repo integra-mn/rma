@@ -72,12 +72,20 @@ function rma_receipt_recipients(array $rma): array {
 
     $has_partner = !empty($rma['partner_id']) && !empty($rma['partner_email']);
     if ($has_partner) {
-        $add($rma['partner_email'], $rma['partner_contact'] ?: $rma['partner_name']);
+        $add($rma['partner_email'], ($rma['partner_contact'] ?? '') ?: ($rma['partner_name'] ?? ''));
     }
 
     // Walk-in, or a partner who wants their customer kept in the loop.
     if (empty($rma['partner_id']) || (int) ($rma['partner_notify_customer'] ?? 1) === 1) {
         $add($rma['customer_email'], $rma['customer_name']);
+    }
+
+    // A partner set as sole contact but holding no email leaves nobody to tell.
+    // Silence there looks identical to a successful send, so say it in the log.
+    if (!$out) {
+        error_log('RMA ' . ($rma['rma_number'] ?? '?') . ': nobody to email — '
+                . 'partner=' . ($rma['partner_email'] ?: 'none')
+                . ' customer=' . ($rma['customer_email'] ?: 'none'));
     }
 
     return $out;
