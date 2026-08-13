@@ -104,6 +104,12 @@ $can_edit  = is_super_admin();
         ];
         $role_channels = [];
         foreach ($roles as $code => $r) { $role_channels[$code] = role_2fa_channels($code); }
+
+        // A channel switched off in Komunikacija -> 2FA, or with no gateway
+        // behind it, can never be used however it is ticked here. Offering the
+        // tick is the duplicate: two screens appearing to decide one thing,
+        // and only one of them having any effect.
+        $usable_channels = enabled_2fa_channels();
       ?>
       <tr>
         <td colspan="<?= count($roles) + 1 ?>"
@@ -113,13 +119,27 @@ $can_edit  = is_super_admin();
         </td>
       </tr>
       <?php foreach ($channel_labels as $ch => $label): ?>
+      <?php $ch_usable = in_array($ch, $usable_channels, true); ?>
       <tr>
-        <td style="color:var(--text-secondary);padding-left:1.5rem;"><?= $label ?></td>
+        <td style="color:var(--text-secondary);padding-left:1.5rem;<?= $ch_usable ? '' : 'opacity:0.55;' ?>">
+          <?= $label ?>
+          <?php if (!$ch_usable): ?>
+            <span style="font-size:11px;color:var(--text-muted);"> &middot; <?= __('admin.perm_2fa_off') ?></span>
+          <?php endif; ?>
+        </td>
         <?php foreach ($roles as $code => $role): ?>
+          <?php $ticked = in_array($ch, $role_channels[$code], true); ?>
           <td style="text-align:center;">
+            <?php if ($ticked && !$ch_usable): ?>
+              <!-- A disabled box submits nothing, so saving this screen would
+                   quietly strip a channel that is only temporarily switched
+                   off. Carry the stored value so it survives until somebody
+                   unticks it deliberately. -->
+              <input type="hidden" name="chan[<?= $code ?>][<?= $ch ?>]" value="1">
+            <?php endif; ?>
             <input type="checkbox" name="chan[<?= $code ?>][<?= $ch ?>]" value="1"
-                   <?= in_array($ch, $role_channels[$code], true) ? 'checked' : '' ?>
-                   <?= $can_edit ? '' : 'disabled' ?>
+                   <?= $ticked ? 'checked' : '' ?>
+                   <?= ($can_edit && $ch_usable) ? '' : 'disabled' ?>
                    style="accent-color:var(--accent);cursor:<?= $can_edit ? 'pointer' : 'not-allowed' ?>;width:16px;height:16px;">
           </td>
         <?php endforeach; ?>

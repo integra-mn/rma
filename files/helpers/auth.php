@@ -248,9 +248,32 @@ function enabled_2fa_channels(): array {
     $on = ['totp'];
     foreach (['email', 'sms', 'whatsapp'] as $c) {
         $default = $c === 'whatsapp' ? '0' : '1';
-        if (setting("twofa_{$c}_enabled", $default) === '1') $on[] = $c;
+        if (setting("twofa_{$c}_enabled", $default) !== '1') continue;
+        // Switched on is not the same as able to send. A channel with no
+        // gateway behind it would be offered at the login screen and then
+        // silently fail to deliver the code, which looks to the user like the
+        // password being wrong.
+        if (!channel_can_send($c)) continue;
+        $on[] = $c;
     }
     return $on;
+}
+
+/**
+ * Has this channel got something behind it to actually send with?
+ *
+ * Deliberately shallow — it asks whether a gateway is configured at all, not
+ * whether it is reachable this second. Anything more would mean a network call
+ * on every login screen.
+ */
+function channel_can_send(string $channel): bool {
+    return match ($channel) {
+        'totp'     => true,
+        'email'    => trim((string) setting('smtp_host', '')) !== '',
+        'sms'      => trim((string) setting('sms_provider', '')) !== '',
+        'whatsapp' => trim((string) setting('whatsapp_provider', '')) !== '',
+        default    => false,
+    };
 }
 
 /**
