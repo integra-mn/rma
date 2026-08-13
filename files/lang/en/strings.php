@@ -951,7 +951,7 @@ return [
     'settings.rma_reset_needs_year'  => 'Unavailable: the format has no year, so restarting the sequence would repeat numbers already issued. Add {YY} or {YEAR} to enable it',
     'settings.sidebar'       => 'Sidebar',
     'settings.sidebar_collapse' => 'Collapse sidebar by default (icon-only mode)',
-    'sms.rma_received'       => 'We have received your device. RMA :number. Track it here: :url',
+    'sms.rma_received'       => 'Device received for service. Track the repair: :url',
     'settings.rma_sms'       => 'Text the customer when an RMA is created',
     'settings.rma_sms_hint'  => 'Every message is charged. Partners are notified by email, never by SMS, and a partner who is the sole contact means their customer is not texted either.',
     'settings.sessions'          => 'Login sessions',
