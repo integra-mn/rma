@@ -47,6 +47,11 @@ function __in(string $lang, string $key, array $replace = []): string {
     }
 
     $text = $cache[$lang][$key] ?? $key;
+    // Longest placeholder first. With :to and :total both in play, replacing
+    // :to first turns ":total" into "25tal" — the same shape of bug as the
+    // ":code" one that produced "::code". Sorting by length kills the class of
+    // it rather than renaming one placeholder and waiting for the next.
+    uksort($replace, fn($a, $b) => strlen((string)$b) <=> strlen((string)$a));
     foreach ($replace as $k => $v) {
         $text = str_replace(':' . $k, (string) $v, $text);
     }
@@ -56,6 +61,11 @@ function __in(string $lang, string $key, array $replace = []): string {
 function __(string $key, array $replace = []): string {
     $strings = load_lang();
     $text    = $strings[$key] ?? $key;
+    // Longest placeholder first. With :to and :total both in play, replacing
+    // :to first turns ":total" into "25tal" — the same shape of bug as the
+    // ":code" one that produced "::code". Sorting by length kills the class of
+    // it rather than renaming one placeholder and waiting for the next.
+    uksort($replace, fn($a, $b) => strlen((string)$b) <=> strlen((string)$a));
     foreach ($replace as $k => $v) {
         $text = str_replace(':' . $k, (string) $v, $text);
     }
@@ -122,6 +132,11 @@ function history_note(string $note, ?string $lang = null): string {
 function __raw(string $key, array $replace = []): string {
     $strings = load_lang();
     $text    = $strings[$key] ?? $key;
+    // Longest placeholder first. With :to and :total both in play, replacing
+    // :to first turns ":total" into "25tal" — the same shape of bug as the
+    // ":code" one that produced "::code". Sorting by length kills the class of
+    // it rather than renaming one placeholder and waiting for the next.
+    uksort($replace, fn($a, $b) => strlen((string)$b) <=> strlen((string)$a));
     foreach ($replace as $k => $v) {
         $text = str_replace(':' . $k, (string) $v, $text);
     }
