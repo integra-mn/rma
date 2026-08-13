@@ -530,7 +530,7 @@ return [
     'rma.days_10' => '10 dana',
     'rma.days_15' => '15 dana',
     'rma.search_placeholder' => 'Serijski broj, IMEI, Broj reklamacije, Ime korisnika',
-    'rma.sn' => 'S/B',
+    'rma.sn' => 'S/N',
     'rma.check_apple_warranty' => 'Provjeri garanciju',
     'rma.accessories' => 'Oprema',
     'rma.system' => 'Sistem',
