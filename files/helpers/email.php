@@ -84,8 +84,8 @@ function rma_receipt_recipients(array $rma): array {
     // Silence there looks identical to a successful send, so say it in the log.
     if (!$out) {
         error_log('RMA ' . ($rma['rma_number'] ?? '?') . ': nobody to email — '
-                . 'partner=' . ($rma['partner_email'] ?: 'none')
-                . ' customer=' . ($rma['customer_email'] ?: 'none'));
+                . 'partner=' . (($rma['partner_email'] ?? '') ?: 'none')
+                . ' customer=' . (($rma['customer_email'] ?? '') ?: 'none'));
     }
 
     return $out;
