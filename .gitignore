@@ -23,6 +23,11 @@
 /files/storage/evidence/
 /files/storage/signatures/
 /files/storage/tmp/
+
+# Session files — live logins. Never in git.
+/files/storage/sessions/*
+!/files/storage/sessions/.gitkeep
+!/files/storage/sessions/.htaccess
 /files/uploads/*
 !/files/uploads/.gitkeep
 !/files/uploads/.htaccess

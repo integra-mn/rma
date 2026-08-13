@@ -1,0 +1,4 @@
+# Session files. Nothing here is ever served — a readable session file hands
+# over a logged-in account. Apache serves the app from files/, so this path is
+# inside the docroot and needs the guard even though nothing links to it.
+Require all denied

@@ -100,6 +100,15 @@ class SettingsController {
             'rma_number_reset_yearly' => ['string',
                 (!empty($_POST['rma_number_reset_yearly']) && preg_match('/\{(YY|YYYY|YEAR)\}/', $rma_format))
                     ? '1' : '0'],
+            // Clamped rather than trusted. Below 5 minutes nobody could finish
+            // a form; a week is not a session. The absolute limit is floored at
+            // the idle one, because an absolute shorter than idle would end
+            // sessions that were never idle and look like a bug.
+            'session_idle_minutes' => ['int',
+                max(5, min(1440, (int)($_POST['session_idle_minutes'] ?? 120)))],
+            'session_max_minutes'  => ['int',
+                max(max(5, min(1440, (int)($_POST['session_idle_minutes'] ?? 120))),
+                    min(10080, (int)($_POST['session_max_minutes'] ?? 480)))],
             'pdf_engine'        => ['string', in_array($_POST['pdf_engine']??'',['html','mpdf']) ? $_POST['pdf_engine'] : 'html'],
             'pdf_paper_size'    => ['string', in_array($_POST['pdf_paper_size']??'',['A4','A5','Letter']) ? $_POST['pdf_paper_size'] : 'A4'],
         ];

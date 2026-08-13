@@ -3,12 +3,79 @@ defined('RMS') or die('Direct access not permitted');
 
 // ── Session helpers ──────────────────────────────────────────
 
+/**
+ * How long a login lasts, in minutes, from Settings → Sistem.
+ *
+ * Two clocks, because they answer different questions. Idle is "you walked
+ * away"; absolute is "you have been logged in long enough". A counter PC left
+ * open all day needs the second one — someone who clicks every ten minutes
+ * never trips the first.
+ */
+function session_idle_minutes(): int {
+    return max(5, (int) setting('session_idle_minutes', '120'));
+}
+function session_absolute_minutes(): int {
+    return max(session_idle_minutes(), (int) setting('session_max_minutes', '480'));
+}
+
 function auth_start(): void {
     if (session_status() === PHP_SESSION_NONE) {
+        // The app keeps its sessions in its own directory. In the shared
+        // /var/lib/php/sessions a system timer (phpsessionclean) deletes files
+        // on php.ini's gc_maxlifetime — 24 minutes here — and knows nothing
+        // about anything set at runtime. Any timeout configured in Settings
+        // would have been quietly overruled by that sweeper.
+        $dir = ROOT . '/storage/sessions';
+        if (!is_dir($dir)) @mkdir($dir, 0770, true);
+        if (is_dir($dir) && is_writable($dir)) {
+            session_save_path($dir);
+            // php.ini ships gc_probability=0 because Debian sweeps by cron
+            // instead. Nothing sweeps our directory, so PHP has to do it.
+            ini_set('session.gc_probability', '1');
+            ini_set('session.gc_divisor', '100');
+        }
+        ini_set('session.gc_maxlifetime', (string) (session_idle_minutes() * 60));
+
         session_name('rms_sess');
+        // lifetime 0 on purpose: closing the browser ends the session whatever
+        // the clocks below say.
         session_set_cookie_params(['httponly' => true, 'samesite' => 'Strict']);
         session_start();
+        session_enforce_timeouts();
     }
+}
+
+/**
+ * End a session that has gone idle or simply run long.
+ *
+ * Only touches a session that is actually logged in, so it cannot interfere
+ * with a login or a half-finished 2FA.
+ */
+function session_enforce_timeouts(): void {
+    if (empty($_SESSION['user'])) return;
+
+    $now   = time();
+    $idle  = session_idle_minutes() * 60;
+    $max   = session_absolute_minutes() * 60;
+    $seen  = (int) ($_SESSION['last_seen'] ?? $now);
+    $start = (int) ($_SESSION['login_at']  ?? $now);
+
+    if (($now - $seen) > $idle || ($now - $start) > $max) {
+        $_SESSION = [];
+        // Clear the cookie too, or the browser keeps offering a dead id.
+        if (ini_get('session.use_cookies')) {
+            $p = session_get_cookie_params();
+            setcookie(session_name(), '', $now - 42000,
+                      $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+        }
+        session_destroy();
+        session_start();                 // a fresh, empty session for the redirect
+        $_SESSION['auth_error'] = __('auth.session_expired');
+        return;
+    }
+
+    $_SESSION['last_seen'] = $now;
+    if (!isset($_SESSION['login_at'])) $_SESSION['login_at'] = $now;
 }
 
 function current_user(): ?array {
@@ -298,6 +365,11 @@ function auth_grant_session(array $user): void {
         'access_scope' => $user['access_scope'] ?? 'any',
         '2fa_ok'       => true,
     ];
+
+    // Both clocks start here, not on the first page load — a login that sat on
+    // the 2FA screen for a while should not eat into the eight hours.
+    $_SESSION['login_at']  = time();
+    $_SESSION['last_seen'] = time();
 
     db_update('users', ['last_login' => date('Y-m-d H:i:s')], 'id = ?', [$user['id']]);
 

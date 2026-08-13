@@ -80,6 +80,24 @@
         </div>
       </div>
 
+      <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;margin-top:1.5rem;"><?= __('settings.sessions') ?></h2>
+
+      <div class="form-grid">
+        <div class="field">
+          <label><?= __('settings.session_idle') ?></label>
+          <input type="number" name="session_idle_minutes" min="5" max="1440"
+                 value="<?= (int) setting('session_idle_minutes', '120') ?>">
+          <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('settings.session_idle_hint') ?></p>
+        </div>
+        <div class="field">
+          <label><?= __('settings.session_max') ?></label>
+          <input type="number" name="session_max_minutes" min="5" max="10080"
+                 value="<?= (int) setting('session_max_minutes', '480') ?>">
+          <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('settings.session_max_hint') ?></p>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin:0 0 1.5rem;"><?= __('settings.session_note') ?></p>
+
       <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;margin-top:1.5rem;"><?= __('settings.rma_numbering') ?></h2>
 
       <div class="field" style="max-width:320px;margin-bottom:8px;">
