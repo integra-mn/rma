@@ -681,19 +681,26 @@ class RmaController {
         $dlike  = strlen($tail) >= 3 ? "%{$tail}%" : null;
         $elike  = "%{$q}%";
 
+        // refused@... is what reception records when a customer gives no email.
+        // Dozens of unrelated people carry the same one, so searching it would
+        // return strangers; excluded from the email side of the search, while
+        // the phone side is untouched.
+        $not_placeholder = "AND LOWER(COALESCE(email, '')) NOT LIKE 'refused@%'";
+
         if ($dlike) {
             // Match digits-stripped phone OR email as typed
             $customers = db_rows(
                 "SELECT id, name, phone, email, city, address FROM customers
                  WHERE deleted_at IS NULL
-                   AND (REGEXP_REPLACE(phone, '[^0-9]', '') LIKE ? OR email LIKE ?)
+                   AND (REGEXP_REPLACE(phone, '[^0-9]', '') LIKE ?
+                        OR (email LIKE ? {$not_placeholder}))
                  ORDER BY name LIMIT 10",
                 [$dlike, $elike]
             );
         } else {
             $customers = db_rows(
                 "SELECT id, name, phone, email, city, address FROM customers
-                 WHERE deleted_at IS NULL AND email LIKE ?
+                 WHERE deleted_at IS NULL AND email LIKE ? {$not_placeholder}
                  ORDER BY name LIMIT 10",
                 [$elike]
             );

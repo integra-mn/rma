@@ -465,21 +465,31 @@ function checkDuplicates() {
         warn.style.display = 'block';
         warn.innerHTML = `
           <div style="background:#faeeda;border:0.5px solid #ef9f27;border-radius:8px;padding:10px 12px;font-size:13px;color:#633806;">
-            <strong>Similar customer found:</strong>
+            <strong>${DUP_TITLE}</strong>
             ${data.map(c => `
               <div style="margin-top:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
                 <span>${escHtml(c.name)} ${c.phone ? '· '+escHtml(c.phone) : ''} ${c.email ? '· '+escHtml(c.email) : ''}
-                  <em style="font-size:11px;opacity:0.7;">matched by ${c.match_type}</em>
+                  <em style="font-size:11px;opacity:0.7;">${DUP_BY[c.match_type] || c.match_type}</em>
                 </span>
                 <button type="button" class="btn btn-sm"
                         onclick="selectCustomer(${c.id},'${escHtml(c.name)}','${escHtml(c.phone||'')}','${escHtml(c.email||'')}');hideWalkIn()">
-                  Link to this customer
+                  ${DUP_LINK}
                 </button>
               </div>`).join('')}
           </div>`;
       });
   }, 500);
 }
+
+// The banner was never visible, so nobody noticed it was written in English.
+// It is about to be, and this app does not show English to a Montenegrin user.
+const DUP_TITLE = <?= json_encode(__('rma.dup_found')) ?>;
+const DUP_LINK  = <?= json_encode(__('rma.dup_link')) ?>;
+const DUP_BY    = {
+  email: <?= json_encode(__('rma.dup_by_email')) ?>,
+  phone: <?= json_encode(__('rma.dup_by_phone')) ?>,
+  name:  <?= json_encode(__('rma.dup_by_name')) ?>
+};
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');

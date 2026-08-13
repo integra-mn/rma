@@ -28,9 +28,76 @@ function phone_last_digits(string $phone, int $n = 8): string {
     return substr(preg_replace('/\D/', '', $phone), -$n);
 }
 
+/**
+ * Is this a stand-in address rather than a real one?
+ *
+ * When a customer will not or cannot give an email, reception records
+ * refused@<brand>.com. Those are markers, not addresses: the same one is on
+ * dozens of unrelated people, so matching on it would file strangers under one
+ * customer — which is how a new customer on 50152 ended up as the customer
+ * from 50151.
+ *
+ * Matched on the local part, so refused@apple.com and refused@tcl.com are
+ * covered along with any brand added later, with no list to maintain.
+ */
+function is_placeholder_email(?string $email): bool {
+    $email = strtolower(trim((string) $email));
+    if ($email === '') return true;
+    return str_starts_with($email, 'refused@');
+}
+
+/**
+ * Every customer resembling these details, for the warning shown while
+ * reception types. The singular find_customer_match() below decides who the
+ * RMA is filed under; this one decides nothing — it feeds a banner a person
+ * reads and acts on.
+ *
+ * customersController::check_duplicate() has called this since the form was
+ * written, but it was never defined and no route reached it, so the fetch
+ * 404ed and the warning never appeared. That is why a silent auto-link was the
+ * first anyone knew of a duplicate.
+ */
+function find_customer_matches(string $name, string $phone, string $email): array {
+    $out = $seen = [];
+    $push = function (?array $c, string $type) use (&$out, &$seen): void {
+        if (!$c || isset($seen[$c['id']])) return;
+        $seen[$c['id']] = true;
+        $out[] = ['id' => (int) $c['id'], 'name' => $c['name'], 'phone' => $c['phone'],
+                  'email' => $c['email'], 'match_type' => $type];
+    };
+
+    $email = strtolower(trim($email));
+    if ($email !== '' && !is_placeholder_email($email)) {
+        $push(db_row('SELECT * FROM customers WHERE LOWER(email) = ? AND deleted_at IS NULL',
+                     [$email]), 'email');
+    }
+
+    if (trim($phone) !== '') {
+        $last8 = phone_last_digits(normalize_phone($phone));
+        if (strlen($last8) >= 6) {
+            foreach (db_rows('SELECT * FROM customers WHERE phone IS NOT NULL AND deleted_at IS NULL') as $c) {
+                if (phone_last_digits($c['phone']) === $last8) $push($c, 'phone');
+            }
+        }
+    }
+
+    // Names are worth showing even though they never decide anything: two
+    // people share a name often enough that the operator has to be the judge.
+    if (($name = trim($name)) !== '') {
+        foreach (db_rows('SELECT * FROM customers WHERE name LIKE ? AND deleted_at IS NULL LIMIT 5',
+                         ['%' . $name . '%']) as $c) {
+            $push($c, 'name');
+        }
+    }
+
+    return array_slice($out, 0, 5);
+}
+
 function find_customer_match(string $name, string $phone, string $email): array {
     $email = strtolower(trim($email));
-    if ($email) {
+    // A refused@ address says "no email given". Treating it as one would match
+    // every other customer who also declined.
+    if ($email && !is_placeholder_email($email)) {
         $c = db_row('SELECT * FROM customers WHERE LOWER(email) = ? AND deleted_at IS NULL', [$email]);
         if ($c) return ['customer' => $c, 'match_type' => 'email', 'confidence' => 'exact'];
     }

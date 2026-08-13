@@ -68,6 +68,7 @@ $routes = [
         '/invoices/([0-9]+)'           => 'invoices/view',
         '/customers'                   => 'customers/index',
         '/customers/([0-9]+)/edit'     => 'customers/edit',
+        '/customers/check-duplicate'   => 'customers/check_duplicate',
         '/suppliers'                   => 'suppliers/index',
         '/partners'                    => 'partners/index',
         '/partners/([0-9]+)/edit'      => 'partners/edit',
