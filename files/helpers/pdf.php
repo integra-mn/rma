@@ -149,7 +149,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
      is applied via padding on .page in the print media query below. */
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  body { font-family: ' . app_font_stack() . ';
          font-size: 14px; color: #2c2c2a; background: #f4f4f0; -webkit-font-smoothing: antialiased; }
   /* A real A4 sheet on screen — the same width, height and 10mm padding the
      printer uses, so the view matches what comes out.
@@ -198,7 +198,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
      moved anywhere. */
   #toolbar { width: 210mm; max-width: 100%; height: 64px; margin: 0 auto;
              display: flex; align-items: center; justify-content: flex-end;
-             gap: 12px; font-family: Montserrat, system-ui, sans-serif; }
+             gap: 12px; font-family: ' . app_font_stack() . '; }
   #toolbar .tb { display: inline-flex; align-items: center; height: 40px;
                  padding: 0; border: none; border-radius: 8px; color: #fff;
                  cursor: pointer; text-decoration: none; font-family: inherit;
@@ -502,18 +502,35 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
 
     $html = generate_rma_pdf_html_string($rma, $device, $date, $app_name, $tracking_url, $qr_base64, $signature);
 
-    // mPDF font config: try Montserrat first (if TTFs exist in
-    // assets/fonts/), fall back to DejaVu Sans (bundled with mPDF).
+    // The PDF follows Settings → Izgled like the print view does, but it cannot
+    // do it the same way. A browser renders the woff2 the app serves; mPDF can
+    // only embed a real TTF or OTF, so the font is used only when its files are
+    // sitting in assets/fonts/ under the usual <Font>-Regular.ttf naming.
+    //
+    // Today only Montserrat has them, so any other choice prints in DejaVu Sans
+    // — legible, and plainly not the app font. Dropping the four TTFs for a
+    // font into assets/fonts/ is all it takes to fix that; nothing here needs
+    // editing.
     $font_dir    = ROOT . '/assets/fonts';
-    $has_mont    = is_file($font_dir . '/Montserrat-Regular.ttf');
+    $app_font    = setting('app_font', 'Montserrat');
+    $file_stem   = str_replace(' ', '', $app_font);      // "Maven Pro" -> MavenPro-Regular.ttf
+    $mpdf_name   = strtolower($file_stem);               // mPDF wants a lowercase key
+    $regular     = $file_stem . '-Regular.ttf';
+    $has_font    = is_file($font_dir . '/' . $regular);
     $extra_fonts = [];
-    if ($has_mont) {
-        $extra_fonts['montserrat'] = [
-            'R'  => 'Montserrat-Regular.ttf',
-            'B'  => is_file($font_dir . '/Montserrat-Bold.ttf')      ? 'Montserrat-Bold.ttf'      : 'Montserrat-Regular.ttf',
-            'I'  => is_file($font_dir . '/Montserrat-Italic.ttf')    ? 'Montserrat-Italic.ttf'    : 'Montserrat-Regular.ttf',
-            'BI' => is_file($font_dir . '/Montserrat-BoldItalic.ttf')? 'Montserrat-BoldItalic.ttf': 'Montserrat-Regular.ttf',
+    if ($has_font) {
+        // A missing weight falls back to Regular rather than aborting: a PDF in
+        // the right face without true italics beats no PDF at all.
+        $variant = fn(string $suffix): string =>
+            is_file($font_dir . "/{$file_stem}-{$suffix}.ttf") ? "{$file_stem}-{$suffix}.ttf" : $regular;
+        $extra_fonts[$mpdf_name] = [
+            'R'  => $regular,
+            'B'  => $variant('Bold'),
+            'I'  => $variant('Italic'),
+            'BI' => $variant('BoldItalic'),
         ];
+    } else {
+        error_log("Receipt PDF: no TTF for app font '{$app_font}' in {$font_dir} — falling back to DejaVu Sans");
     }
 
     $mpdf = new \Mpdf\Mpdf([
@@ -526,9 +543,9 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
         'margin_right'   => 10,
         'margin_footer'  => 6,
         'tempDir'        => ROOT . '/storage/tmp',
-        'default_font'   => $has_mont ? 'montserrat' : 'dejavusans',
-        'fontDir'        => $has_mont ? array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], [$font_dir]) : null,
-        'fontdata'       => $has_mont ? ($extra_fonts + (new \Mpdf\Config\FontVariables())->getDefaults()['fontdata']) : null,
+        'default_font'   => $has_font ? $mpdf_name : 'dejavusans',
+        'fontDir'        => $has_font ? array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], [$font_dir]) : null,
+        'fontdata'       => $has_font ? ($extra_fonts + (new \Mpdf\Config\FontVariables())->getDefaults()['fontdata']) : null,
     ]);
 
     // Page-bottom footer: app name + location contact details + print stamp.
@@ -574,6 +591,12 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
     // placeholder verbatim.
     $t = fn(string $k, array $r = []): string => __in(customer_lang($rma['customer_lang'] ?? null), $k, $r);
 
+    // The same font the app and the print view use. mPDF keys fonts lowercase
+    // with no spaces; if the caller could not register it — no TTF in
+    // assets/fonts/ — this name simply does not resolve and the dejavusans
+    // after it in the stack takes over.
+    $pdf_font = strtolower(str_replace(' ', '', setting('app_font', 'Montserrat')));
+
     // mPDF accepts local file paths in <img src>. Using absolute path so
     // relative URL resolution (which mPDF does poorly) doesn't bite us.
     $logo_path = ROOT . '/assets/integra.svg';
@@ -583,7 +606,7 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
 
     return '<style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: montserrat, dejavusans, sans-serif; font-size: 14px; color: #2c2c2a; }
+      body { font-family: ' . $pdf_font . ', dejavusans, sans-serif; font-size: 14px; color: #2c2c2a; }
       .header { margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #1D9E75; }
       .header table { width: 100%; border-collapse: collapse; }
       .header td { vertical-align: top; padding: 0; }
