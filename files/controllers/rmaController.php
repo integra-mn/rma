@@ -392,6 +392,42 @@ class RmaController {
             $_SESSION['form_success'] = __('rma.tech_assigned');
         }
 
+        // Correcting what was typed at the counter: the customer name and the
+        // SN/IMEI. Neither lives on the RMA — the name is the customers row and
+        // the numbers are the devices row — so a typo caught after submitting
+        // could not be fixed anywhere until now.
+        if ($action === 'identity') {
+            $name = trim($_POST['customer_name'] ?? '');
+            if ($name !== '' && $rma['customer_id']) {
+                $old = db_row('SELECT name FROM customers WHERE id = ?', [(int)$rma['customer_id']]);
+                if ($old && $old['name'] !== $name) {
+                    // Writing to the customers row is the point: the correction
+                    // has to show in Korisnici and on every other RMA of theirs,
+                    // not just on this one.
+                    db_update('customers', ['name' => $name], 'id = ?', [(int)$rma['customer_id']]);
+                    audit_change('customer', (int)$rma['customer_id'],
+                                 ['name' => $old['name']], ['name' => $name]);
+                }
+            }
+
+            if ($rma['device_id']) {
+                $sn   = trim($_POST['serial_number'] ?? '');
+                $imei = trim($_POST['imei'] ?? '');
+                $old  = db_row('SELECT serial_number, imei FROM devices WHERE id = ?',
+                               [(int)$rma['device_id']]);
+                // Empty clears the field — a number typed onto the wrong device
+                // has to be removable, not just correctable.
+                $new = ['serial_number' => $sn ?: null, 'imei' => $imei ?: null];
+                if ($old && ($old['serial_number'] !== $new['serial_number']
+                          || $old['imei'] !== $new['imei'])) {
+                    db_update('devices', $new, 'id = ?', [(int)$rma['device_id']]);
+                    audit_change('device', (int)$rma['device_id'], $old, $new);
+                }
+            }
+
+            $_SESSION['flash'] = ['type' => 'success', 'message' => __('rma.identity_updated')];
+        }
+
         if ($action === 'details') {
             db_update('rma_requests', [
                 'priority'             => $_POST['priority'] ?? $rma['priority'],

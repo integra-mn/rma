@@ -49,7 +49,7 @@
     <table class="data-table dash-table">
       <thead>
         <tr>
-          <th><?= __('rma.number') ?></th>
+          <th><?= __('label.rma') ?></th>
           <th><?= __('rma.customer') ?></th>
           <th><?= __('label.status') ?></th>
           <th><?= __('label.priority') ?></th>
@@ -88,7 +88,7 @@
     <table class="data-table dash-table">
       <thead>
         <tr>
-          <th><?= __('rma.number') ?></th>
+          <th><?= __('label.work_order') ?></th>
           <th><?= __('rma.customer') ?></th>
           <th><?= __('label.status') ?></th>
           <th><?= __('rma.technician') ?></th>
@@ -126,7 +126,7 @@
     <table class="data-table dash-table">
       <thead>
         <tr>
-          <th><?= __('rma.number') ?></th>
+          <th><?= __('label.rma') ?></th>
           <th><?= __('rma.customer') ?></th>
           <th><?= __('track.rma_status') ?></th>
           <th><?= __('dashboard.repaired') ?></th>

@@ -48,7 +48,15 @@
 
       <!-- Details card -->
       <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:1.25rem;margin-bottom:1rem;min-height:170px;display:flex;flex-direction:column;">
-        <div style="font-size:16px;font-weight:500;margin-bottom:4px;"><?= htmlspecialchars($rma['customer_name'] ?? '—') ?><?= $rma['customer_phone'] ? '<span style="font-size:13px;font-weight:400;color:var(--text-muted);"> &nbsp;·&nbsp; '.$rma['customer_phone'].'</span>' : '' ?></div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+          <div style="font-size:16px;font-weight:500;margin-bottom:4px;"><?= htmlspecialchars($rma['customer_name'] ?? '—') ?><?= $rma['customer_phone'] ? '<span style="font-size:13px;font-weight:400;color:var(--text-muted);"> &nbsp;·&nbsp; '.$rma['customer_phone'].'</span>' : '' ?></div>
+          <?php if (can('rma', 'edit')): ?>
+            <button type="button" id="identity-edit-btn"
+                    style="background:#f4f4f0;color:#2c2c2a;border:0.5px solid #d3d1c7;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0;">
+              <?= __('btn.edit') ?>
+            </button>
+          <?php endif; ?>
+        </div>
         <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('rma.model') ?>:</span> <?= htmlspecialchars(trim(($rma['brand_name'] ?? '').' '.($rma['model_name'] ?? '')) ?: '—') ?></div>
         <?php if (($rma['serial_number'] ?? null) || ($rma['imei'] ?? null)): ?>
           <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -349,3 +357,57 @@
   <?php include views_path('rma/_shipments.php'); ?>
 
 </div>
+
+<?php if (can('rma', 'edit')): ?>
+<!-- Correcting a typo made at the counter. Only the three fields that had no
+     way to be fixed: everything else on this page is already editable, and the
+     complaint text deliberately is not - it is what the customer signed. -->
+<div id="identity-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:50;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-surface);border-radius:12px;padding:1.5rem;width:100%;max-width:460px;margin:1rem;">
+    <h2 style="font-size:16px;font-weight:500;margin-bottom:1rem;"><?= __('rma.identity_edit') ?></h2>
+    <form id="identity-form" method="POST" action="/rma/<?= (int)$rma['id'] ?>/update">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="identity">
+      <div class="field">
+        <label><?= __('rma.identity_customer') ?></label>
+        <input type="text" name="customer_name" value="<?= htmlspecialchars($rma['customer_name'] ?? '') ?>"
+               <?= $rma['customer_id'] ? '' : 'disabled' ?>>
+        <!-- Said out loud, because it is not obvious: this is the customer
+             record, not a label on this RMA. -->
+        <p style="font-size:11px;color:var(--text-muted);margin-top:4px;"><?= __('rma.identity_customer_hint') ?></p>
+      </div>
+      <div class="field">
+        <label><?= __('rma.sn') ?></label>
+        <input type="text" name="serial_number" value="<?= htmlspecialchars($rma['serial_number'] ?? '') ?>"
+               <?= $rma['device_id'] ? '' : 'disabled' ?>>
+      </div>
+      <div class="field">
+        <label><?= __('rma.imei') ?></label>
+        <input type="text" name="imei" value="<?= htmlspecialchars($rma['imei'] ?? '') ?>"
+               <?= $rma['device_id'] ? '' : 'disabled' ?>>
+      </div>
+    </form>
+    <div class="modal-actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;">
+      <button type="button" class="btn" onclick="document.getElementById('identity-modal').style.display='none'"><?= __('btn.cancel') ?></button>
+      <button type="submit" form="identity-form" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var btn = document.getElementById('identity-edit-btn');
+  var box = document.getElementById('identity-modal');
+  if (!btn || !box) return;
+  btn.addEventListener('click', function () {
+    box.style.display = 'flex';
+    var first = box.querySelector('input:not([type=hidden]):not([disabled])');
+    if (first) first.focus();
+  });
+  /* Click the backdrop or press Escape to leave without saving. */
+  box.addEventListener('click', function (e) { if (e.target === box) box.style.display = 'none'; });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && box.style.display === 'flex') box.style.display = 'none';
+  });
+})();
+</script>
+<?php endif; ?>
