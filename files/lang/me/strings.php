@@ -951,7 +951,7 @@ return [
     'settings.rma_reset_needs_year'  => 'Nedostupno: format nema godinu, pa bi resetovanje ponovilo već izdate brojeve. Dodajte {YY} ili {YEAR} da omogućite ovu opciju',
     'settings.sidebar'       => 'Bočna traka',
     'settings.sidebar_collapse' => 'Podrazumijevano skupi bočnu traku (samo ikone)',
-    'sms.rma_received'       => 'Integra: primili smo vaš uredjaj. Reklamacija :number. Status pratite ovdje: :url',
+    'sms.rma_received'       => 'Primili smo vaš uredjaj. Reklamacija :number. Status pratite ovdje: :url',
     'settings.rma_sms'       => 'Pošalji SMS korisniku kada se otvori reklamacija',
     'settings.rma_sms_hint'  => 'Svaka poruka se naplaćuje. Partneri se obavještavaju email-om, nikada SMS-om, a ako je partner jedini kontakt onda se ni njegovom korisniku ne šalje SMS.',
     'settings.sessions'          => 'Trajanje prijave',
