@@ -282,10 +282,18 @@ select {
 select {
   -webkit-appearance: none; -moz-appearance: none; appearance: none;
   padding-right: 30px;
+  /* The shared control rule above sets line-height:1, which at 13px leaves a
+     line box exactly 13px tall - no room for the tails of g j p q y. The closed
+     field is drawn with the engine's own metrics and looks fine; the open list
+     is laid out from these styles, so descenders were clipped there. Height is
+     set explicitly on the control, so the text stays centred without it. */
+  line-height: normal;
   background-image: var(--select-chevron, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23888780' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 2.5 6 6.5l4.5-4'/%3E%3C/svg%3E"));
   background-repeat: no-repeat;
   background-position: right 10px center;
 }
+/* The open list takes its metrics from the option, which inherited the same 1. */
+select option { line-height: normal; }
 
 /* Colour input: swatch + hex code as one split pill, divided by a single
    vertical line. */
