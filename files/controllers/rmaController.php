@@ -248,10 +248,20 @@ class RmaController {
                                         : null),
         ]);
 
-        // Generate tracking token
+        // Tracking token. 64 hex characters was 94 characters of URL in a text
+        // message, on its own enough to push every SMS into a second segment.
+        //
+        // 16 hex characters is 64 bits. That is safe here because the token is
+        // not what protects the page: /track asks for the phone number or email
+        // on the RMA before showing anything, and locks out after repeated
+        // failures. Guessing a token buys you the verify form.
+        //
+        // Existing 64-character tokens keep working — the route matches any
+        // length of hex, so receipts already printed and QR codes already
+        // handed over are unaffected.
         db_insert('rma_tracking_tokens', [
             'rma_id' => $rma_id,
-            'token'  => bin2hex(random_bytes(32)),
+            'token'  => bin2hex(random_bytes(8)),
         ]);
 
         // Log initial status

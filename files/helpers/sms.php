@@ -10,6 +10,27 @@ defined('RMS') or die('Direct access not permitted');
  *   - twilio     : Twilio REST API (https://api.twilio.com)
  *   - clickatell : Clickatell Platform (https://platform.clickatell.com)
  */
+/**
+ * Montenegrin letters an SMS can carry, in plain form.
+ *
+ * The GSM-7 alphabet a text message is billed in has no č ć š ž. One of them
+ * anywhere in the body switches the whole message to UCS-2, which cuts a
+ * segment from 153 characters to 67 — so a single "vaš" turned a 168-character
+ * message into three billed messages instead of two.
+ *
+ * Stripping them is normal practice for SMS in the region and reads fine in a
+ * text, where it would look wrong in an email. Applied here, at the one point
+ * every message passes through, so nothing can route around it.
+ *
+ * dj rather than the ligature, matching the house spelling rule.
+ */
+function sms_plain(string $text): string {
+    return strtr($text, [
+        'č' => 'c', 'ć' => 'c', 'š' => 's', 'ž' => 'z', 'đ' => 'dj',
+        'Č' => 'C', 'Ć' => 'C', 'Š' => 'S', 'Ž' => 'Z', 'Đ' => 'Dj',
+    ]);
+}
+
 function sms_send(string $to, string $text): bool {
     return sms_send_result($to, $text)['ok'];
 }
@@ -25,6 +46,9 @@ function sms_send_result(string $to, string $text): array {
     // Normalise the phone number to E.164-ish (digits + optional leading +)
     $to = preg_replace('/[^\d+]/', '', $to);
     if ($to === '') return ['ok' => false, 'error' => __('settings.sms_no_number')];
+
+    // Every message, from here on, in plain letters. See sms_plain().
+    $text = sms_plain($text);
 
     return match ($provider) {
         'mtel'       => sms_send_mtel($to, $text),
