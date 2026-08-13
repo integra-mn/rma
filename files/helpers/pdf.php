@@ -150,7 +150,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: ' . app_font_stack() . ';
-         font-size: 14px; color: #2c2c2a; background: #f4f4f0; -webkit-font-smoothing: antialiased; }
+         font-size: 14px; color: #2c2c2a; background: #F4F4F4; -webkit-font-smoothing: antialiased; }
   /* A real A4 sheet on screen — the same width, height and 10mm padding the
      printer uses, so the view matches what comes out.
      The column layout is what lets .footer sit on the bottom edge of the sheet
@@ -253,7 +253,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
      rather than to the document, so they are still reachable when scrolled.
      There is room across a row, so the labels stay out. */
   @media screen and (max-width: 1119px) {
-    #toolbar { position: sticky; top: 0; z-index: 10; background: #f4f4f0; }
+    #toolbar { position: sticky; top: 0; z-index: 10; background: #F4F4F4; }
   }
   @media print {
     /* Browsers drop background colours when printing unless asked. Without this
