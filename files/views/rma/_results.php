@@ -5,7 +5,7 @@
   <table class="data-table">
     <thead>
       <tr>
-        <th><?= __('rma.number') ?></th>
+        <th><?= __('label.rma') ?></th>
         <th><?= __('rma.customer') ?></th>
         <th><?= __('rma.partner') ?></th>
         <th><?= __('label.status') ?></th>

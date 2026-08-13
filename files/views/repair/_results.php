@@ -5,7 +5,7 @@
   <table class="data-table">
     <thead>
       <tr>
-        <th><?= __('repair.job_rma') ?></th>
+        <th><?= __('label.work_order') ?></th>
         <th><?= __('rma.customer') ?></th>
         <th><?= __('label.status') ?></th>
         <th><?= __('label.priority') ?></th>
