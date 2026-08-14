@@ -124,7 +124,7 @@ $can_edit  = is_super_admin();
         <td style="color:var(--text-secondary);padding-left:1.5rem;<?= $ch_usable ? '' : 'opacity:0.55;' ?>">
           <?= $label ?>
           <?php if (!$ch_usable): ?>
-            <span style="font-size:11px;color:var(--text-muted);"> &middot; <?= __('admin.perm_2fa_off') ?></span>
+            <span style="font-size:11px;color:var(--text-muted);"> &middot; <?= __('admin.perm_2fa_off', ['channel' => $label]) ?></span>
           <?php endif; ?>
         </td>
         <?php foreach ($roles as $code => $role): ?>
