@@ -30,9 +30,16 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
 
     $token = db_val('SELECT token FROM rma_tracking_tokens WHERE rma_id = ?', [$rma_id]);
     $tracking_url = $token ? 'https://rma.integra.mn/track/' . $token : '';
-    $qr_base64    = $tracking_url ? generate_qr_base64($tracking_url, 150) : '';
 
     $engine = $engine_override ?: setting('pdf_engine', 'html');
+
+    // The two renderers put the QR on different colours, so it is drawn to
+    // suit each. In the PDF the tracking block is grey and a white QR sat on
+    // it as a white card; there it takes the same grey. The print view keeps
+    // white, which is right on paper — the block loses its fill when printed,
+    // so white on white shows no square either.
+    $qr_bg     = $engine === 'mpdf' ? [244, 244, 244] : null;
+    $qr_base64 = $tracking_url ? generate_qr_base64($tracking_url, 150, $qr_bg) : '';
 
     if ($engine === 'mpdf' && file_exists(ROOT . '/vendor/autoload.php')) {
         generate_rma_pdf_mpdf($rma, $tracking_url, $qr_base64, $mode);
