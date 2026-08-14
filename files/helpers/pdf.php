@@ -259,8 +259,17 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
     /* Browsers drop background colours when printing unless asked. Without this
        the grey blocks behind Dostavljena oprema and Opis reklamacije showed on
        screen and vanished on paper. */
-    body, .complaint-box, .status-badge, .qr-section, .signature-box {
+    body, .signature-box {
       -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    /* On paper the grey fill behind Primljena oprema, Opis reklamacije and the
+       tracking block reads as shading and costs toner on every receipt. A
+       hairline marks the same boundary. Print only — the screen keeps the fill,
+       and so does the PDF, which is built from its own stylesheet further down
+       this file. */
+    .complaint-box, .qr-section {
+      background: transparent;
+      border: 0.5px solid #d3d1c7;
     }
     body { background: #fff; }
     /* 10mm matches the print padding on .page, so the footer lines up with the

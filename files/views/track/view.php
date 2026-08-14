@@ -26,6 +26,10 @@
       background: #f4f4f0; color: #2c2c2a; padding: 24px;
       -webkit-font-smoothing: antialiased;
     }
+    /* Form controls do not inherit font-family — browsers give them the OS
+       default — so without this the phone field and the buttons sat in a
+       different typeface from the page around them. */
+    input, button, select, textarea { font-family: inherit; }
     .wrap { width: 1080px; max-width: 100%; margin: 0 auto; }
 
     .logo-bar { margin-bottom: 18px; }
@@ -63,7 +67,10 @@
     .detail-row { display: flex; font-size: 13px; padding: 4px 0; }
     .detail-row .k { color: #888780; width: 70px; flex-shrink: 0; }
     .detail-row .v { color: #2c2c2a; }
-    .mono { font-family: "SF Mono", Menlo, Consolas, monospace; }
+    /* Was monospace so IMEI and serial digits lined up. Montserrat carries
+       tabular figures, so they line up in the page font and the tracking
+       page is one typeface throughout. */
+    .mono { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
 
     /* Prose for free-text fields (complaint, findings, resolution) */
     .prose { font-size: 13.5px; line-height: 1.6; color: #2c2c2a; white-space: pre-wrap; }

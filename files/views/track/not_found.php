@@ -21,6 +21,10 @@
            background: #f4f4f0; display: flex;
            -webkit-font-smoothing: antialiased;
            align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; }
+    /* Form controls do not inherit font-family — browsers give them the OS
+       default — so without this the phone field and the buttons sat in a
+       different typeface from the page around them. */
+    input, button, select, textarea { font-family: inherit; }
     .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px;
             padding: 2rem; max-width: 360px; text-align: center; }
     img { width: 90px; margin-bottom: 1rem; }
