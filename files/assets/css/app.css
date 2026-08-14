@@ -256,6 +256,24 @@ button, input, select, textarea {
 /* Popup/modal action rows: give every button the same width for a tidy footer. */
 .modal-actions button { min-width: 90px; }
 
+/* ── Figures ──────────────────────────────────────────────────
+   Montserrat draws proportional digits: a 1 is 4.7px where a 0 is 8.6px, so
+   52151 renders nearly 4px shorter than 52150 and a column of RMA numbers
+   comes out ragged. Tabular figures give every digit the same advance, which
+   is what a column of numbers wants — and the shipped woff2 carries the
+   feature, so this needs no new font file.
+
+   Applied to tables and to the RMA number wherever it is shown on its own.
+   Prose is left alone: proportional figures read better inside a sentence,
+   which is why they are the default. */
+.data-table,
+.dash-table,
+.rma-number,
+.rma-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;   /* older engines that ignore the property */
+}
+
 /* ── Form controls ───────────────────────────────────────────── */
 input[type=text], input[type=email], input[type=password],
 input[type=date], input[type=number], input[type=search], input[type=url],
