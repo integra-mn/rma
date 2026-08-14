@@ -151,7 +151,6 @@
       'physical_damage'     => __('repair.refuse_physical'),
       'liquid_damage'       => __('repair.refuse_liquid'),
       'unauthorized_repair' => __('repair.refuse_unauthorized'),
-      'out_of_warranty'     => __('repair.refuse_out_of_warranty'),
     ];
     $current_refusals = $job['warranty_refusal'] ? json_decode($job['warranty_refusal'], true) : [];
     $btn_style = "display:inline-flex;align-items:center;padding:7px 12px;font-size:13px;border-radius:8px;cursor:pointer;border:0.5px solid var(--border,#d3d1c7);background:#fff;color:var(--text-secondary,#5f5e5a);user-select:none;line-height:1;box-sizing:border-box;min-height:34px;font-family:inherit;";
@@ -167,12 +166,23 @@
 
       <!-- Under Warranty / Warranty Refused toggle -->
       <div style="display:flex;gap:10px;margin-bottom:1rem;">
-        <button type="button" id="war-yes" onclick="setWarrantyRepair(1)"
-                style="<?= $btn_style ?><?= $job['is_warranty'] ? $btn_active : '' ?>">
+        <?php
+          // out_of_warranty stored on its own is the third state rather than a
+          // refusal reason — which is how it was already recorded, so nothing
+          // in the database changes shape.
+          $war_out  = $current_refusals === ['out_of_warranty'];
+          $war_mode = $job['is_warranty'] ? 'yes' : ($war_out ? 'out' : 'refused');
+        ?>
+        <button type="button" id="war-yes" onclick="setWarrantyRepair('yes')"
+                style="<?= $btn_style ?><?= $war_mode === 'yes' ? $btn_active : '' ?>">
           <?= __('repair.under_warranty') ?>
         </button>
-        <button type="button" id="war-no" onclick="setWarrantyRepair(0)"
-                style="<?= $btn_style ?><?= !$job['is_warranty'] ? 'background:#fcebeb;color:#a32d2d;border-color:#f09595;' : '' ?>">
+        <button type="button" id="war-out" onclick="setWarrantyRepair('out')"
+                style="<?= $btn_style ?><?= $war_mode === 'out' ? 'background:var(--bg-subtle,#f4f4f0);color:var(--text-primary,#2c2c2a);' : '' ?>">
+          <?= __('repair.refuse_out_of_warranty') ?>
+        </button>
+        <button type="button" id="war-no" onclick="setWarrantyRepair('refused')"
+                style="<?= $btn_style ?><?= $war_mode === 'refused' ? 'background:#fcebeb;color:#a32d2d;border-color:#f09595;' : '' ?>">
           <?= __('repair.warranty_refused') ?>
         </button>
       </div>
@@ -271,9 +281,11 @@
   <?php endif; ?>
 
   <script>
-  function setWarrantyRepair(val) {
+  function setWarrantyRepair(mode) {
+    var val = mode === 'yes' ? 1 : 0;
     document.getElementById('war-val').value = val;
     var btnYes = document.getElementById('war-yes');
+    var btnOut = document.getElementById('war-out');
     var btnNo  = document.getElementById('war-no');
     var active = 'var(--accent-bg,#e1f5ee)';
     var aColor = 'var(--accent-text,#085041)';
@@ -281,20 +293,26 @@
     var def    = '#fff';
     var dColor = 'var(--text-secondary,#5f5e5a)';
     var dBorder= 'var(--border,#d3d1c7)';
-    if (val) {
+    [btnYes, btnOut, btnNo].forEach(function (b) {
+      b.style.background = def; b.style.color = dColor; b.style.borderColor = dBorder;
+    });
+    if (mode === 'yes') {
       btnYes.style.background = active; btnYes.style.color = aColor; btnYes.style.borderColor = aBorder;
-      btnNo.style.background  = def;   btnNo.style.color  = dColor; btnNo.style.borderColor  = dBorder;
+    } else if (mode === 'out') {
+      // Neutral, not red: past its cover is a fact about the device, not a
+      // judgement about the claim.
+      btnOut.style.background = 'var(--bg-subtle,#f4f4f0)';
+      btnOut.style.color      = 'var(--text-primary,#2c2c2a)';
     } else {
-      btnNo.style.background  = '#fcebeb'; btnNo.style.color  = '#a32d2d'; btnNo.style.borderColor = '#f09595';
-      btnYes.style.background = def;       btnYes.style.color = dColor;    btnYes.style.borderColor = dBorder;
+      btnNo.style.background = '#fcebeb'; btnNo.style.color = '#a32d2d'; btnNo.style.borderColor = '#f09595';
     }
     // Disable/enable and reset refusal buttons
     document.querySelectorAll('#war-reasons button[id^="ref-"]').forEach(function(b) {
-      b.disabled = !!val;
-      b.style.cursor = val ? 'not-allowed' : 'pointer';
-      b.style.pointerEvents = val ? 'none' : '';
+      b.disabled = mode !== 'refused';
+      b.style.cursor = mode === 'refused' ? 'pointer' : 'not-allowed';
+      b.style.pointerEvents = mode === 'refused' ? '' : 'none';
       b.style.opacity = '1';
-      if (val) {
+      if (mode !== 'refused') {
         b.dataset.active    = '0';
         b.style.background  = '#fff';
         b.style.color       = dColor;

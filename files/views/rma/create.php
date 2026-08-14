@@ -210,7 +210,6 @@ defined('RMS') or die('Direct access not permitted');
             'physical_damage'     => __('rma.ref_physical_damage'),
             'liquid_damage'       => __('rma.ref_liquid_damage'),
             'unauthorized_repair' => __('rma.ref_unauthorized_repair'),
-            'out_of_warranty'     => __('rma.ref_out_of_warranty'),
           ];
           foreach ($refusal_reasons as $key => $label): ?>
             <button type="button" id="ref-btn-<?= $key ?>"
@@ -624,9 +623,15 @@ function dismissDeviceMatch() {
   document.getElementById('device-id-input').value = '';
 }
 
-function setWarranty(val) {
+function setWarranty(mode) {
+  // Three states, one column. is_warranty carries yes/no as before; "out of
+  // warranty" is the no case recorded as its own single reason, which is where
+  // it was already stored — so nothing in the database changes shape and old
+  // records keep their meaning.
+  const val = mode === 'yes' ? 1 : 0;
   document.getElementById('is_warranty_val').value = val;
   const yes = document.getElementById('btn-warranty-yes');
+  const out = document.getElementById('btn-warranty-out');
   const no  = document.getElementById('btn-warranty-no');
 
   const setActive = (btn) => {
@@ -640,28 +645,43 @@ function setWarranty(val) {
     btn.style.borderColor = 'var(--border, #d3d1c7)';
   };
 
-  val ? setActive(yes) : setInactive(yes);
-  if (!val) {
+  setInactive(yes); setInactive(out); setInactive(no);
+  if (mode === 'yes') {
+    setActive(yes);
+  } else if (mode === 'out') {
+    // Neutral, not red: past its cover is a fact about the device, not a
+    // judgement about the claim.
+    out.style.background  = 'var(--bg-subtle, #f4f4f0)';
+    out.style.color       = 'var(--text-primary, #2c2c2a)';
+    out.style.borderColor = 'var(--border, #d3d1c7)';
+  } else {
     no.style.background  = '#fcebeb';
     no.style.color       = '#a32d2d';
     no.style.borderColor = '#f09595';
-  } else {
-    setInactive(no);
   }
 
-  // Refusal buttons: always fully visible, clickable only when Warranty Refused
+  // Reasons belong to "refused" alone: there is nothing to justify when the
+  // device was under warranty, and nothing to justify when it simply is not.
+  const reasons = mode === 'refused';
   document.querySelectorAll('#ref-buttons button').forEach(btn => {
-    btn.disabled      = !!val;
+    btn.disabled      = !reasons;
     btn.style.opacity = '1';
-    btn.style.cursor  = val ? 'not-allowed' : 'pointer';
-    if (val) {
+    btn.style.cursor  = reasons ? 'pointer' : 'not-allowed';
+    if (!reasons) {
       btn.dataset.active    = '0';
       btn.style.background  = '#fff';
       btn.style.color       = 'var(--text-secondary, #5f5e5a)';
       btn.style.borderColor = 'var(--border, #d3d1c7)';
     }
   });
-  if (val) document.getElementById('ref-inputs').innerHTML = '';
+
+  const box = document.getElementById('ref-inputs');
+  box.innerHTML = '';
+  if (mode === 'out') {
+    const inp = document.createElement('input');
+    inp.type = 'hidden'; inp.name = 'warranty_refusal[]'; inp.value = 'out_of_warranty';
+    box.appendChild(inp);
+  }
 }
 
 

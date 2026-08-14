@@ -352,7 +352,11 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
                   : '')) . '
         <tr><td>' . $t('pdf.status') . '</td><td>' . $t('pdf.status_received') . (
               !empty($rma['is_warranty']) ? ' · ' . $t('pdf.status_warranty')
-            : (!empty($rma['warranty_refusal']) ? ' · ' . $t('pdf.status_warranty_no') : '')
+            : (!empty($rma['warranty_refusal'])
+                    // out_of_warranty alone is the third state, not a refusal.
+                    ? ' · ' . (json_decode((string)$rma['warranty_refusal'], true) === ['out_of_warranty']
+                               ? $t('rma.ref_out_of_warranty') : $t('pdf.status_warranty_no'))
+                    : '')
         ) . '</td></tr>
       </table>
     </div>
@@ -684,7 +688,11 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
                       : '')) . '
             <tr><td>' . $t('pdf.status') . '</td><td>' . $t('pdf.status_received') . (
                   !empty($rma['is_warranty']) ? ' · ' . $t('pdf.status_warranty')
-                : (!empty($rma['warranty_refusal']) ? ' · ' . $t('pdf.status_warranty_no') : '')
+                : (!empty($rma['warranty_refusal'])
+                    // out_of_warranty alone is the third state, not a refusal.
+                    ? ' · ' . (json_decode((string)$rma['warranty_refusal'], true) === ['out_of_warranty']
+                               ? $t('rma.ref_out_of_warranty') : $t('pdf.status_warranty_no'))
+                    : '')
             ) . '</td></tr>
           </table>
         </td>

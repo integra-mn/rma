@@ -19,10 +19,15 @@
             <span class="badge" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('rma.warranty') ?></span>
           <?php else: ?>
             <?php
-              $refusal_labels = ['physical_damage'=>'Physical Damage','liquid_damage'=>'Contact With Liquid','unauthorized_repair'=>'Un-Authorized Repair','out_of_warranty'=>'Out Of Warranty'];
               $refusals = $rma['warranty_refusal'] ? json_decode($rma['warranty_refusal'], true) : [];
+              // out_of_warranty on its own is the third state, not a refusal —
+              // the device is simply past its cover and there is nothing to
+              // refuse. Alongside other reasons it remains part of a refusal.
+              $out_only = $refusals === ['out_of_warranty'];
             ?>
-            <?php if (!empty($refusals)): ?>
+            <?php if ($out_only): ?>
+              <span class="badge" style="background:var(--bg-subtle);color:var(--text-secondary);border:0.5px solid var(--border);"><?= __('rma.ref_out_of_warranty') ?></span>
+            <?php elseif (!empty($refusals)): ?>
               <span class="badge" style="background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;"><?= __('rma.warranty_refused') ?></span>
             <?php endif; ?>
           <?php endif; ?>
