@@ -178,7 +178,7 @@
           <?= __('repair.under_warranty') ?>
         </button>
         <button type="button" id="war-out" onclick="setWarrantyRepair('out')"
-                style="<?= $btn_style ?><?= $war_mode === 'out' ? 'background:var(--bg-subtle,#f4f4f0);color:var(--text-primary,#2c2c2a);' : '' ?>">
+                style="<?= $btn_style ?><?= $war_mode === 'out' ? 'background:#e8f3ff;color:#185fa5;border-color:#c5dcf5;' : '' ?>">
           <?= __('repair.refuse_out_of_warranty') ?>
         </button>
         <button type="button" id="war-no" onclick="setWarrantyRepair('refused')"
@@ -299,10 +299,10 @@
     if (mode === 'yes') {
       btnYes.style.background = active; btnYes.style.color = aColor; btnYes.style.borderColor = aBorder;
     } else if (mode === 'out') {
-      // Neutral, not red: past its cover is a fact about the device, not a
-      // judgement about the claim.
-      btnOut.style.background = 'var(--bg-subtle,#f4f4f0)';
-      btnOut.style.color      = 'var(--text-primary,#2c2c2a)';
+      // The app's light blue, not the red of a refusal.
+      btnOut.style.background  = '#e8f3ff';
+      btnOut.style.color       = '#185fa5';
+      btnOut.style.borderColor = '#c5dcf5';
     } else {
       btnNo.style.background = '#fcebeb'; btnNo.style.color = '#a32d2d'; btnNo.style.borderColor = '#f09595';
     }

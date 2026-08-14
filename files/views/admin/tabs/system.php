@@ -442,6 +442,28 @@
       <?= csrf_field() ?>
       <input type="hidden" name="tab" value="smtp">
 
+      <style>
+        /* Dimmed, not disabled. A disabled input submits nothing and this form
+           writes whatever arrives — so disabling these would blank the host,
+           port, user and from address on the next save, losing exactly what the
+           switch exists to preserve. They stay editable so settings can be
+           prepared before the service is switched on. */
+        .smtp-dim.is-off label,
+        .smtp-dim.is-off .field label { color: var(--text-muted); }
+        .smtp-dim.is-off input,
+        .smtp-dim.is-off select { opacity: 0.55; background: var(--bg-subtle); }
+      </style>
+      <script>
+        function smtpDim(off) {
+          document.querySelectorAll('.smtp-dim').forEach(function (el) {
+            el.classList.toggle('is-off', off);
+          });
+        }
+        // Reflect the saved state on load, then follow the dropdown live so the
+        // clue appears before anything is saved.
+        smtpDim(document.getElementById('smtp-enabled').value !== '1');
+      </script>
+
       <!-- Servis, Hostname, Port and Enkripcija are one decision made together
            — where mail goes and how it gets there — so they sit on one line.
            SMS and WhatsApp switch off by picking Iskljuceno in their provider
@@ -450,20 +472,21 @@
       <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="field">
           <label><?= __('settings.channel_state') ?></label>
-          <select name="smtp_enabled" class="custom-select">
+          <select name="smtp_enabled" id="smtp-enabled" class="custom-select"
+                onchange="smtpDim(this.value !== '1')">
             <option value="1" <?= setting_on('smtp_enabled', true) ? 'selected' : '' ?>><?= __('settings.channel_on') ?></option>
             <option value="0" <?= setting_on('smtp_enabled', true) ? '' : 'selected' ?>><?= __('settings.provider_disabled') ?></option>
           </select>
         </div>
-        <div class="field">
+        <div class="field smtp-dim">
           <label><?= __('settings.smtp_host') ?></label>
           <input type="text" name="smtp_host" value="<?= htmlspecialchars(setting('smtp_host','')) ?>">
         </div>
-        <div class="field">
+        <div class="field smtp-dim">
           <label><?= __('settings.port') ?></label>
           <input type="number" name="smtp_port" value="<?= (int)setting('smtp_port',587) ?>">
         </div>
-        <div class="field">
+        <div class="field smtp-dim">
           <label><?= __('settings.encryption') ?></label>
           <select name="smtp_encryption">
             <?php foreach (['tls'=>'TLS (STARTTLS)','ssl'=>'SSL','none'=>__('settings.enc_none')] as $v => $l): ?>
@@ -473,7 +496,7 @@
         </div>
       </div>
 
-      <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="form-grid smtp-dim" style="grid-template-columns:repeat(4,1fr)">
         <div class="field">
           <label><?= __('settings.username') ?></label>
           <input type="text" name="smtp_user" value="<?= htmlspecialchars(setting('smtp_user','')) ?>" autocomplete="off">

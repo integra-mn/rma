@@ -26,7 +26,7 @@
               $out_only = $refusals === ['out_of_warranty'];
             ?>
             <?php if ($out_only): ?>
-              <span class="badge" style="background:var(--bg-subtle);color:var(--text-secondary);border:0.5px solid var(--border);"><?= __('rma.ref_out_of_warranty') ?></span>
+              <span class="badge" style="background:#e8f3ff;color:#185fa5;border:0.5px solid #c5dcf5;"><?= __('rma.ref_out_of_warranty') ?></span>
             <?php elseif (!empty($refusals)): ?>
               <span class="badge" style="background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;"><?= __('rma.warranty_refused') ?></span>
             <?php endif; ?>

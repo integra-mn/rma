@@ -654,11 +654,11 @@ function setWarranty(mode) {
   if (mode === 'yes') {
     setActive(yes);
   } else if (mode === 'out') {
-    // Neutral, not red: past its cover is a fact about the device, not a
-    // judgement about the claim.
-    out.style.background  = 'var(--bg-subtle, #f4f4f0)';
-    out.style.color       = 'var(--text-primary, #2c2c2a)';
-    out.style.borderColor = 'var(--border, #d3d1c7)';
+    // The app's light blue, not the red of a refusal: past its cover is a fact
+    // about the device, not a judgement about the claim.
+    out.style.background  = '#e8f3ff';
+    out.style.color       = '#185fa5';
+    out.style.borderColor = '#c5dcf5';
   } else {
     no.style.background  = '#fcebeb';
     no.style.color       = '#a32d2d';
