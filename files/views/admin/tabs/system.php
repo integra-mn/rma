@@ -443,24 +443,50 @@
       <input type="hidden" name="tab" value="smtp">
 
       <style>
-        /* Dimmed, not disabled. A disabled input submits nothing and this form
-           writes whatever arrives — so disabling these would blank the host,
-           port, user and from address on the next save, losing exactly what the
-           switch exists to preserve. They stay editable so settings can be
-           prepared before the service is switched on. */
-        .smtp-dim.is-off label,
-        .smtp-dim.is-off .field label { color: var(--text-muted); }
+        .smtp-dim.is-off label { color: var(--text-muted); }
         .smtp-dim.is-off input,
-        .smtp-dim.is-off select { opacity: 0.55; background: var(--bg-subtle); }
+        .smtp-dim.is-off select {
+          opacity: 0.55; background: var(--bg-subtle); cursor: not-allowed;
+        }
       </style>
       <script>
+        /**
+         * Iskljuceno locks every field but Servis itself.
+         *
+         * readonly, not disabled: a disabled input submits nothing, and
+         * save_smtp() writes whatever arrives — so disabling these would blank
+         * the host, port, user and from address on the next save, losing
+         * exactly what the switch exists to preserve. readonly cannot be typed
+         * into and still submits.
+         *
+         * A <select> has no readonly, so Enkripcija is disabled and a hidden
+         * twin carries its value instead.
+         */
         function smtpDim(off) {
           document.querySelectorAll('.smtp-dim').forEach(function (el) {
             el.classList.toggle('is-off', off);
           });
+          document.querySelectorAll('.smtp-dim input').forEach(function (i) {
+            i.readOnly = off;
+          });
+          document.querySelectorAll('.smtp-dim select').forEach(function (sel) {
+            sel.disabled = off;
+            var id = 'smtp-mirror-' + sel.name;
+            var twin = document.getElementById(id);
+            if (off) {
+              if (!twin) {
+                twin = document.createElement('input');
+                twin.type = 'hidden'; twin.id = id; twin.name = sel.name;
+                sel.parentNode.appendChild(twin);
+              }
+              twin.value = sel.value;
+            } else if (twin) {
+              twin.remove();
+            }
+          });
         }
         // Reflect the saved state on load, then follow the dropdown live so the
-        // clue appears before anything is saved.
+        // clue appears as soon as the choice is made.
         smtpDim(document.getElementById('smtp-enabled').value !== '1');
       </script>
 
