@@ -33,13 +33,7 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
 
     $engine = $engine_override ?: setting('pdf_engine', 'html');
 
-    // The two renderers put the QR on different colours, so it is drawn to
-    // suit each. In the PDF the tracking block is grey and a white QR sat on
-    // it as a white card; there it takes the same grey. The print view keeps
-    // white, which is right on paper — the block loses its fill when printed,
-    // so white on white shows no square either.
-    $qr_bg     = $engine === 'mpdf' ? [244, 244, 244] : null;
-    $qr_base64 = $tracking_url ? generate_qr_base64($tracking_url, 150, $qr_bg) : '';
+    $qr_base64 = $tracking_url ? generate_qr_base64($tracking_url, 150) : '';
 
     if ($engine === 'mpdf' && file_exists(ROOT . '/vendor/autoload.php')) {
         generate_rma_pdf_mpdf($rma, $tracking_url, $qr_base64, $mode);
@@ -176,6 +170,9 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .two-col { display: flex; gap: 24px; margin-bottom: 18px; }
   .col { flex: 1; }
   .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 7px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
+  /* Primljena oprema and Opis reklamacije are followed by a bordered box,
+     so the heading rule sat directly above another line. */
+  .section-title.no-rule { border-bottom: none; padding-bottom: 0; }
   table.info { width: 100%; border-collapse: collapse; }
   table.info td { padding: 4px 0; vertical-align: top; font-size: 13px; border-bottom: 0.5px solid #F4F4F4; }
   table.info td:first-child { color: #888780; width: 95px; font-size: 12px; }
@@ -184,7 +181,10 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .warranty-badge { font-weight: 500; color: #1A1A1F; }
   .warranty-badge::before { content: " · "; color: #888780; font-weight: 400; }
   .complaint-box { background: #F4F4F4; border-radius: 6px; padding: 11px 13px; font-size: 13px; line-height: 1.6; margin-bottom: 18px; }
-  .qr-section { display: flex; align-items: flex-start; gap: 14px; background: #F4F4F4; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
+  /* No fill: the QR is drawn on white, so any panel behind it shows as a
+     white card around the code. A hairline marks the block instead. */
+  .qr-section { display: flex; align-items: flex-start; gap: 14px; border: 0.5px solid #d3d1c7;
+                border-radius: 8px; padding: 14px; margin-bottom: 18px; }
   .qr-section img { width: 88px; height: 88px; flex-shrink: 0; }
   .qr-text h3 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
   .qr-text p { font-size: 12px; color: #5f5e5a; line-height: 1.5; }
@@ -274,7 +274,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
        hairline marks the same boundary. Print only — the screen keeps the fill,
        and so does the PDF, which is built from its own stylesheet further down
        this file. */
-    .complaint-box, .qr-section {
+    .complaint-box {
       background: transparent;
       border: 0.5px solid #d3d1c7;
     }
@@ -343,12 +343,12 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   </div>
 
   ' . ($accessories ? '
-  <p class="section-title">' . $t('pdf.accessories') . '</p>
+  <p class="section-title no-rule">' . $t('pdf.accessories') . '</p>
   <div class="complaint-box">' . htmlspecialchars($accessories) . '</div>
   ' : '') . '
 
   ' . ($rma['complaint'] ? '
-  <p class="section-title">' . $t('pdf.reported_issue') . '</p>
+  <p class="section-title no-rule">' . $t('pdf.reported_issue') . '</p>
   <div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>
   ' : '') . '
 
@@ -628,6 +628,9 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
       .header td { vertical-align: top; padding: 0; }
       .rma-num { font-size: 22px; font-weight: 700; color: #1D9E75; }
       .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 6px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
+      /* Primljena oprema and Opis reklamacije are followed by a bordered box,
+         so the heading rule sat directly above another line. */
+      .section-title.no-rule { border-bottom: none; padding-bottom: 0; }
       table.info td { padding: 4px 0; font-size: 13px; border-bottom: 0.5px solid #F4F4F4; }
       table.info td:first-child { color: #888780; width: 95px; font-size: 10px; }
       .status-badge { font-weight: 500; color: #1A1A1F; }
@@ -677,9 +680,9 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
       </tr>
     </table>
 
-    ' . (($acc = format_rma_accessories($rma, customer_lang($rma['customer_lang'] ?? null))) ? '<p class="section-title">' . $t('pdf.accessories') . '</p><div class="complaint-box">' . htmlspecialchars($acc) . '</div>' : '') . '
+    ' . (($acc = format_rma_accessories($rma, customer_lang($rma['customer_lang'] ?? null))) ? '<p class="section-title no-rule">' . $t('pdf.accessories') . '</p><div class="complaint-box">' . htmlspecialchars($acc) . '</div>' : '') . '
 
-    ' . ($rma['complaint'] ? '<p class="section-title">' . $t('pdf.reported_issue') . '</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>' : '') . '
+    ' . ($rma['complaint'] ? '<p class="section-title no-rule">' . $t('pdf.reported_issue') . '</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>' : '') . '
 
     ' . ($qr_base64 ? '<table width="100%" style="margin-top:12px;"><tr>
       <td style="vertical-align:top;padding-right:12px;width:100px;"><img src="' . $qr_base64 . '" width="90" height="90"></td>
