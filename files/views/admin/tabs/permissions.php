@@ -98,8 +98,8 @@ $can_edit  = is_super_admin();
         // has a real policy row and its channels matter.
         $channel_labels = [
           'totp'     => __('auth.channel_totp'),
-          'sms'      => 'SMS',
           'email'    => 'Email',
+          'sms'      => 'SMS',
           'whatsapp' => 'WhatsApp',
         ];
         $role_channels = [];
@@ -125,6 +125,11 @@ $can_edit  = is_super_admin();
           <?= $label ?>
           <?php if (!$ch_usable): ?>
             <span style="font-size:11px;color:var(--text-muted);"> &middot; <?= __('admin.perm_2fa_off', ['channel' => $label]) ?></span>
+          <?php elseif ($ch === 'totp'): ?>
+            <!-- Always shown: the authenticator is never switched on centrally.
+                 It appears for a person once they enrol in their own profile,
+                 which is not something this screen can grant. -->
+            <span style="font-size:11px;color:var(--text-muted);"> &middot; <?= __('admin.perm_2fa_totp_hint') ?></span>
           <?php endif; ?>
         </td>
         <?php foreach ($roles as $code => $role): ?>
@@ -145,20 +150,15 @@ $can_edit  = is_super_admin();
         <?php endforeach; ?>
       </tr>
       <?php endforeach; ?>
-      <tr>
-        <td colspan="<?= count($roles) + 1 ?>"
-            style="font-size:11px;color:var(--text-muted);padding:4px 12px 10px 1.5rem;line-height:1.5;">
-          <?= __('admin.perm_2fa_note') ?>
-        </td>
-      </tr>
     </tbody>
   </table>
   </div>
 
   <?php if ($can_edit): ?>
   <div style="margin-top:1rem;display:flex;gap:10px;align-items:center;min-height:18px;">
-    <span id="perm-status" data-note="<?= htmlspecialchars(__('admin.perm_apply_note')) ?>"
-          style="font-size:12px;color:var(--text-muted);"><?= __('admin.perm_apply_note') ?></span>
+    <!-- Empty until something is saved: it reports saving / saved / failed and
+         then clears, rather than carrying a standing sentence nobody re-reads. -->
+    <span id="perm-status" data-note="" style="font-size:12px;color:var(--text-muted);"></span>
   </div>
   <?php else: ?>
   <p style="margin-top:1rem;font-size:12px;color:var(--text-muted);"><?= __('admin.perm_no_edit') ?></p>
