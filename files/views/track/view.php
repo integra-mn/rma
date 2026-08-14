@@ -23,7 +23,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: <?= app_font_stack() ?>;
-      background: #f4f4f0; color: #2c2c2a; padding: 24px;
+      background: #F4F4F4; color: #2c2c2a; padding: 24px;
       -webkit-font-smoothing: antialiased;
     }
     /* Form controls do not inherit font-family — browsers give them the OS
@@ -48,6 +48,9 @@
     /* Hero */
     .hero { padding: 24px 26px; }
     .hero .rma-number { font-size: 26px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.01em; }
+    /* Lighter than the number: it says what the number is without
+       competing with it. */
+    .hero .rma-word { font-weight: 400; color: #5f5e5a; }
     .hero .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
     .pill { display: inline-block; font-size: 13px; font-weight: 500; padding: 5px 14px; border-radius: 6px; }
     .pill-warranty { background: #faeeda; color: #633806; }
@@ -209,7 +212,7 @@
 
   <!-- ── HERO ── -->
   <div class="card hero">
-    <div class="rma-number"><?= htmlspecialchars($rma['rma_number']) ?></div>
+    <div class="rma-number"><span class="rma-word"><?= $tt('label.rma') ?></span> <?= htmlspecialchars($rma['rma_number']) ?></div>
     <div class="pills">
       <span class="pill"
             style="background:<?= htmlspecialchars($rma['status_color']) ?>22;color:<?= htmlspecialchars($rma['status_color']) ?>;">
@@ -221,16 +224,18 @@
     </div>
     <?php if ($rma['created_at'] || ($vis['est_completion'] && $rma['estimated_completion'])): ?>
       <div class="eta">
+        <!-- Predato first: the date the device was handed over is the fact the
+             customer is sure of, and the estimate follows from it. -->
+        <div>
+          <div class="eta-label"><?= $tt('track.submitted') ?></div>
+          <div class="eta-value"><?= format_date($rma['created_at']) ?></div>
+        </div>
         <?php if ($vis['est_completion'] && $rma['estimated_completion']): ?>
           <div>
             <div class="eta-label"><?= $tt('track.est_completion') ?></div>
             <div class="eta-value"><?= format_date($rma['estimated_completion']) ?></div>
           </div>
         <?php endif; ?>
-        <div>
-          <div class="eta-label"><?= $tt('track.submitted') ?></div>
-          <div class="eta-value"><?= format_date($rma['created_at']) ?></div>
-        </div>
       </div>
     <?php endif; ?>
   </div>
