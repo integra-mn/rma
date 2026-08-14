@@ -86,7 +86,7 @@
               <?= htmlspecialchars($sh['tracking_number'] ?: '—') ?>
             <?php endif; ?>
           </td>
-          <td><span class="badge" style="background:<?= $sc ?>22;color:<?= $sc ?>;border:0.5px solid <?= $sc ?>66;"><?= shipment_status_label($sh['status']) ?></span></td>
+          <td><span class="badge badge-status" style="background:<?= $sc ?>22;color:<?= $sc ?>;border:0.5px solid <?= $sc ?>66;"><?= shipment_status_label($sh['status']) ?></span></td>
           <td style="text-align:right;color:var(--text-secondary);"><?= $sh['cost'] !== null ? htmlspecialchars(number_format((float)$sh['cost'], 2)) : '—' ?></td>
           <td style="color:var(--text-muted);"><?= $sh['dispatched_at'] ? format_date($sh['dispatched_at']) : '—' ?></td>
           <td style="color:var(--text-muted);"><?= $sh['delivered_at'] ? format_date($sh['delivered_at']) : '—' ?></td>

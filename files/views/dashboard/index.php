@@ -62,7 +62,7 @@
             <td style="font-weight:500;"><?= htmlspecialchars($r['rma_number']) ?></td>
             <td style="color:var(--text-secondary);"><?= htmlspecialchars($r['customer_name'] ?? '—') ?></td>
             <td>
-              <span class="badge" style="<?= ($r['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;' : 'background:'.htmlspecialchars($r['status_color']).'22;color:'.htmlspecialchars($r['status_color']).';'.'border:0.5px solid '.htmlspecialchars($r['status_color']).'66;' ?>">
+              <span class="badge badge-status" style="<?= ($r['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;' : 'background:'.htmlspecialchars($r['status_color']).'22;color:'.htmlspecialchars($r['status_color']).';'.'border:0.5px solid '.htmlspecialchars($r['status_color']).'66;' ?>">
                 <?= status_label($r['status_code'] ?? '', $r['status_label']) ?>
               </span>
             </td>
@@ -103,7 +103,7 @@
             <td style="font-weight:500;"><?= htmlspecialchars($j['rma_number']) ?></td>
             <td style="color:var(--text-secondary);"><?= htmlspecialchars($j['customer_name'] ?? '—') ?></td>
             <td>
-              <span class="badge" style="background:<?= htmlspecialchars($j['status_color']) ?>22;color:<?= htmlspecialchars($j['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($j['status_color']) ?>66;">
+              <span class="badge badge-status" style="background:<?= htmlspecialchars($j['status_color']) ?>22;color:<?= htmlspecialchars($j['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($j['status_color']) ?>66;">
                 <?= status_label($j['status_code'] ?? '', $j['status_label']) ?>
               </span>
             </td>
@@ -139,7 +139,7 @@
             <td style="font-weight:500;"><?= htmlspecialchars($w['rma_number']) ?></td>
             <td style="color:var(--text-secondary);"><?= htmlspecialchars($w['customer_name'] ?? '—') ?></td>
             <td>
-              <span class="badge" style="background:<?= htmlspecialchars($w['status_color']) ?>22;color:<?= htmlspecialchars($w['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($w['status_color']) ?>66;">
+              <span class="badge badge-status" style="background:<?= htmlspecialchars($w['status_color']) ?>22;color:<?= htmlspecialchars($w['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($w['status_color']) ?>66;">
                 <?= status_label($w['status_code'] ?? '', $w['status_label']) ?>
               </span>
             </td>
