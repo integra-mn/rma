@@ -27,8 +27,18 @@ function nav_active(string $prefix): string {
   <?php $font_slug = strtolower(str_replace(' ', '-', setting('app_font', 'Montserrat'))); ?>
   <link rel="preload" href="/assets/fonts/<?= $font_slug ?>-400-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/<?= $font_slug ?>-500-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/assets/css/fonts.css">
-  <link rel="stylesheet" href="/assets/css/app.css">
+  <?php
+    // The stylesheet is served with a 30-day cache and no version on the URL,
+    // so a deploy changed nothing for anyone who did not hard-refresh — which
+    // is everyone. Stamping the file's own mtime on it means a new deploy is a
+    // new URL, fetched once, and unchanged files stay cached as before.
+    $css_v = static function (string $rel): string {
+        $t = @filemtime(ROOT . $rel);
+        return $rel . ($t ? '?v=' . $t : '');
+    };
+  ?>
+  <link rel="stylesheet" href="<?= $css_v('/assets/css/fonts.css') ?>">
+  <link rel="stylesheet" href="<?= $css_v('/assets/css/app.css') ?>">
   <link rel="stylesheet" href="/assets/css/filefield.css">
   <link rel="stylesheet" href="/assets/css/search-select.css">
   <script>

@@ -195,7 +195,10 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .qr-print { display: none; }
   .qr-text h3 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
   .qr-text p { font-size: 12px; color: #5f5e5a; line-height: 1.5; }
-  .qr-text a { font-size: 11px; color: #1D9E75; word-break: break-all; }
+  /* No underline: it is a URL printed for reading or scanning, not a link
+     anyone clicks on paper, and the rule cuts through the descenders in a
+     long token. */
+  .qr-text a { font-size: 11px; color: #1D9E75; word-break: break-all; text-decoration: none; }
   /* Company details live here rather than under the logo. Left-aligned, and
      pinned to the foot of the sheet when printed so it reads as stationery
      rather than as one more content block. */
