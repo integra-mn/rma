@@ -36,7 +36,11 @@
     h1 { font-size: 18px; font-weight: 500; margin-bottom: 6px; color: #2c2c2a; }
     .subtitle { font-size: 13px; color: #5f5e5a; margin-bottom: 1.5rem; line-height: 1.5; }
     label { display: block; font-size: 12px; color: #5f5e5a; margin-bottom: 4px; }
-    input { width: 100%; padding: 9px 12px; font-size: 14px; border: 0.5px solid #d3d1c7;
+    /* Centred, so the caret starts in the middle and the number stays centred
+       as it is typed. A phone number is the only thing entered here and it sits
+       under centred text, so left-aligned it read as misplaced. */
+    input { width: 100%; padding: 9px 12px; font-size: 14px; text-align: center;
+            border: 0.5px solid #d3d1c7;
             border-radius: 8px; outline: none; transition: border-color .15s; }
     input:focus { border-color: #1D9E75; }
     .btn { width: 100%; padding: 10px; font-size: 14px; font-weight: 500; background: #1D9E75;

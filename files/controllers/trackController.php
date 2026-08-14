@@ -223,10 +223,15 @@ class TrackController {
         ]);
         // And age out counted failures so the visitor isn't still "locked":
         // set created_at into the past for any un-handled failures.
-        db()->prepare(
+        // db_translate() by hand, because this is a raw prepare: db_row() and
+        // friends translate for you, and going straight to PDO does not. On
+        // Postgres the untranslated DATE_SUB reached the server verbatim and
+        // threw, which is why the tracking page 500ed the moment somebody
+        // entered a correct phone number.
+        db()->prepare(db_translate(
             "UPDATE auth_attempts SET created_at = DATE_SUB(NOW(), INTERVAL ? MINUTE)
              WHERE identifier = ? AND success = 0 AND created_at >= DATE_SUB(NOW(), INTERVAL ? MINUTE)"
-        )->execute([
+        ))->execute([
             self::TRACK_LOCKOUT_MIN + 1,
             $this->track_identifier($token),
             self::TRACK_LOCKOUT_MIN,
