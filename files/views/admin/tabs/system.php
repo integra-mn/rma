@@ -531,7 +531,7 @@
         <div class="field smtp-dim">
           <label><?= __('settings.encryption') ?></label>
           <select name="smtp_encryption">
-            <?php foreach (['tls'=>'TLS (STARTTLS)','ssl'=>'SSL','none'=>__('settings.enc_none')] as $v => $l): ?>
+            <?php foreach (['none'=>__('settings.enc_none'),'ssl'=>'SSL','tls'=>'STARTTLS'] as $v => $l): ?>
               <option value="<?= $v ?>" <?= setting('smtp_encryption','tls') === $v ? 'selected' : '' ?>><?= $l ?></option>
             <?php endforeach; ?>
           </select>
