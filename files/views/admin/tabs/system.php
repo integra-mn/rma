@@ -444,9 +444,20 @@
 
       <style>
         .smtp-dim.is-off label { color: var(--text-muted); }
+        /* background-color, not the background shorthand: the shorthand would
+           reset background-image and take the chevron off the select. */
         .smtp-dim.is-off input,
         .smtp-dim.is-off select {
-          opacity: 0.55; background: var(--bg-subtle); cursor: not-allowed;
+          opacity: 0.55; background-color: var(--bg-subtle); cursor: not-allowed;
+        }
+        /* Enkripcija is disabled rather than readonly, having no readonly of
+           its own, and a browser greys a disabled control's text with its own
+           colour — so it read a different tone from the readonly inputs beside
+           it. Stated explicitly, both now dim by the same 0.55 and nothing
+           else. */
+        .smtp-dim.is-off select:disabled {
+          color: var(--text-primary);
+          -webkit-text-fill-color: var(--text-primary);
         }
       </style>
       <script>
