@@ -195,7 +195,9 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   /* auto pushes it to the foot of the sheet. When the content is long enough
      to reach down here by itself, the 16px margin under the signature box plus
      the 10px padding here keeps the two apart. */
-  .footer { border-top: 0.5px solid #e8e6e0; padding-top: 10px;
+  /* Same colour as the | separators below it, so the rule and the marks
+     under it carry equal weight. */
+  .footer { border-top: 0.5px solid #888780; padding-top: 10px;
             margin-top: auto; text-align: left; font-size: 9.5px; color: #888780; }
   .signature-box { border: 0.5px solid #d3d1c7; border-radius: 6px; padding: 11px 13px; margin-bottom: 16px; }
   .signature-box p { font-size: 12px; color: #888780; margin-bottom: 36px; }
@@ -580,7 +582,7 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
           ? $t('pdf.footer_email') . ': ' . htmlspecialchars(trim((string)$rma['location_email'])) : '',
     ], fn($v) => $v !== '');
     $mpdf->SetHTMLFooter(
-        '<div style="border-top:0.5px solid #e8e6e0;padding-top:5px;font-size:8.5px;color:#888780;">'
+        '<div style="border-top:0.5px solid #888780;padding-top:5px;font-size:8.5px;color:#888780;">'
       . '<table width="100%" cellpadding="0" cellspacing="0"><tr>'
       . '<td style="text-align:left;">' . implode(' &nbsp;|&nbsp; ', $footer_parts)
       . '</td>'
