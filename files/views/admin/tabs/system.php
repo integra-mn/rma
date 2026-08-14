@@ -485,9 +485,14 @@
             }
           });
         }
-        // Reflect the saved state on load, then follow the dropdown live so the
-        // clue appears as soon as the choice is made.
-        smtpDim(document.getElementById('smtp-enabled').value !== '1');
+        // This script sits above the fields it acts on, so the first call has
+        // to wait for them: run at parse time it found no select, threw, and
+        // left everything editable after a save — which is exactly what it was
+        // added to prevent.
+        document.addEventListener('DOMContentLoaded', function () {
+          var sel = document.getElementById('smtp-enabled');
+          if (sel) smtpDim(sel.value !== '1');
+        });
       </script>
 
       <!-- Servis, Hostname, Port and Enkripcija are one decision made together
