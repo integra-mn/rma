@@ -129,6 +129,23 @@ class SettingsController {
 
     private function save_smtp(): void {
         $this->save_notify_audiences('email');
+
+        // Switching email off is refused when it would leave a role with no way
+        // to receive a 2FA code. An email that does not arrive is an
+        // inconvenience; being unable to sign in is not, and this is the screen
+        // where that mistake would be made.
+        $want_on = ($_POST['smtp_enabled'] ?? '1') === '1';
+        if (!$want_on && setting('smtp_enabled', '1') === '1') {
+            $stranded = roles_stranded_without('email');
+            if ($stranded) {
+                $want_on = true;
+                $_SESSION['form_error'] = __('settings.channel_last_for_roles', [
+                    'roles' => implode(', ', array_map('role_label', $stranded)),
+                ]);
+            }
+        }
+        $this->set('smtp_enabled', $want_on ? '1' : '0', 'bool', 'smtp');
+
         $fields = [
             'smtp_host'       => trim($_POST['smtp_host'] ?? ''),
             'smtp_port'       => (string)(int)($_POST['smtp_port'] ?? 587),

@@ -442,6 +442,17 @@
       <?= csrf_field() ?>
       <input type="hidden" name="tab" value="smtp">
 
+      <!-- SMS and WhatsApp switch off by picking Iskljuceno in their provider
+           list. Email had no equivalent: the only way to stop it was to delete
+           the host, which loses the setting rather than parking it. -->
+      <div class="field" style="max-width:220px;margin-bottom:1rem;">
+        <label><?= __('settings.channel_state') ?></label>
+        <select name="smtp_enabled" class="custom-select">
+          <option value="1" <?= setting('smtp_enabled','1') === '1' ? 'selected' : '' ?>><?= __('settings.channel_on') ?></option>
+          <option value="0" <?= setting('smtp_enabled','1') === '1' ? '' : 'selected' ?>><?= __('settings.provider_disabled') ?></option>
+        </select>
+      </div>
+
       <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
         <div class="field">
           <label><?= __('settings.smtp_host') ?></label>

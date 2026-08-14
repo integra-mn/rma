@@ -270,11 +270,35 @@ function enabled_2fa_channels(): array {
 function channel_can_send(string $channel): bool {
     return match ($channel) {
         'totp'     => true,
-        'email'    => trim((string) setting('smtp_host', '')) !== '',
+        // Switched on AND configured. The switch parks the channel without
+        // losing the SMTP settings, which deleting the host would.
+        'email'    => setting('smtp_enabled', '1') === '1'
+                      && trim((string) setting('smtp_host', '')) !== '',
         'sms'      => trim((string) setting('sms_provider', '')) !== '',
         'whatsapp' => trim((string) setting('whatsapp_provider', '')) !== '',
         default    => false,
     };
+}
+
+/**
+ * Roles that would have no way to receive a 2FA code if this channel went away.
+ *
+ * Returns role names, empty when nobody is stranded. Used to refuse switching
+ * off the last channel a role can use: an email that does not arrive is an
+ * inconvenience, being unable to sign in is not.
+ *
+ * TOTP counts only where the role actually lists it — a role limited to email
+ * has nothing to fall back on.
+ */
+function roles_stranded_without(string $channel): array {
+    $remaining = array_values(array_diff(enabled_2fa_channels(), [$channel]));
+    $stranded  = [];
+    foreach (db_rows('SELECT role, allowed_2fa_channels FROM security_policies') as $p) {
+        $allowed = array_filter(array_map('trim', explode(',', (string) $p['allowed_2fa_channels'])));
+        if (!$allowed) continue;
+        if (!array_intersect($allowed, $remaining)) $stranded[] = $p['role'];
+    }
+    return $stranded;
 }
 
 /**
