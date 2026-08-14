@@ -170,14 +170,14 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .doc-title h2 { font-size: 12.5px; font-weight: 600; color: #888780; text-transform: uppercase; letter-spacing: 0.08em; }
   .doc-title .rma-num { font-size: 26px; font-weight: 700; color: #1D9E75; line-height: 1.1; margin-top: 2px; }
   .doc-title .date { font-size: 12px; color: #888780; margin-top: 2px; }
-  .two-col { display: flex; gap: 24px; margin-bottom: 18px; }
-  .col { flex: 1; }
-  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 7px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
-  /* Primljena oprema and Opis reklamacije are followed by a bordered box,
-     so the heading rule sat directly above another line. */
-  .section-title.no-rule { border-bottom: none; padding-bottom: 0; }
+  .two-col { display: flex; gap: 16px; margin-bottom: 18px; }
+  /* Each column is its own panel, so the page reads as blocks top to bottom.
+     Border rather than fill: fill means "what the customer told us" on this
+     receipt, and a border survives printing, where the fills come off. */
+  .col { flex: 1; border: 0.5px solid #d3d1c7; border-radius: 8px; padding: 12px 14px; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 7px; }
   table.info { width: 100%; border-collapse: collapse; }
-  table.info td { padding: 4px 0; vertical-align: top; font-size: 13px; border-bottom: 0.5px solid #F4F4F4; }
+  table.info td { padding: 4px 0; vertical-align: top; font-size: 13px; }
   table.info td:first-child { color: #888780; width: 95px; font-size: 12px; }
   /* Plain-text presentation for status & warranty (cleaner look). */
   .status-badge   { font-weight: 500; color: #1A1A1F; }
@@ -346,12 +346,12 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   </div>
 
   ' . ($accessories ? '
-  <p class="section-title no-rule">' . $t('pdf.accessories') . '</p>
+  <p class="section-title">' . $t('pdf.accessories') . '</p>
   <div class="complaint-box">' . htmlspecialchars($accessories) . '</div>
   ' : '') . '
 
   ' . ($rma['complaint'] ? '
-  <p class="section-title no-rule">' . $t('pdf.reported_issue') . '</p>
+  <p class="section-title">' . $t('pdf.reported_issue') . '</p>
   <div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>
   ' : '') . '
 
@@ -630,11 +630,8 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
       .header table { width: 100%; border-collapse: collapse; }
       .header td { vertical-align: top; padding: 0; }
       .rma-num { font-size: 22px; font-weight: 700; color: #1D9E75; }
-      .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 6px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
-      /* Primljena oprema and Opis reklamacije are followed by a bordered box,
-         so the heading rule sat directly above another line. */
-      .section-title.no-rule { border-bottom: none; padding-bottom: 0; }
-      table.info td { padding: 4px 0; font-size: 13px; border-bottom: 0.5px solid #F4F4F4; }
+      .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 6px; }
+      table.info td { padding: 4px 0; font-size: 13px; }
       table.info td:first-child { color: #888780; width: 95px; font-size: 10px; }
       .status-badge { font-weight: 500; color: #1A1A1F; }
       .complaint-box { background: #F4F4F4; border-radius: 4px; padding: 10px; font-size: 13px; line-height: 1.5; margin: 12px 0; }
@@ -657,7 +654,7 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
 
     <table width="100%" style="margin-bottom:14px;" cellspacing="0" cellpadding="0">
       <tr>
-        <td width="50%" style="vertical-align:top;padding-right:10px;">
+        <td width="50%" style="vertical-align:top;border:0.5px solid #d3d1c7;border-radius:8px;padding:10px 12px;">
           <p class="section-title">' . $t('pdf.customer') . '</p>
           <table class="info" width="100%">
             <tr><td>' . $t('pdf.name') . '</td><td><strong>' . htmlspecialchars($rma['customer_name'] ?? '—') . '</strong></td></tr>
@@ -665,7 +662,8 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
             ' . ($rma['customer_email'] ? '<tr><td>' . $t('pdf.email') . '</td><td>' . htmlspecialchars($rma['customer_email']) . '</td></tr>' : '') . '
           </table>
         </td>
-        <td width="50%" style="vertical-align:top;padding-left:10px;">
+        <td width="8" style="width:8px;"></td>
+        <td width="50%" style="vertical-align:top;border:0.5px solid #d3d1c7;border-radius:8px;padding:10px 12px;">
           <p class="section-title">' . $t('pdf.device') . '</p>
           <table class="info" width="100%">
             ' . ($device ? '<tr><td>' . $t('pdf.model') . '</td><td><strong>' . htmlspecialchars($device) . '</strong></td></tr>' : '') . '
@@ -683,9 +681,9 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
       </tr>
     </table>
 
-    ' . (($acc = format_rma_accessories($rma, customer_lang($rma['customer_lang'] ?? null))) ? '<p class="section-title no-rule">' . $t('pdf.accessories') . '</p><div class="complaint-box">' . htmlspecialchars($acc) . '</div>' : '') . '
+    ' . (($acc = format_rma_accessories($rma, customer_lang($rma['customer_lang'] ?? null))) ? '<p class="section-title">' . $t('pdf.accessories') . '</p><div class="complaint-box">' . htmlspecialchars($acc) . '</div>' : '') . '
 
-    ' . ($rma['complaint'] ? '<p class="section-title no-rule">' . $t('pdf.reported_issue') . '</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>' : '') . '
+    ' . ($rma['complaint'] ? '<p class="section-title">' . $t('pdf.reported_issue') . '</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>' : '') . '
 
     ' . ($qr_base64 ? '<table width="100%" style="margin-top:12px;background:#F4F4F4;" cellpadding="8"><tr>
       <td style="vertical-align:top;padding-right:12px;width:100px;"><img src="' . $qr_base64 . '" width="90" height="90"></td>

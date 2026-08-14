@@ -1,0 +1,276 @@
+<!doctype html><meta charset="utf-8"><title>KORISNIK / UREDJAJ — three options</title><link href="/assets/css/fonts.css" rel="stylesheet"><style>
+  /* A4 page: 210mm x 297mm. margin:0 suppresses the browser default
+     page header/footer (URL, timestamp, page numbers). Our own margin
+     is applied via padding on .page in the print media query below. */
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+         font-size: 14px; color: #2c2c2a; background: #F4F4F4; -webkit-font-smoothing: antialiased; }
+  /* A real A4 sheet on screen — the same width, height and 10mm padding the
+     printer uses, so the view matches what comes out.
+     The column layout is what lets .footer sit on the bottom edge of the sheet
+     on screen, the way it does on paper, instead of floating directly under
+     the signature box. */
+  .page { width: 210mm; min-height: 297mm; max-width: 100%; margin: 0 auto 24px;
+          padding: 10mm; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+          border-radius: 8px; display: flex; flex-direction: column; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid #1D9E75; }
+  .logo img { height: 36px; width: auto; display: block; margin-bottom: 6px; }
+  .company p { font-size: 12px; color: #888780; margin-top: 1px; line-height: 1.5; }
+  .doc-title { text-align: right; }
+  .doc-title h2 { font-size: 12.5px; font-weight: 600; color: #888780; text-transform: uppercase; letter-spacing: 0.08em; }
+  .doc-title .rma-num { font-size: 26px; font-weight: 700; color: #1D9E75; line-height: 1.1; margin-top: 2px; }
+  .doc-title .date { font-size: 12px; color: #888780; margin-top: 2px; }
+  .two-col { display: flex; gap: 24px; margin-bottom: 18px; }
+  .col { flex: 1; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 7px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
+  /* Primljena oprema and Opis reklamacije are followed by a bordered box,
+     so the heading rule sat directly above another line. */
+  .section-title.no-rule { border-bottom: none; padding-bottom: 0; }
+  table.info { width: 100%; border-collapse: collapse; }
+  table.info td { padding: 4px 0; vertical-align: top; font-size: 13px; border-bottom: 0.5px solid #F4F4F4; }
+  table.info td:first-child { color: #888780; width: 95px; font-size: 12px; }
+  /* Plain-text presentation for status & warranty (cleaner look). */
+  .status-badge   { font-weight: 500; color: #1A1A1F; }
+  .warranty-badge { font-weight: 500; color: #1A1A1F; }
+  .warranty-badge::before { content: " · "; color: #888780; font-weight: 400; }
+  .complaint-box { background: #F4F4F4; border-radius: 6px; padding: 11px 13px; font-size: 13px; line-height: 1.6; margin-bottom: 18px; }
+  .qr-section { display: flex; align-items: flex-start; gap: 14px; background: #F4F4F4;
+                border-radius: 8px; padding: 14px; margin-bottom: 18px; }
+  .qr-section img { width: 88px; height: 88px; flex-shrink: 0; }
+  .qr-text h3 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .qr-text p { font-size: 12px; color: #5f5e5a; line-height: 1.5; }
+  .qr-text a { font-size: 11px; color: #1D9E75; word-break: break-all; }
+  /* Company details live here rather than under the logo. Left-aligned, and
+     pinned to the foot of the sheet when printed so it reads as stationery
+     rather than as one more content block. */
+  /* auto pushes it to the foot of the sheet. When the content is long enough
+     to reach down here by itself, the 16px margin under the signature box plus
+     the 10px padding here keeps the two apart. */
+  /* Same colour as the | separators below it, so the rule and the marks
+     under it carry equal weight. */
+  .footer { border-top: 0.5px solid #888780; padding-top: 10px;
+            margin-top: auto; text-align: left; font-size: 9.5px; color: #888780; }
+  .signature-box { border: 0.5px solid #d3d1c7; border-radius: 6px; padding: 11px 13px; margin-bottom: 16px; }
+  .signature-box p { font-size: 12px; color: #888780; margin-bottom: 36px; }
+  .signature-line { border-top: 0.5px solid #2c2c2a; width: 200px; font-size: 11px; color: #888780; padding-top: 3px; }
+  /* The button bar. These used to be inline on the element, where a media
+     query cannot reach them — inline styles win — so the bar could not be
+     moved anywhere. */
+  #toolbar { width: 210mm; max-width: 100%; height: 64px; margin: 0 auto;
+             display: flex; align-items: center; justify-content: flex-end;
+             gap: 12px; font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif; }
+  #toolbar .tb { display: inline-flex; align-items: center; height: 40px;
+                 padding: 0; border: none; border-radius: 8px; color: #fff;
+                 cursor: pointer; text-decoration: none; font-family: inherit;
+                 font-size: 13px; font-weight: 500; overflow: hidden;
+                 white-space: nowrap; transition: box-shadow .15s ease; }
+  #toolbar .tb svg  { width: 40px; height: 40px; padding: 10px; flex: 0 0 40px; display: block; }
+  #toolbar .tb span { padding-right: 14px; }
+  #toolbar .tb:hover, #toolbar .tb:focus-visible { box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+  #toolbar .tb-save  { background: #1D9E75; }
+  #toolbar .tb-print { background: #2563EB; }
+  #toolbar .tb-close { background: #DC2626; }
+  /* Wide enough for a margin beside the paper: a fixed column tucked against
+     the right edge of the sheet. Fixed matters — the sheet is taller than most
+     windows, and sitting in the flow above it the buttons scrolled out of
+     reach the moment you read past the header, so printing meant scrolling
+     back to the top first.
+
+     The sheet is centred, so its right edge is half the window plus half of
+     210mm, plus 24px — the same gap the sheet keeps from the top of the
+     window, which the 24px top of this column lines up with. The buttons sit
+     12px apart, tighter than their distance from the paper so they read as
+     one group. Under the fit-to-height zoom both the sheet and this offset scale
+     together, so they stay tucked in.
+
+     Beside the sheet the three shrink to 40px squares and open their label on
+     hover. They open to the RIGHT, into empty margin: opening leftwards would
+     slide the label over the paper. The square itself never moves, so nothing
+     shifts under the pointer.
+
+     1120px is where the sheet stops leaving room, and it is the OPEN width
+     that sets it, not the square: (1120 - 794) / 2 is 163px a side, just over
+     the 24px gap plus the 136px of an open "Sacuvaj PDF". Sized to the square
+     instead, the label would be clipped by the window edge on any screen
+     between about 920 and 1114px. */
+  @media screen and (min-width: 1120px) {
+    #toolbar { position: fixed; top: 24px; left: calc(50% + 105mm + 24px);
+               z-index: 10; width: auto; height: auto; margin: 0;
+               flex-direction: column; align-items: flex-start; gap: 12px; }
+    .page { margin-top: 24px; }
+    #toolbar .tb span { max-width: 0; opacity: 0; padding-right: 0; overflow: hidden;
+                        transition: max-width .18s ease, opacity .12s ease,
+                                    padding-right .18s ease; }
+    #toolbar .tb:hover span,
+    #toolbar .tb:focus-visible span { max-width: 160px; opacity: 1; padding-right: 14px; }
+    /* A tablet at the counter has no pointer to hover with, and would be left
+       with three coloured squares and no way to find out what they are. */
+    @media (hover: none) {
+      #toolbar .tb span { max-width: 160px; opacity: 1; padding-right: 14px; }
+    }
+  }
+  /* Too narrow for a side margin: keep them on top, but stuck to the window
+     rather than to the document, so they are still reachable when scrolled.
+     There is room across a row, so the labels stay out. */
+  @media screen and (max-width: 1119px) {
+    #toolbar { position: sticky; top: 0; z-index: 10; background: #F4F4F4; }
+  }
+  @media print {
+    /* Browsers drop background colours when printing unless asked. Without this
+       the grey blocks behind Dostavljena oprema and Opis reklamacije showed on
+       screen and vanished on paper. */
+    body, .signature-box {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    /* On paper the grey fill behind Primljena oprema, Opis reklamacije and the
+       tracking block reads as shading and costs toner on every receipt. A
+       hairline marks the same boundary. Print only — the screen keeps the fill,
+       and so does the PDF, which is built from its own stylesheet further down
+       this file. */
+    .complaint-box, .qr-section {
+      background: transparent;
+      border: 0.5px solid #d3d1c7;
+    }
+    body { background: #fff; }
+    /* 10mm matches the print padding on .page, so the footer lines up with the
+       left edge of the content above it. */
+    .footer { position: fixed; bottom: 8mm; left: 10mm; right: 10mm;
+              margin-top: 0; background: #fff; }
+    /* !important beats the inline display:flex on the toolbar */
+    .no-print { display: none !important; }
+    /* With @page margin:0, we rely on the page container padding
+       to keep content away from the sheet edges. */
+    .page { width: auto; max-width: none; margin: 0; padding: 10mm;
+            background: transparent; box-shadow: none; border-radius: 0; }
+  }
+</style><style>body{background:#e9e9e6;padding:8px 0 40px;}.page{margin:0 auto 8px;min-height:auto;box-shadow:0 2px 12px rgba(0,0,0,0.06);}.hdr{font:600 15px Montserrat,system-ui,sans-serif;color:#2c2c2a;width:210mm;max-width:100%;margin:26px auto 4px;}.sub{font:400 13px Montserrat,system-ui,sans-serif;color:#5f5e5a;width:210mm;max-width:100%;margin:0 auto 10px;line-height:1.5;}.v2 .col { border: 0.5px solid #d3d1c7; border-radius: 8px; padding: 12px 14px; }.v2 .two-col { gap: 16px; } .v2 .section-title { border-bottom: none; padding-bottom: 0; }.v3 .col { background: #F4F4F4; border-radius: 8px; padding: 12px 14px; }.v3 .two-col { gap: 16px; } .v3 .section-title { border-bottom: none; padding-bottom: 0; }.v3 table.info td { border-bottom: 0.5px solid #e4e2dc; }</style><div class="hdr">A — as it is now</div><div class="sub">What you have today. The section titles and their underline already mark each block.</div><div class="v1"><div class="page">
+
+  <div class="header">
+    <div class="company">
+      <div class="logo"><img src="/assets/integra.svg" alt="Integra"></div>
+    </div>
+    <div class="doc-title">
+      <h2>Potvrda o prijemu</h2>
+      <div class="rma-num">52150</div>
+      <div class="date">11-08-2026</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="col">
+      <p class="section-title">Korisnik</p>
+      <table class="info">
+        <tr><td>Ime</td><td><strong>Dragana Drobnjak</strong></td></tr>
+        <tr><td>Telefon</td><td>+382 68 072 050</td></tr>
+        <tr><td>Email</td><td>refused@integra.rma</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <p class="section-title">Uredjaj</p>
+      <table class="info">
+        <tr><td>Model</td><td><strong>Apple iPhone 17 Pro</strong></td></tr>
+        <tr><td>SN / IMEI</td><td style="font-family:monospace;">359637824807016</td></tr>
+        <tr><td>Status</td><td>Primljeno · U garanciji</td></tr>
+      </table>
+    </div>
+  </div>
+
+  
+  <p class="section-title no-rule">Primljena oprema</p>
+  <div class="complaint-box">Baterija, Račun o kupovini</div>
+  
+
+  
+  <p class="section-title no-rule">Opis reklamacije</p>
+  <div class="complaint-box">Zvuk zvona ili alarma se nekada dugo ne prekida nakon javljanja ili gasenja alarma. Desava se da zvuk pregledanog videa nastavi sa reprodukcijom nakon gasenja ili prelaska na drugi video. Nakon azuriranje iOS-a ili restartovanja uredjaja problem nestane privremeno.</div>
+  
+
+  
+  </div></div><div class="hdr">B — hairline border, no fill</div><div class="sub">The page reads as four panels. A border survives printing, where the fills are stripped.</div><div class="v2"><div class="page">
+
+  <div class="header">
+    <div class="company">
+      <div class="logo"><img src="/assets/integra.svg" alt="Integra"></div>
+    </div>
+    <div class="doc-title">
+      <h2>Potvrda o prijemu</h2>
+      <div class="rma-num">52150</div>
+      <div class="date">11-08-2026</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="col">
+      <p class="section-title">Korisnik</p>
+      <table class="info">
+        <tr><td>Ime</td><td><strong>Dragana Drobnjak</strong></td></tr>
+        <tr><td>Telefon</td><td>+382 68 072 050</td></tr>
+        <tr><td>Email</td><td>refused@integra.rma</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <p class="section-title">Uredjaj</p>
+      <table class="info">
+        <tr><td>Model</td><td><strong>Apple iPhone 17 Pro</strong></td></tr>
+        <tr><td>SN / IMEI</td><td style="font-family:monospace;">359637824807016</td></tr>
+        <tr><td>Status</td><td>Primljeno · U garanciji</td></tr>
+      </table>
+    </div>
+  </div>
+
+  
+  <p class="section-title no-rule">Primljena oprema</p>
+  <div class="complaint-box">Baterija, Račun o kupovini</div>
+  
+
+  
+  <p class="section-title no-rule">Opis reklamacije</p>
+  <div class="complaint-box">Zvuk zvona ili alarma se nekada dugo ne prekida nakon javljanja ili gasenja alarma. Desava se da zvuk pregledanog videa nastavi sa reprodukcijom nakon gasenja ili prelaska na drugi video. Nakon azuriranje iOS-a ili restartovanja uredjaja problem nestane privremeno.</div>
+  
+
+  
+  </div></div><div class="hdr">C — grey fill, like Primljena oprema</div><div class="sub">Your suggestion. Watch the row separators: grey on grey they nearly vanish, so Ime / Telefon / Email lose the line that keeps them aligned.</div><div class="v3"><div class="page">
+
+  <div class="header">
+    <div class="company">
+      <div class="logo"><img src="/assets/integra.svg" alt="Integra"></div>
+    </div>
+    <div class="doc-title">
+      <h2>Potvrda o prijemu</h2>
+      <div class="rma-num">52150</div>
+      <div class="date">11-08-2026</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="col">
+      <p class="section-title">Korisnik</p>
+      <table class="info">
+        <tr><td>Ime</td><td><strong>Dragana Drobnjak</strong></td></tr>
+        <tr><td>Telefon</td><td>+382 68 072 050</td></tr>
+        <tr><td>Email</td><td>refused@integra.rma</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <p class="section-title">Uredjaj</p>
+      <table class="info">
+        <tr><td>Model</td><td><strong>Apple iPhone 17 Pro</strong></td></tr>
+        <tr><td>SN / IMEI</td><td style="font-family:monospace;">359637824807016</td></tr>
+        <tr><td>Status</td><td>Primljeno · U garanciji</td></tr>
+      </table>
+    </div>
+  </div>
+
+  
+  <p class="section-title no-rule">Primljena oprema</p>
+  <div class="complaint-box">Baterija, Račun o kupovini</div>
+  
+
+  
+  <p class="section-title no-rule">Opis reklamacije</p>
+  <div class="complaint-box">Zvuk zvona ili alarma se nekada dugo ne prekida nakon javljanja ili gasenja alarma. Desava se da zvuk pregledanog videa nastavi sa reprodukcijom nakon gasenja ili prelaska na drugi video. Nakon azuriranje iOS-a ili restartovanja uredjaja problem nestane privremeno.</div>
+  
+
+  
+  </div></div>
