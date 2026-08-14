@@ -201,7 +201,7 @@ function send_email_result(string $to, string $to_name, string $subject, string 
     // being offered for 2FA. Without this the switch only removed email from
     // the login screen while notifications and receipts kept going out, which
     // is not what "off" says.
-    if (setting('smtp_enabled', '1') !== '1') {
+    if (!setting_on('smtp_enabled', true)) {
         return ['ok' => false, 'error' => __('settings.smtp_disabled')];
     }
     if ($host === '' || $from === '') {
@@ -317,7 +317,7 @@ function notify_rma_status(int $rma_id): void {
     // Partner, by whichever channels the grid allows for partners.
     if (!empty($rma['partner_id'])) {
         [$subject, $body, $sms] = $for($partner_lang);
-        if (setting('notify_partner_email', '1') === '1'
+        if (setting_on('notify_partner_email', true)
             && !empty($rma['partner_email']) && !is_placeholder_email($rma['partner_email'])) {
             send_email($rma['partner_email'],
                        ($rma['partner_contact'] ?? '') ?: ($rma['partner_name'] ?? ''),
@@ -332,12 +332,12 @@ function notify_rma_status(int $rma_id): void {
 
     [$subject, $body, $sms] = $for($customer_lang);
 
-    if (setting('notify_customer_email', '1') === '1'
+    if (setting_on('notify_customer_email', true)
         && !empty($rma['customer_email']) && !is_placeholder_email($rma['customer_email'])) {
         send_email($rma['customer_email'], $rma['customer_name'], $subject, nl2br(htmlspecialchars($body)));
     }
 
-    if (setting('notify_customer_sms', '1') === '1') {
+    if (setting_on('notify_customer_sms', true)) {
         foreach (rma_sms_recipients($rma) as $number) {
             sms_send($number, $sms);
         }

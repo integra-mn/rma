@@ -357,7 +357,7 @@
             printf('<div style="display:flex;align-items:center;gap:8px;margin-bottom:0.5rem;">'
                  . '<input type="checkbox" id="%1$s" name="%1$s" value="1"%2$s>'
                  . '<label for="%1$s" style="font-size:13px;margin-bottom:0;">%3$s</label></div>',
-                 $key, setting($key, $default) === '1' ? ' checked' : '', htmlspecialchars($label));
+                 $key, setting_on($key, $default === '1') ? ' checked' : '', htmlspecialchars($label));
         }
         echo '<p style="font-size:12px;color:var(--text-muted);margin-top:4px;">'
            . __('settings.notify_note') . '</p>';
@@ -451,8 +451,8 @@
         <div class="field">
           <label><?= __('settings.channel_state') ?></label>
           <select name="smtp_enabled" class="custom-select">
-            <option value="1" <?= setting('smtp_enabled','1') === '1' ? 'selected' : '' ?>><?= __('settings.channel_on') ?></option>
-            <option value="0" <?= setting('smtp_enabled','1') === '1' ? '' : 'selected' ?>><?= __('settings.provider_disabled') ?></option>
+            <option value="1" <?= setting_on('smtp_enabled', true) ? 'selected' : '' ?>><?= __('settings.channel_on') ?></option>
+            <option value="0" <?= setting_on('smtp_enabled', true) ? '' : 'selected' ?>><?= __('settings.provider_disabled') ?></option>
           </select>
         </div>
         <div class="field">

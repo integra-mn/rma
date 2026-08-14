@@ -144,7 +144,7 @@ class SettingsController {
                 ]);
             }
         }
-        $this->set('smtp_enabled', $want_on ? '1' : '0', 'bool', 'smtp');
+        $this->set('smtp_enabled', $want_on ? '1' : '0', 'string', 'smtp');
 
         $fields = [
             'smtp_host'       => trim($_POST['smtp_host'] ?? ''),
@@ -219,7 +219,7 @@ class SettingsController {
     private function save_notify_audiences(string $channel): void {
         foreach (['customer', 'partner'] as $who) {
             $key = "notify_{$who}_{$channel}";
-            $this->set($key, isset($_POST[$key]) ? '1' : '0', 'bool', 'integrations');
+            $this->set($key, isset($_POST[$key]) ? '1' : '0', 'string', 'integrations');
         }
     }
 

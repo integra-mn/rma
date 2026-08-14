@@ -1,6 +1,22 @@
 <?php
 defined('RMS') or die('Direct access not permitted');
 
+/**
+ * Is this yes/no setting on?
+ *
+ * setting() casts by the type recorded in the row, so a flag saved as 'bool'
+ * comes back as a PHP bool while one saved as 'string' comes back as "1".
+ * Comparing with === '1' therefore silently answered "no" for every flag
+ * stored the other way, which is how the whole notification grid came to be
+ * off without anyone switching it off.
+ *
+ * This accepts either. Any flag meaning on/off should go through it.
+ */
+function setting_on(string $key, bool $default = false): bool {
+    $v = setting($key, $default ? '1' : '0');
+    return $v === true || $v === 1 || $v === '1';
+}
+
 function setting(string $key, mixed $default = null, ?int $location_id = null): mixed {
     static $cache = [];
 

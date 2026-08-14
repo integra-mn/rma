@@ -272,7 +272,7 @@ function channel_can_send(string $channel): bool {
         'totp'     => true,
         // Switched on AND configured. The switch parks the channel without
         // losing the SMTP settings, which deleting the host would.
-        'email'    => setting('smtp_enabled', '1') === '1'
+        'email'    => setting_on('smtp_enabled', true)
                       && trim((string) setting('smtp_host', '')) !== '',
         'sms'      => trim((string) setting('sms_provider', '')) !== '',
         'whatsapp' => trim((string) setting('whatsapp_provider', '')) !== '',
