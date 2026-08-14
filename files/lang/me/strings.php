@@ -456,7 +456,7 @@ return [
     'track.rma_status'       => 'Status RMA',
     'track.device'           => 'Uredjaj',
     'track.condition'        => 'Stanje pri prijemu',
-    'track.est_completion'   => 'Predvidjeni završetak',
+    'track.est_completion'   => 'Očekivani završetak',
     'track.delivery'         => 'Praćenje dostave',
     'track.invoice'          => 'Račun',
     'track.tech_notes'       => 'Napomene tehničara',
