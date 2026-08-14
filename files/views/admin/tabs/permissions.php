@@ -41,7 +41,7 @@ $can_edit  = is_super_admin();
 <form method="POST" action="/admin/permissions/save" id="perm-form">
   <?= csrf_field() ?>
   <div style="overflow-x:auto;">
-  <table class="data-table">
+  <table class="data-table perm-table">
     <thead>
       <tr>
         <th><?= __('admin.perm_module_action') ?></th>
