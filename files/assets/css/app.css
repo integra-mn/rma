@@ -440,6 +440,20 @@ label { display: block; font-size: 12px; color: var(--text-secondary); margin-bo
   padding: 2px 8px; border-radius: 4px;
 }
 
+/* Status pills in a list are read down a column, so a ragged right edge makes
+   them harder to scan than the words themselves warrant. Every one is set to
+   the width of the widest status, measured in Montserrat at 11px across all
+   36 labels in both languages: "Čeka se odobrenje" at 117.9px is the longest,
+   with "Awaiting approval" just behind it.
+
+   min-width, not width: a status renamed to something longer still fits, it
+   just becomes the odd one out until this number is raised. The SLA and
+   warranty pills beside it are not statuses and keep their natural size. */
+.data-table .badge-status {
+  min-width: 120px;
+  text-align: center;
+}
+
 /* ── Stat cards ──────────────────────────────────────────────── */
 .stat-card { background: var(--bg-subtle); border-radius: 8px; padding: 1rem; }
 .stat-card .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
