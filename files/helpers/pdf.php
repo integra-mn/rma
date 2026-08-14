@@ -33,7 +33,10 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
 
     $engine = $engine_override ?: setting('pdf_engine', 'html');
 
-    $qr_base64 = $tracking_url ? generate_qr_base64($tracking_url, 150) : '';
+    // The QR is drawn on the same grey as the panel it sits in. The encoder
+    // always paints white behind the modules, and a white QR on a grey panel is
+    // exactly the white square it looked like.
+    $qr_base64 = $tracking_url ? generate_qr_base64($tracking_url, 150, [244, 244, 244]) : '';
 
     if ($engine === 'mpdf' && file_exists(ROOT . '/vendor/autoload.php')) {
         generate_rma_pdf_mpdf($rma, $tracking_url, $qr_base64, $mode);
@@ -181,9 +184,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .warranty-badge { font-weight: 500; color: #1A1A1F; }
   .warranty-badge::before { content: " · "; color: #888780; font-weight: 400; }
   .complaint-box { background: #F4F4F4; border-radius: 6px; padding: 11px 13px; font-size: 13px; line-height: 1.6; margin-bottom: 18px; }
-  /* No fill: the QR is drawn on white, so any panel behind it shows as a
-     white card around the code. A hairline marks the block instead. */
-  .qr-section { display: flex; align-items: flex-start; gap: 14px; border: 0.5px solid #d3d1c7;
+  .qr-section { display: flex; align-items: flex-start; gap: 14px; background: #F4F4F4;
                 border-radius: 8px; padding: 14px; margin-bottom: 18px; }
   .qr-section img { width: 88px; height: 88px; flex-shrink: 0; }
   .qr-text h3 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
@@ -276,7 +277,7 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
        hairline marks the same boundary. Print only — the screen keeps the fill,
        and so does the PDF, which is built from its own stylesheet further down
        this file. */
-    .complaint-box {
+    .complaint-box, .qr-section {
       background: transparent;
       border: 0.5px solid #d3d1c7;
     }
@@ -686,7 +687,7 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
 
     ' . ($rma['complaint'] ? '<p class="section-title no-rule">' . $t('pdf.reported_issue') . '</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>' : '') . '
 
-    ' . ($qr_base64 ? '<table width="100%" style="margin-top:12px;"><tr>
+    ' . ($qr_base64 ? '<table width="100%" style="margin-top:12px;background:#F4F4F4;" cellpadding="8"><tr>
       <td style="vertical-align:top;padding-right:12px;width:100px;"><img src="' . $qr_base64 . '" width="90" height="90"></td>
       <td style="vertical-align:top;">
         <strong style="font-size:11px;">' . $t('pdf.track_title') . '</strong><br>
