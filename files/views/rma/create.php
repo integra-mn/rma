@@ -189,12 +189,17 @@ defined('RMS') or die('Direct access not permitted');
 
       <div style="display:flex;gap:10px;margin-bottom:1rem;">
         <button type="button" id="btn-warranty-yes"
-                onclick="setWarranty(1)"
+                onclick="setWarranty('yes')"
                 style="display:inline-flex;align-items:center;padding:7px 12px;font-size:13px;border-radius:8px;cursor:pointer;border:0.5px solid var(--border,#d3d1c7);background:#fff;color:var(--text-secondary,#5f5e5a);user-select:none;line-height:1;box-sizing:border-box;min-height:34px;">
           <?= __('rma.under_warranty') ?>
         </button>
+        <button type="button" id="btn-warranty-out"
+                onclick="setWarranty('out')"
+                style="display:inline-flex;align-items:center;padding:7px 12px;font-size:13px;border-radius:8px;cursor:pointer;border:0.5px solid var(--border,#d3d1c7);background:#fff;color:var(--text-secondary,#5f5e5a);user-select:none;line-height:1;box-sizing:border-box;min-height:34px;">
+          <?= __('rma.ref_out_of_warranty') ?>
+        </button>
         <button type="button" id="btn-warranty-no"
-                onclick="setWarranty(0)"
+                onclick="setWarranty('refused')"
                 style="display:inline-flex;align-items:center;padding:7px 12px;font-size:13px;border-radius:8px;cursor:pointer;border:0.5px solid var(--border,#d3d1c7);background:#fff;color:var(--text-secondary,#5f5e5a);user-select:none;line-height:1;box-sizing:border-box;min-height:34px;">
           <?= __('rma.warranty_refused') ?>
         </button>

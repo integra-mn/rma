@@ -1266,6 +1266,7 @@ Status popravke pratite ovdje:
     'settings.gsx_adapter_not_loadable' => 'Adapter nije moguće učitati',
     'settings.smtp_invalid_email' => 'Nevažeća email adresa.',
     'settings.smtp_not_configured' => 'SMTP nije konfigurisan.',
+    'settings.smtp_disabled' => 'Email je isključen u Podešavanja → Komunikacija → Email.',
     'settings.smtp_test_subject' => 'Integra RMA — test email',
     'settings.smtp_test_body' => 'Ovo je test poruka iz Integra RMA. Ako je vidite, slanje email-a radi.',
     'settings.smtp_test_sent' => 'Test email poslat na :email.',

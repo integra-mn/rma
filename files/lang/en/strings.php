@@ -1266,6 +1266,7 @@ Track the repair here:
     'settings.gsx_adapter_not_loadable' => 'Adapter not loadable',
     'settings.smtp_invalid_email' => 'Invalid email address.',
     'settings.smtp_not_configured' => 'SMTP not configured.',
+    'settings.smtp_disabled' => 'Email is switched off in Settings → Communications → Email.',
     'settings.smtp_test_subject' => 'Integra RMA — test email',
     'settings.smtp_test_body' => 'This is a test message from Integra RMA. If you can read it, email sending works.',
     'settings.smtp_test_sent' => 'Test email sent to :email.',

@@ -197,6 +197,13 @@ function send_email_result(string $to, string $to_name, string $subject, string 
     $fromname = setting('smtp_from_name', 'Integra RMA');
     $enc      = setting('smtp_encryption', 'tls');
 
+    // Iskljuceno means no email leaves the app — not merely that email stops
+    // being offered for 2FA. Without this the switch only removed email from
+    // the login screen while notifications and receipts kept going out, which
+    // is not what "off" says.
+    if (setting('smtp_enabled', '1') !== '1') {
+        return ['ok' => false, 'error' => __('settings.smtp_disabled')];
+    }
     if ($host === '' || $from === '') {
         return ['ok' => false, 'error' => __('settings.smtp_not_configured')];
     }
