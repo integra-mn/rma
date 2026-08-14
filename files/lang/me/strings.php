@@ -396,7 +396,6 @@ return [
     'pdf.sig_get'            => 'Pokreni potpisivanje',
     'pdf.sig_station_hint'   => 'Ako je tablet za potpis aktivan na ovoj lokaciji, otvoriće se automatski.',
     'pdf.sn_imei'            => 'SN / IMEI',
-    'pdf.printed'            => 'Odštampano :date',
     'pager.prev'             => 'Prethodna',
     'pager.next'             => 'Sljedeća',
     'pager.showing'          => 'Prikazano :from–:to od :total',

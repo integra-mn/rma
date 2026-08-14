@@ -1,4 +1,11 @@
-<!doctype html><meta charset="utf-8"><title>KORISNIK / UREDJAJ — three options</title><link href="/assets/css/fonts.css" rel="stylesheet"><style>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="csrf-token" content="d52b581164362116d4273f4a36b7292b53d609a81ffbf504d0e2f804386df871">
+<title>RMA Receipt — 52150</title>
+<link href="/assets/css/fonts.css" rel="stylesheet">
+<style>
   /* A4 page: 210mm x 297mm. margin:0 suppresses the browser default
      page header/footer (URL, timestamp, page numbers). Our own margin
      is applied via padding on .page in the print media query below. */
@@ -21,14 +28,14 @@
   .doc-title h2 { font-size: 12.5px; font-weight: 600; color: #888780; text-transform: uppercase; letter-spacing: 0.08em; }
   .doc-title .rma-num { font-size: 26px; font-weight: 700; color: #1D9E75; line-height: 1.1; margin-top: 2px; }
   .doc-title .date { font-size: 12px; color: #888780; margin-top: 2px; }
-  .two-col { display: flex; gap: 24px; margin-bottom: 18px; }
-  .col { flex: 1; }
-  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 7px; border-bottom: 0.5px solid #e8e6e0; padding-bottom: 3px; }
-  /* Primljena oprema and Opis reklamacije are followed by a bordered box,
-     so the heading rule sat directly above another line. */
-  .section-title.no-rule { border-bottom: none; padding-bottom: 0; }
+  .two-col { display: flex; gap: 16px; margin-bottom: 18px; }
+  /* Each column is its own panel, so the page reads as blocks top to bottom.
+     Border rather than fill: fill means "what the customer told us" on this
+     receipt, and a border survives printing, where the fills come off. */
+  .col { flex: 1; border: 0.5px solid #d3d1c7; border-radius: 8px; padding: 12px 14px; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888780; margin-bottom: 7px; }
   table.info { width: 100%; border-collapse: collapse; }
-  table.info td { padding: 4px 0; vertical-align: top; font-size: 13px; border-bottom: 0.5px solid #F4F4F4; }
+  table.info td { padding: 4px 0; vertical-align: top; font-size: 13px; }
   table.info td:first-child { color: #888780; width: 95px; font-size: 12px; }
   /* Plain-text presentation for status & warranty (cleaner look). */
   .status-badge   { font-weight: 500; color: #1A1A1F; }
@@ -144,7 +151,20 @@
     .page { width: auto; max-width: none; margin: 0; padding: 10mm;
             background: transparent; box-shadow: none; border-radius: 0; }
   }
-</style><style>body{background:#e9e9e6;padding:8px 0 40px;}.page{margin:0 auto 8px;min-height:auto;box-shadow:0 2px 12px rgba(0,0,0,0.06);}.hdr{font:600 15px Montserrat,system-ui,sans-serif;color:#2c2c2a;width:210mm;max-width:100%;margin:26px auto 4px;}.sub{font:400 13px Montserrat,system-ui,sans-serif;color:#5f5e5a;width:210mm;max-width:100%;margin:0 auto 10px;line-height:1.5;}.v2 .col { border: 0.5px solid #d3d1c7; border-radius: 8px; padding: 12px 14px; }.v2 .two-col { gap: 16px; } .v2 .section-title { border-bottom: none; padding-bottom: 0; }.v3 .col { background: #F4F4F4; border-radius: 8px; padding: 12px 14px; }.v3 .two-col { gap: 16px; } .v3 .section-title { border-bottom: none; padding-bottom: 0; }.v3 table.info td { border-bottom: 0.5px solid #e4e2dc; }</style><div class="hdr">A — as it is now</div><div class="sub">What you have today. The section titles and their underline already mark each block.</div><div class="v1"><div class="page">
+</style>
+</head>
+<body>
+
+<div class="no-print" id="toolbar">
+  <a href="/rma/1/receipt?engine=mpdf&mode=download"
+     class="tb tb-save" title="Sačuvaj PDF" aria-label="Sačuvaj PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><span>Sačuvaj PDF</span></a>
+  <button onclick="window.print()"
+     class="tb tb-print" title="Štampaj" aria-label="Štampaj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6"/><path d="M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="7" y="14" width="10" height="7" rx="1"/></svg><span>Štampaj</span></button>
+  <button onclick="window.close()"
+     class="tb tb-close" title="Zatvori" aria-label="Zatvori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg><span>Zatvori</span></button>
+</div>
+
+<div class="page">
 
   <div class="header">
     <div class="company">
@@ -177,100 +197,141 @@
   </div>
 
   
-  <p class="section-title no-rule">Primljena oprema</p>
+  <p class="section-title">Primljena oprema</p>
   <div class="complaint-box">Baterija, Račun o kupovini</div>
   
 
   
-  <p class="section-title no-rule">Opis reklamacije</p>
+  <p class="section-title">Opis reklamacije</p>
   <div class="complaint-box">Zvuk zvona ili alarma se nekada dugo ne prekida nakon javljanja ili gasenja alarma. Desava se da zvuk pregledanog videa nastavi sa reprodukcijom nakon gasenja ili prelaska na drugi video. Nakon azuriranje iOS-a ili restartovanja uredjaja problem nestane privremeno.</div>
   
 
   
-  </div></div><div class="hdr">B — hairline border, no fill</div><div class="sub">The page reads as four panels. A border survives printing, where the fills are stripped.</div><div class="v2"><div class="page">
-
-  <div class="header">
-    <div class="company">
-      <div class="logo"><img src="/assets/integra.svg" alt="Integra"></div>
-    </div>
-    <div class="doc-title">
-      <h2>Potvrda o prijemu</h2>
-      <div class="rma-num">52150</div>
-      <div class="date">11-08-2026</div>
+  <div class="qr-section">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPUAAAD1CAIAAAAH0yQyAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAGP0lEQVR4nO3dS24kOQwFwPGgl77/SX2A3icMoWWSSvkhYuvKT7keBBCSqI+vr6//INT/b78ADJJvksk3yeSbZPJNMvkmmXyTTL5JJt8kk2+SyTfJ5Jtk8k0y+SaZfJNMvkkm3ySTb5LJN8n+VC7+/Pzseo+19SbR9Ws0Xnvs+26Z+4KVOzeqbBE2fpNMvkkm3ySTb5KV6suHxlZBldpl6zUaS6it525VcutrG8vryi94ya//YPwmmXyTTL5JJt8k66wvH94qzhpLt4f1g96q8xonWStfYetWlTtvMX6TTL5JJt8kk2+SDdaXl2iconuYq1zX124VlHOLh38F4zfJ5Jtk8k0y+SZZQn25VX41zm5u1XmNc5+NFXPjhOWdjN8kk2+SyTfJ5Jtkg/Xlseqksfyq3Gpu82JlhrLyGo3/ybcYv0km3ySTb5LJN8k668tfsZyysnfzrb8+zD234s5f3/hNMvkmmXyTTL5J9nHJPNOWuRm7isajThqXvB7rH3sn4zfJ5Jtk8k0y+SZZ5/mXc3Njjzu/VautzVVyc7OMc32FtugfCz8h3ySTb5LJN8kG5y8vKc7eUvn6c1XgXI24Vnlu5ec2fpNMvkkm3ySTb5KV6su3ttzNLR89dorIsVM51x+uPLdy52OM3ySTb5LJN8nkm2Sd9WXjYYpvrdtsPHJkzlxNvPXcY7cyfwnfk2+SyTfJ5Jtkg+eTzJ00ecnJJ3PHYR47wnNO5Ss0/r7Gb5LJN8nkm2TyTbLO/ZdznUvnKrn1h7e81bh1bkHssYp5zfwlfE++SSbfJJNvkg32j9368CWzfcf2UM6tNd26dm436vpBlVttMX6TTL5JJt8kk2+S3TJ/+dA4GfbWzNnaJc2AKhq/wlx/YOM3yeSbZPJNMvkmWef85daHK9Xn3MmLc99o/dwtx/ZfVqr8xgnaCuM3yeSbZPJNMvkm2eD5lw+XVCdvHQxy7NpjWzmP9Z61/xK+J98kk2+SyTfJzs1fXrLk9WGrODs2Q/lWA6O5k0/eaghs/CaZfJNMvkkm3yTrPJ+ksc/OXKuguWsr7zw36XiJuV5Ia8Zvksk3yeSbZPJNssHzLyuOtQpamzuzs3FF6NzEcOP+y7faKhm/SSbfJJNvksk3yUr7L4+duVG51frOx87sXL9G44OOra09tqHW/CV8T75JJt8kk2+SddaXa41zgXPHWWyZOx5ybkpyy1tlbiPjN8nkm2TyTTL5JtlgfXnJCsmKt7ravlWNNa5xfXjrBzV+k0y+SSbfJJNvkp3r73PsmMb1re5cxnlspXFjm6FjJ71YHwvfk2+SyTfJ5Jtkl66PnXvQXBuatzYvrs0tW52bzlRfwj+Rb5LJN8nkm2Sl+vLhWH/Rh8ZbNT732IrQuanBO/sZbTF+k0y+SSbfJJNvkg3Wlw/HOqZWHFtM+/DW/OX6w1vu/H2N3ySTb5LJN8nkm2SD518emzlrvPaSMx1/xT+ncudjDYyM3ySTb5LJN8nkm2Sl+nJuHnGuGdBbJePcdGalZc+x0zHX9PeBn5Bvksk3yeSbZIPzlw9zDW7mZijXjpVQl0zfbtm6lf2X8BPyTTL5Jpl8k6yzf2zAXODWc986DvOSzakV9l9CA/kmmXyTTL5Jdm7/5ZZj+/O2HCugt5577BzKirljONeM3ySTb5LJN8nkm2Sl+nKuzrukO0zjROncqSlzJ1xWPlzZFFt57oPxm2TyTTL5Jpl8k6yzv8+cufmtymu8deLj1l7G9VtVfsG5VrSNjN8kk2+SyTfJ5Jtknetjj00cHtuPWGlSs+XYmSqN3qrytxi/SSbfJJNvksk3yQb3Xx7bnlgx18e18bnr15jrstS4xPetMBi/SSbfJJNvksk3yc6dT3LMsXnEY8d3rK+dq4nnjpQ5xvhNMvkmmXyTTL5JllBfzhWFW21Ot8qvxl2SjdtAG6+9pNw0fpNMvkkm3ySTb5Jdej7JnXe+s2/t+jUqJfJc9bn+sPWx8E/km2TyTTL5JtnH3CmVjeZ2HM6ptIRt/EbHet42vmQj4zfJ5Jtk8k0y+SZZqb6Eyxm/SSbfJJNvksk3yeSbZPJNMvkmmXyTTL5JJt8kk2+SyTfJ5Jtk8k0y+SaZfJNMvkkm3ySTb5L9BfZpzfIeMZQJAAAAAElFTkSuQmCC" alt="QR Code">
+    <div class="qr-text">
+      <h3>Pratite status popravke</h3>
+      <p>Za provjeru statusa popravke vašeg uredjaja skenirajte QR kod ili posjetite link ispod.</p>
+      <a href="https://rma.integra.mn/track/f0503a47f2a3422dcb5fb0a70a89ff4ef119e0b4505216dbac37c079fa98e804">https://rma.integra.mn/track/f0503a47f2a3422dcb5fb0a70a89ff4ef119e0b4505216dbac37c079fa98e804</a>
     </div>
   </div>
+  
 
-  <div class="two-col">
-    <div class="col">
-      <p class="section-title">Korisnik</p>
-      <table class="info">
-        <tr><td>Ime</td><td><strong>Dragana Drobnjak</strong></td></tr>
-        <tr><td>Telefon</td><td>+382 68 072 050</td></tr>
-        <tr><td>Email</td><td>refused@integra.rma</td></tr>
-      </table>
-    </div>
-    <div class="col">
-      <p class="section-title">Uredjaj</p>
-      <table class="info">
-        <tr><td>Model</td><td><strong>Apple iPhone 17 Pro</strong></td></tr>
-        <tr><td>SN / IMEI</td><td style="font-family:monospace;">359637824807016</td></tr>
-        <tr><td>Status</td><td>Primljeno · U garanciji</td></tr>
-      </table>
-    </div>
+  <div class="signature-box">
+    <p>Potvrdjujem da je uredjaj primljen na servis sa ispravnim opisom reklamacije te da prihvatam uslove popravke.</p>
+    <div id="sig-placeholder" style="height:90px;display:flex;align-items:center;justify-content:space-between;margin:4px 0;">
+             <span class="signature-line" style="border-top:0;padding-top:0;color:#b5b2a8;">(čeka se potpis)</span>
+             <button type="button" class="no-print" id="sig-btn"
+                     style="background:#1D9E75;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">
+               Pokreni potpisivanje
+             </button>
+           </div>
+           <div id="sig-qr-wrap" class="no-print" style="display:none;align-items:center;gap:16px;padding:14px;background:#F4F4F4;border-radius:8px;margin:6px 0;">
+             <div id="sig-qr" style="background:#fff;padding:8px;border-radius:6px;"></div>
+             <div style="flex:1;font-size:12px;color:#5f5e5a;line-height:1.5;">
+               <div style="font-weight:600;color:#2c2c2a;margin-bottom:4px;">Skenirajte kamerom telefona ili tablet uredjaja</div>
+               <div id="sig-status">Čeka se skeniranje QR koda&hellip;</div>
+               <div style="color:#888780;margin-top:4px;font-size:11px;">Ako je tablet za potpis aktivan na ovoj lokaciji, otvoriće se automatski.</div>
+               <div style="margin-top:6px;word-break:break-all;" id="sig-url"></div>
+             </div>
+           </div>
+           <!-- Served locally on purpose: a CDN would send every visitor IP to
+                a third party on page load, which GDPR does not allow here. -->
+           <script src="/assets/js/qrcode.min.js"></script>
+           <script>
+           (function () {
+             var rmaId  = 1;
+             var btn    = document.getElementById("sig-btn");
+             var wrap   = document.getElementById("sig-qr-wrap");
+             var qrDiv  = document.getElementById("sig-qr");
+             var statusEl = document.getElementById("sig-status");
+             var urlEl  = document.getElementById("sig-url");
+             var poll   = null, currentToken = null;
+
+             btn.addEventListener("click", function () {
+               btn.disabled = true; btn.textContent = "Generating\u2026";
+               var csrf = document.querySelector("meta[name=csrf-token]").getAttribute("content");
+               fetch("/signature/token", {
+                 method: "POST",
+                 headers: {
+                   "Content-Type": "application/x-www-form-urlencoded",
+                   "X-CSRF-Token": csrf
+                 },
+                 body: "rma_id=" + rmaId + "&_csrf=" + encodeURIComponent(csrf)
+               })
+                 .then(function (r) { return r.json(); })
+                 .then(function (res) {
+                   if (!res.success) {
+                     btn.disabled = false; btn.textContent = "Pokreni potpisivanje";
+                     alert(res.error || "Nije moguće generisati link za potpis.");
+                     return;
+                   }
+                   currentToken = res.token;
+                   btn.style.display = "none";
+                   wrap.style.display = "flex";
+                   qrDiv.innerHTML = "";
+                   new QRCode(qrDiv, {text: res.url, width: 140, height: 140,
+                                      colorDark: "#000000", colorLight: "#ffffff"});
+                   urlEl.textContent = res.url;
+                   startPoll();
+                 });
+             });
+
+             function startPoll() {
+               if (poll) clearInterval(poll);
+               poll = setInterval(function () {
+                 fetch("/signature/status?token=" + encodeURIComponent(currentToken))
+                   .then(function (r) { return r.json(); })
+                   .then(function (s) {
+                     if (s.visited && !s.signed) statusEl.textContent = "Stranica za potpis je otvorena\u2026";
+                     if (s.signed && s.url) {
+                       clearInterval(poll); poll = null;
+                       statusEl.textContent = "Potpis primljen. Osvježavanje\u2026";
+                       setTimeout(function () { location.reload(); }, 600);
+                     }
+                   });
+               }, 2000);
+             }
+           })();
+           </script>
   </div>
 
-  
-  <p class="section-title no-rule">Primljena oprema</p>
-  <div class="complaint-box">Baterija, Račun o kupovini</div>
-  
+  <div class="footer">Integra &nbsp;|&nbsp; Bulevar Mihaila Lalica 2 &nbsp;|&nbsp; 81000 Podgorica &nbsp;|&nbsp; Telefon: +382 20 206 200 &nbsp;|&nbsp; Email: service@integra.mn</div>
 
-  
-  <p class="section-title no-rule">Opis reklamacije</p>
-  <div class="complaint-box">Zvuk zvona ili alarma se nekada dugo ne prekida nakon javljanja ili gasenja alarma. Desava se da zvuk pregledanog videa nastavi sa reprodukcijom nakon gasenja ili prelaska na drugi video. Nakon azuriranje iOS-a ili restartovanja uredjaja problem nestane privremeno.</div>
-  
+</div>
 
-  
-  </div></div><div class="hdr">C — grey fill, like Primljena oprema</div><div class="sub">Your suggestion. Watch the row separators: grey on grey they nearly vanish, so Ime / Telefon / Email lose the line that keeps them aligned.</div><div class="v3"><div class="page">
+<script>
+/* The sheet is a fixed A4, so on a tall screen it left a band of empty
+   background below it. Scale the whole preview up to use that spare height —
+   the "fit page" behaviour a PDF viewer has.
 
-  <div class="header">
-    <div class="company">
-      <div class="logo"><img src="/assets/integra.svg" alt="Integra"></div>
-    </div>
-    <div class="doc-title">
-      <h2>Potvrda o prijemu</h2>
-      <div class="rma-num">52150</div>
-      <div class="date">11-08-2026</div>
-    </div>
-  </div>
+   Only ever upwards: shrinking to fit a short window would make the preview
+   smaller than the paper and it would stop telling the truth about what
+   prints. A receipt whose content runs past one A4 measures taller than the
+   window, so it is simply left alone. */
+(function () {
+  var bar  = document.getElementById("toolbar");
+  var page = document.querySelector(".page");
+  if (!bar || !page) return;
 
-  <div class="two-col">
-    <div class="col">
-      <p class="section-title">Korisnik</p>
-      <table class="info">
-        <tr><td>Ime</td><td><strong>Dragana Drobnjak</strong></td></tr>
-        <tr><td>Telefon</td><td>+382 68 072 050</td></tr>
-        <tr><td>Email</td><td>refused@integra.rma</td></tr>
-      </table>
-    </div>
-    <div class="col">
-      <p class="section-title">Uredjaj</p>
-      <table class="info">
-        <tr><td>Model</td><td><strong>Apple iPhone 17 Pro</strong></td></tr>
-        <tr><td>SN / IMEI</td><td style="font-family:monospace;">359637824807016</td></tr>
-        <tr><td>Status</td><td>Primljeno · U garanciji</td></tr>
-      </table>
-    </div>
-  </div>
+  function fit() {
+    document.body.style.zoom = "";                 /* measure at 100% */
+    /* A fixed toolbar is out of the flow and takes up no height of its own. */
+    var inFlow = getComputedStyle(bar).position === "static" ? bar.offsetHeight : 0;
+    var above  = parseFloat(getComputedStyle(page).marginTop) || 0;
+    var natural = inFlow + above + page.offsetHeight + 24;   /* 24 = .page bottom margin */
+    var z = window.innerHeight / natural;
+    if (z > 1.005) document.body.style.zoom = z.toFixed(3);
+  }
+  function reset() { document.body.style.zoom = ""; }
 
-  
-  <p class="section-title no-rule">Primljena oprema</p>
-  <div class="complaint-box">Baterija, Račun o kupovini</div>
-  
+  fit();
+  window.addEventListener("resize", fit);
+  /* Paper gets the real A4, never the screen zoom. */
+  window.addEventListener("beforeprint", reset);
+  window.addEventListener("afterprint", fit);
+})();
+</script>
 
-  
-  <p class="section-title no-rule">Opis reklamacije</p>
-  <div class="complaint-box">Zvuk zvona ili alarma se nekada dugo ne prekida nakon javljanja ili gasenja alarma. Desava se da zvuk pregledanog videa nastavi sa reprodukcijom nakon gasenja ili prelaska na drugi video. Nakon azuriranje iOS-a ili restartovanja uredjaja problem nestane privremeno.</div>
-  
-
-  
-  </div></div>
+</body>
+</html>

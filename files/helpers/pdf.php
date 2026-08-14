@@ -33,15 +33,19 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
 
     $engine = $engine_override ?: setting('pdf_engine', 'html');
 
-    // The QR is drawn on the same grey as the panel it sits in. The encoder
-    // always paints white behind the modules, and a white QR on a grey panel is
-    // exactly the white square it looked like.
-    $qr_base64 = $tracking_url ? generate_qr_base64($tracking_url, 150, [244, 244, 244]) : '';
+    // The encoder always paints white behind the modules, so the QR has to be
+    // drawn on whatever is behind it or it shows as a card. The panel is grey
+    // on screen and loses its fill on paper, so there are two: the print view
+    // carries both and shows one per medium, and the PDF takes the grey, its
+    // panel being grey wherever it ends up.
+    $qr_grey  = $tracking_url ? generate_qr_base64($tracking_url, 150, [244, 244, 244]) : '';
+    $qr_white = $tracking_url ? generate_qr_base64($tracking_url, 150) : '';
+    $qr_base64 = $qr_grey;
 
     if ($engine === 'mpdf' && file_exists(ROOT . '/vendor/autoload.php')) {
         generate_rma_pdf_mpdf($rma, $tracking_url, $qr_base64, $mode);
     } else {
-        generate_rma_pdf_html($rma, $tracking_url, $qr_base64);
+        generate_rma_pdf_html($rma, $tracking_url, $qr_grey, $qr_white);
     }
 }
 
@@ -84,7 +88,7 @@ function format_rma_accessories(array $rma, ?string $lang = null): ?string {
     return $parts ? implode(', ', $parts) : null;
 }
 
-function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base64): void {
+function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base64, string $qr_print = ''): void {
     // Printed for the customer, so it follows THEIR language, not the
     // language of the employee at the counter.
     // Takes replacements too — without the second argument, ':date' in
@@ -187,6 +191,8 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   .qr-section { display: flex; align-items: flex-start; gap: 14px; background: #F4F4F4;
                 border-radius: 8px; padding: 14px; margin-bottom: 18px; }
   .qr-section img { width: 88px; height: 88px; flex-shrink: 0; }
+  /* The grey one on screen, where the panel is grey. */
+  .qr-print { display: none; }
   .qr-text h3 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
   .qr-text p { font-size: 12px; color: #5f5e5a; line-height: 1.5; }
   .qr-text a { font-size: 11px; color: #1D9E75; word-break: break-all; }
@@ -281,6 +287,10 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
       background: transparent;
       border: 0.5px solid #d3d1c7;
     }
+    /* The panel has no fill here, so the white QR is the one that disappears
+       into the page. */
+    .qr-screen { display: none; }
+    .qr-print  { display: block; }
     body { background: #fff; }
     /* 10mm matches the print padding on .page, so the footer lines up with the
        left edge of the content above it. */
@@ -357,7 +367,8 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
 
   ' . ($tracking_url ? '
   <div class="qr-section">
-    ' . ($qr_base64 ? '<img src="' . $qr_base64 . '" alt="QR Code">' : '') . '
+    ' . ($qr_base64 ? '<img class="qr-screen" src="' . $qr_base64 . '" alt="QR Code">' : '') . '
+    ' . ($qr_print  ? '<img class="qr-print" src="'  . $qr_print  . '" alt="QR Code">' : '') . '
     <div class="qr-text">
       <h3>' . $t('pdf.track_title') . '</h3>
       <p>' . $t('pdf.track_hint') . '</p>
@@ -583,12 +594,8 @@ function generate_rma_pdf_mpdf(array $rma, string $tracking_url, string $qr_base
           ? $t('pdf.footer_email') . ': ' . htmlspecialchars(trim((string)$rma['location_email'])) : '',
     ], fn($v) => $v !== '');
     $mpdf->SetHTMLFooter(
-        '<div style="border-top:0.5px solid #888780;padding-top:5px;font-size:8.5px;color:#888780;">'
-      . '<table width="100%" cellpadding="0" cellspacing="0"><tr>'
-      . '<td style="text-align:left;">' . implode(' &nbsp;|&nbsp; ', $footer_parts)
-      . '</td>'
-      . '<td style="text-align:right;">' . $t('pdf.printed', ['date' => format_datetime(time())]) . '</td>'
-      . '</tr></table>'
+        '<div style="border-top:0.5px solid #888780;padding-top:5px;font-size:9.5px;color:#888780;">'
+      . implode(' &nbsp;|&nbsp; ', $footer_parts)
       . '</div>'
     );
 

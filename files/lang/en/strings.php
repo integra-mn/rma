@@ -396,7 +396,6 @@ return [
     'pdf.sig_get'            => 'Start signing',
     'pdf.sig_station_hint'   => 'If a signing tablet is active at this location, it will open automatically.',
     'pdf.sn_imei'            => 'SN / IMEI',
-    'pdf.printed'            => 'Printed :date',
     'pager.prev'             => 'Previous',
     'pager.next'             => 'Next',
     'pager.showing'          => 'Showing :from–:to of :total',
