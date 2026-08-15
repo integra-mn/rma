@@ -302,13 +302,22 @@ function notify_rma_status(int $rma_id): void {
     $url   = $token ? 'https://rma.integra.mn/track/' . $token : '';
 
     // The customer reads their own language; a partner reads the app default.
+    // Sabloni first, the language file when a status has no row yet. The code
+    // is per status, so wording can differ between "come and collect it" and
+    // "we need a decision" without either being a code change.
     $for = function (string $lang) use ($rma, $url): array {
         $status = status_label((string) $rma['status_code'], (string) $rma['status_label'], $lang);
-        return [
-            __in($lang, 'notify.status_subject', ['number' => $rma['rma_number'], 'status' => $status]),
-            __in($lang, 'notify.status_body',    ['number' => $rma['rma_number'], 'status' => $status, 'url' => $url]),
-            __in($lang, 'notify.status_sms',     ['status' => $status, 'url' => $url]),
+        $code   = 'status.' . $rma['status_code'];
+        $repl   = [
+            'number'       => $rma['rma_number'],
+            'status'       => $status,
+            'tracking_url' => $url,
+            'url'          => $url,          // the older token name, still honoured
+            'customer'     => $rma['customer_name'] ?? '',
         ];
+        $mail = notification_text($code, 'email', $lang, $repl, 'notify.status_subject', 'notify.status_body');
+        $text = notification_text($code, 'sms',   $lang, $repl, '',                      'notify.status_sms');
+        return [$mail['subject'], $mail['body'], $text['body']];
     };
 
     $customer_lang = customer_lang($rma['customer_lang'] ?? null);
@@ -342,4 +351,48 @@ function notify_rma_status(int $rma_id): void {
             sms_send($number, $sms);
         }
     }
+}
+
+/**
+ * Wording for a notification, from Sabloni when there is a row for it.
+ *
+ * Falls back to the language file when there is none. The fallback is the point
+ * rather than a nicety: a status added in Administracija has no template until
+ * somebody writes one, and it must still be able to notify.
+ *
+ * Returns ['subject' => ?string, 'body' => string].
+ */
+function notification_text(string $code, string $channel, string $lang, array $repl,
+                           string $fallback_subject_key, string $fallback_body_key): array {
+    $row = db_row(
+        'SELECT subject, body FROM notification_templates
+          WHERE code = ? AND channel = ? AND lang = ? AND is_active = 1 LIMIT 1',
+        [$code, $channel, $lang]
+    );
+
+    if ($row && trim((string) $row['body']) !== '') {
+        return [
+            'subject' => $row['subject'] !== null ? fill_tokens($row['subject'], $repl) : null,
+            'body'    => fill_tokens($row['body'], $repl),
+        ];
+    }
+
+    return [
+        'subject' => $fallback_subject_key ? __in($lang, $fallback_subject_key, $repl) : null,
+        'body'    => __in($lang, $fallback_body_key, $repl),
+    ];
+}
+
+/**
+ * Substitute :tokens in text that came from the database.
+ *
+ * Longest name first, for the same reason __() does it: with :to and :total
+ * both in play, replacing :to first leaves "tal" behind.
+ */
+function fill_tokens(string $text, array $repl): string {
+    uksort($repl, fn($a, $b) => strlen((string) $b) <=> strlen((string) $a));
+    foreach ($repl as $k => $v) {
+        $text = str_replace(':' . $k, (string) $v, $text);
+    }
+    return $text;
 }

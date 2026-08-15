@@ -870,18 +870,27 @@
     $chan_filter = $_GET['channel'] ?? 'email';
     ?>
 
-    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center;">
-      <?php foreach (['email','sms','whatsapp'] as $ch): ?>
+    <!-- Channels as a tab bar, the component the rest of the app already uses
+         for this shape of choice. Buttons read as actions; these switch between
+         views of the same thing, which is what a tab says.
+
+         Language stays a small pair on the right rather than a second tab bar:
+         two bars side by side compete for the same attention, and the channel
+         is the larger choice — it decides which templates exist, where the
+         language only decides which wording of one you are editing. -->
+    <div class="tab-bar" style="margin-bottom:1rem;align-items:flex-end;">
+      <?php foreach (['email' => 'Email', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp'] as $ch => $ch_label): ?>
         <a href="/settings?stab=templates&channel=<?= $ch ?>&lang=<?= $lang_filter ?>"
-           class="btn <?= $chan_filter === $ch ? 'btn-primary' : '' ?>"><?= $ch === 'sms' ? 'SMS' : ucfirst($ch) ?></a>
+           class="tab<?= $chan_filter === $ch ? ' active' : '' ?>"><?= $ch_label ?></a>
       <?php endforeach; ?>
-      <!-- Language buttons pushed to the right so they aren't confused with the channel buttons. -->
-      <div style="margin-left:auto;display:flex;gap:8px;">
+      <span style="margin-left:auto;display:flex;gap:6px;padding-bottom:6px;">
         <?php foreach (['en','me'] as $lc): ?>
           <a href="/settings?stab=templates&channel=<?= $chan_filter ?>&lang=<?= $lc ?>"
-             class="btn <?= $lang_filter === $lc ? 'btn-primary' : '' ?>"><?= strtoupper($lc) ?></a>
+             style="font-size:12px;padding:3px 10px;border-radius:6px;text-decoration:none;
+                    border:0.5px solid <?= $lang_filter === $lc ? 'var(--accent)' : 'var(--border)' ?>;
+                    color:<?= $lang_filter === $lc ? 'var(--accent)' : 'var(--text-secondary)' ?>;"><?= strtoupper($lc) ?></a>
         <?php endforeach; ?>
-      </div>
+      </span>
     </div>
 
     <?php foreach ($grouped as $code => $channels): ?>
