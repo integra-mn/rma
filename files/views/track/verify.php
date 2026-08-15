@@ -19,7 +19,7 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: <?= app_font_stack() ?>;
-           background: #f4f4f0; min-height: 100vh;
+           background: #F4F4F4; min-height: 100vh;
            -webkit-font-smoothing: antialiased;
            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; }
     /* Form controls do not inherit font-family — browsers give them the OS

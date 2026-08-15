@@ -18,7 +18,7 @@
   <link href="/assets/css/fonts.css" rel="stylesheet">
   <style>
     body { font-family: <?= app_font_stack() ?>;
-           background: #f4f4f0; display: flex;
+           background: #F4F4F4; display: flex;
            -webkit-font-smoothing: antialiased;
            align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; }
     /* Form controls do not inherit font-family — browsers give them the OS

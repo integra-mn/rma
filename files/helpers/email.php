@@ -142,13 +142,13 @@ function email_shell(string $content, string $lang = 'me'): string {
 <style>
   html, body { height: 100%; margin: 0; padding: 0; }
   body { font-family: {$font}; background: #F4F4F4; color: #2c2c2a; }
-  /* Spacing taken from the tracking page: 24px above the logo, 18px below,
-     the logo itself 36px. There the 24px is the body padding and the logo sits
-     above the card; here it is inside one, so the card's top padding does that
-     job. */
+  /* Measured off the live tracking page — the verify screen a customer
+     actually lands on, not the status page behind it, which is what I had been
+     copying. There the card is 480px with 40px padding all round, the logo is
+     40px high inside it with 48px beneath, and everything is centred. */
   .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px;
-          padding: 24px 26px 28px; text-align: center; }
-  .logo-bar { margin-bottom: 18px; }
+          padding: 40px; text-align: center; }
+  .logo-bar { margin-bottom: 48px; }
   .logo-bar img { margin: 0 auto; }
   .rma-number { font-size: 28px; font-weight: 600; color: #1D9E75; margin: 0 0 4px; }
   .meta { font-size: 13px; color: #888780; margin-bottom: 24px; }
@@ -161,7 +161,7 @@ function email_shell(string $content, string $lang = 'me'): string {
   .msg { font-size: 15px; line-height: 1.6; color: #2c2c2a; margin: 0 0 24px; }
   .cta { display: inline-block; background: #1D9E75; color: #fff !important; text-decoration: none;
          font-size: 14px; font-weight: 600; padding: 11px 22px; border-radius: 8px; }
-  .footer { text-align: center; font-size: 11.5px; color: #888780; margin: 24px 0 0; }
+  .footer { text-align: center; font-size: 12px; color: #888780; margin: 32px 0 0; }
 </style>
 </head>
 <body>
@@ -175,12 +175,12 @@ function email_shell(string $content, string $lang = 'me'): string {
   <tr>
     <td align='center' valign='middle' style='padding:24px;'>
       <table role='presentation' width='100%' cellpadding='0' cellspacing='0'
-             style='width:100%;max-width:600px;margin:0 auto;'>
+             style='width:100%;max-width:480px;margin:0 auto;'>
         <tr>
           <td>
             <div class='card'>
               <div class='logo-bar'>
-                <img src='cid:integralogo' alt='{$company}' height='36' style='height:36px;width:auto;display:inline-block;border:0;'>
+                <img src='cid:integralogo' alt='{$company}' height='40' style='height:40px;width:auto;display:inline-block;border:0;'>
               </div>
 {$content}
             </div>
