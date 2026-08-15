@@ -33,6 +33,9 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         <th style="width:280px;"><?= __('admin.status_label_me') ?></th>
         <th style="width:180px;"><?= __('label.code') ?></th>
         <th style="width:110px;text-align:center;"><?= __('admin.status_notify') ?></th>
+        <?php if ($sub === 'rma'): ?>
+          <th style="width:190px;"><?= __('admin.status_roles') ?></th>
+        <?php endif; ?>
         <th style="width:100px;text-align:center;"><?= __('label.sort_order') ?></th>
         <th style="text-align:right;"><?= __('label.actions') ?></th>
       </tr>
@@ -53,6 +56,20 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
               <span style="color:var(--text-muted);">&mdash;</span>
             <?php endif; ?>
           </td>
+          <?php if ($sub === 'rma'): ?>
+            <?php $roles = status_roles($s['roles'] ?? null); ?>
+            <td>
+              <?php if (!$roles): ?>
+                <span style="color:var(--text-muted);"><?= __('admin.status_roles_all') ?></span>
+              <?php else: ?>
+                <?php foreach ($roles as $r): ?>
+                  <span class="badge" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin-right:4px;">
+                    <?= htmlspecialchars(role_label($r)) ?>
+                  </span>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </td>
+          <?php endif; ?>
           <td style="text-align:center;color:var(--text-muted);"><?= (int)$s['sort_order'] ?></td>
           <td style="text-align:right;">
             <button type="button" class="btn-link"
@@ -114,6 +131,22 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         </label>
         <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_notify_hint') ?></p>
       </div>
+      <?php if ($sub === 'rma'): ?>
+      <div class="field">
+        <label><?= __('admin.status_roles_label') ?></label>
+        <div style="display:flex;gap:16px;margin-top:4px;">
+          <?php foreach (STATUS_ROLES as $r): ?>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+              <input type="checkbox" name="roles[]" value="<?= $r ?>"
+                     class="f-role" data-role="<?= $r ?>"
+                     style="width:auto;height:auto;">
+              <?= htmlspecialchars(role_label($r)) ?>
+            </label>
+          <?php endforeach; ?>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_roles_hint') ?></p>
+      </div>
+      <?php endif; ?>
       <div style="display:flex;gap:8px;margin-top:1rem;">
         <button type="submit" class="btn btn-primary" style="min-width:100px;" id="modal-save"><?= __('btn.save') ?></button>
         <button type="button" class="btn" style="min-width:100px;" onclick="closeModal()"><?= __('btn.cancel') ?></button>
@@ -131,6 +164,15 @@ const STATUS_TITLES = {
 const SAVE_LABEL = <?= json_encode(__('btn.save')) ?>;
 const SAVE_CHANGES_LABEL = <?= json_encode(__('btn.save_changes')) ?>;
 
+// The role boxes only exist on the RMA sub-tab — repair statuses are not
+// split — so every caller here tolerates them being absent.
+function setRoles(csv) {
+  const picked = (csv || '').split(',').map(s => s.trim()).filter(Boolean);
+  document.querySelectorAll('.f-role').forEach(cb => {
+    cb.checked = picked.includes(cb.dataset.role);
+  });
+}
+
 function openModal(type) {
   document.getElementById('modal-title').textContent = STATUS_TITLES.add[type] || STATUS_TITLES.add.rma;
   document.getElementById('status-form').action = '/admin/status/store';
@@ -144,6 +186,7 @@ function openModal(type) {
   document.getElementById('f-sort').value  = '10';
   document.getElementById('f-terminal').checked = false;
   document.getElementById('f-notify').checked = false;
+  setRoles('');
   document.getElementById('modal-save').textContent = SAVE_LABEL;
   document.getElementById('status-modal').style.display = 'flex';
   document.getElementById('f-label').focus();
@@ -162,6 +205,7 @@ function editStatus(type, s) {
   document.getElementById('f-sort').value  = s.sort_order;
   document.getElementById('f-terminal').checked = !!parseInt(s.is_terminal);
   document.getElementById('f-notify').checked = !!parseInt(s.notify);
+  setRoles(s.roles);
   document.getElementById('modal-save').textContent = SAVE_CHANGES_LABEL;
   document.getElementById('status-modal').style.display = 'flex';
   document.getElementById('f-label').focus();

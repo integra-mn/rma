@@ -356,7 +356,22 @@ class RmaController {
                                  WHERE rma_id = ? AND deleted_at IS NULL
                                  ORDER BY created_at ASC", [(int)$id]);
 
-        $statuses    = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order');
+        // The dropdown offers what this desk may set — reception the counter
+        // steps, the bench the ones in between (Administracija -> Statusi).
+        // The status the RMA is already in stays in the list whoever is
+        // looking, or the box would show somebody else's case as sitting
+        // somewhere it isn't. Re-picking it changes nothing, so that is safe.
+        $all_statuses = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order');
+        $statuses     = statuses_for_user($all_statuses);
+        $current_id   = (int)$rma['status_id'];
+        if (!array_filter($statuses, fn($s) => (int)$s['id'] === $current_id)) {
+            $statuses = array_merge(
+                array_filter($all_statuses, fn($s) => (int)$s['id'] === $current_id),
+                $statuses
+            );
+            usort($statuses, fn($a, $b) => (int)$a['sort_order'] <=> (int)$b['sort_order']);
+        }
+
         $technicians = db_rows("SELECT id, name FROM users WHERE role = 'technician' AND is_active = 1 ORDER BY name");
 
         // Logistics: shipments for this RMA + couriers for the add/edit forms.
@@ -399,6 +414,16 @@ class RmaController {
         if ($action === 'status') {
             $status_id = (int)($_POST['status_id'] ?? 0);
             if ($status_id && $status_id !== (int)$rma['status_id']) {
+                // The dropdown only offers what this desk may set, but a
+                // filtered dropdown is a convenience, not a rule — and this
+                // one can send an SMS to a customer, so check it again here.
+                $target = db_row('SELECT * FROM rma_statuses WHERE id = ?', [$status_id]);
+                if (!$target || !can_set_status($target)) {
+                    $_SESSION['form_error'] = __('rma.status_not_allowed');
+                    header("Location: /rma/{$id}");
+                    exit;
+                }
+
                 db_update('rma_requests', ['status_id' => $status_id], 'id = ?', [(int)$id]);
                 db_insert('rma_status_history', [
                     'rma_id'     => (int)$id,

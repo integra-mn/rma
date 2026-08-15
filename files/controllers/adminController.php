@@ -566,7 +566,7 @@ class AdminController {
         }
 
         $table = $type === 'rma' ? 'rma_statuses' : 'repair_statuses';
-        db_insert($table, [
+        $data  = [
             'label'       => $label,
             'label_me'    => $label_me !== '' ? $label_me : null,
             'code'        => $code,
@@ -574,7 +574,14 @@ class AdminController {
             'sort_order'  => $sort,
             'is_terminal' => $term,
             'notify'      => $notify,
-        ]);
+        ];
+        // Which desk may set this status on an RMA. Nothing ticked means every
+        // role, which is what a new status should do until somebody narrows it.
+        // Repair statuses carry no split — the bench job is the technician's
+        // either way — so the column only exists on rma_statuses.
+        if ($type === 'rma') $data['roles'] = $this->status_roles_input();
+
+        db_insert($table, $data);
 
         $_SESSION['flash'] = ['type'=>'success','message'=>__('admin.status_added')];
         header('Location: /administration?tab=statuses');
@@ -606,7 +613,7 @@ class AdminController {
         }
 
         $table = $type === 'rma' ? 'rma_statuses' : 'repair_statuses';
-        db_update($table, [
+        $data  = [
             'label'       => $label,
             'label_me'    => $label_me !== '' ? $label_me : null,
             'code'        => $code,
@@ -614,11 +621,25 @@ class AdminController {
             'sort_order'  => $sort,
             'is_terminal' => $term,
             'notify'      => $notify,
-        ], 'id = ?', [$id]);
+        ];
+        // See status_store(): the split is an RMA-status property only.
+        if ($type === 'rma') $data['roles'] = $this->status_roles_input();
+
+        db_update($table, $data, 'id = ?', [$id]);
 
         $_SESSION['flash'] = ['type'=>'success','message'=>__('admin.status_updated')];
         header('Location: /administration?tab=statuses');
         exit;
+    }
+
+    /**
+     * The ticked roles from the status modal, as the comma-separated list the
+     * column stores. Unknown role codes are dropped; nothing ticked stores
+     * NULL, which every role can set.
+     */
+    private function status_roles_input(): ?string {
+        $picked = status_roles(implode(',', (array)($_POST['roles'] ?? [])));
+        return $picked ? implode(',', $picked) : null;
     }
 
     public function settings(): void {

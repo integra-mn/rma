@@ -109,6 +109,59 @@ function can(string $module, string $action): bool {
     return false;
 }
 
+// ── Which desk may set which RMA status ───────────────────────
+//
+// rma.edit says somebody may move a case along. This says how far: reception
+// takes the device in and hands it back, the bench does everything in
+// between. The answer lives on the status itself (rma_statuses.roles, a
+// comma-separated list of role codes) beside `notify`, so it is admin-editable
+// and a status added tomorrow carries its own.
+//
+// It matters because four statuses message the customer — without this,
+// reception can mark a case Popravljeno and text somebody to come and collect
+// a device still on the bench.
+
+// The roles a status may be set by. Only these two are split; everybody else
+// is answered by the rules below rather than by the list.
+const STATUS_ROLES = ['reception', 'technician'];
+
+/** Parse the stored list. Unknown or empty entries are dropped. */
+function status_roles(?string $roles): array {
+    if ($roles === null || trim($roles) === '') return [];
+    $out = array_map('trim', explode(',', $roles));
+    return array_values(array_intersect($out, STATUS_ROLES));
+}
+
+/**
+ * May this user move an RMA into this status?
+ *
+ * Admin and Super Admin: always. An absent technician must never leave the
+ * counter unable to move a case, and somebody has to be able to correct a
+ * mistake in either direction.
+ *
+ * An empty list means every role, so a newly added status is usable until
+ * somebody narrows it deliberately — and so this returns true across a
+ * database that has not run the migration yet.
+ */
+function can_set_status(array $status, ?array $user = null): bool {
+    $user = $user ?? current_user();
+    if (!$user) return false;
+    if (is_admin_user($user)) return true;
+
+    $roles = status_roles($status['roles'] ?? null);
+    if (!$roles) return true;
+
+    return in_array($user['role'] ?? '', $roles, true);
+}
+
+/** The subset of a status list this user may actually set. */
+function statuses_for_user(array $statuses, ?array $user = null): array {
+    return array_values(array_filter(
+        $statuses,
+        fn(array $s) => can_set_status($s, $user)
+    ));
+}
+
 /**
  * Editable role -> list of "module.action" grants. Reads the role_permissions
  * table; if that table doesn't exist yet (pre-migration) it falls back to the

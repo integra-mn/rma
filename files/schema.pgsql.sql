@@ -286,6 +286,7 @@ CREATE TABLE rma_statuses (
   color VARCHAR(20),
   sort_order SMALLINT DEFAULT 0,
   notify SMALLINT NOT NULL DEFAULT 0,
+  roles VARCHAR(120) NULL,
   is_terminal SMALLINT DEFAULT 0,
   is_system SMALLINT DEFAULT 1
 );
@@ -1082,20 +1083,22 @@ INSERT INTO vat_rates (label, rate, is_default) VALUES
   ('Reduced 7%',    7.00, 0),
   ('Exempt 0%',     0.00, 0);
 
-INSERT INTO rma_statuses (code, label, label_me, color, sort_order, is_terminal, is_system) VALUES
-  ('draft',             'Draft',              'Nacrt',             '#888780', 1,  0, 1),
-  ('submitted',         'Submitted',          'Podneseno',         '#378ADD', 2,  0, 1),
-  ('awaiting_device',   'Awaiting device',    'Čeka se uredjaj',    '#EF9F27', 3,  0, 1),
-  ('device_received',   'Device received',    'Uredjaj primljen',   '#1D9E75', 4,  0, 1),
-  ('in_diagnosis',      'In diagnosis',       'Na dijagnostici',   '#7F77DD', 5,  0, 1),
-  ('awaiting_parts',    'Awaiting parts',     'Čeka se dio',       '#EF9F27', 6,  0, 1),
-  ('in_repair',         'In repair',          'Na popravci',       '#7F77DD', 7,  0, 1),
-  ('awaiting_approval', 'Awaiting approval',  'Čeka se odobrenje', '#EF9F27', 8,  0, 1),
-  ('repaired',          'Repaired',           'Popravljeno',       '#1D9E75', 9,  0, 1),
-  ('dispatched',        'Dispatched',         'Otpremljeno',       '#378ADD', 10, 0, 1),
-  ('closed',            'Closed',             'Zatvoreno',         '#3B6D11', 11, 1, 1),
-  ('cancelled',         'Cancelled',          'Otkazano',          '#A32D2D', 12, 1, 1),
-  ('unrepairable',      'Unrepairable',       'Nepopravljivo',     '#A32D2D', 13, 1, 1);
+-- `roles` splits the workflow between the counter and the bench; see
+-- migrations/2026_08_15_status_roles.sql for why each one sits where it does.
+INSERT INTO rma_statuses (code, label, label_me, color, sort_order, is_terminal, is_system, roles) VALUES
+  ('draft',             'Draft',              'Nacrt',             '#888780', 1,  0, 1, 'reception'),
+  ('submitted',         'Submitted',          'Podneseno',         '#378ADD', 2,  0, 1, 'reception'),
+  ('awaiting_device',   'Awaiting device',    'Čeka se uredjaj',    '#EF9F27', 3,  0, 1, 'reception'),
+  ('device_received',   'Device received',    'Uredjaj primljen',   '#1D9E75', 4,  0, 1, 'reception'),
+  ('in_diagnosis',      'In diagnosis',       'Na dijagnostici',   '#7F77DD', 5,  0, 1, 'technician'),
+  ('awaiting_parts',    'Awaiting parts',     'Čeka se dio',       '#EF9F27', 6,  0, 1, 'technician'),
+  ('in_repair',         'In repair',          'Na popravci',       '#7F77DD', 7,  0, 1, 'technician'),
+  ('awaiting_approval', 'Awaiting approval',  'Čeka se odobrenje', '#EF9F27', 8,  0, 1, 'technician'),
+  ('repaired',          'Repaired',           'Popravljeno',       '#1D9E75', 9,  0, 1, 'technician'),
+  ('dispatched',        'Dispatched',         'Otpremljeno',       '#378ADD', 10, 0, 1, 'reception'),
+  ('closed',            'Closed',             'Zatvoreno',         '#3B6D11', 11, 1, 1, 'reception'),
+  ('cancelled',         'Cancelled',          'Otkazano',          '#A32D2D', 12, 1, 1, 'reception'),
+  ('unrepairable',      'Unrepairable',       'Nepopravljivo',     '#A32D2D', 13, 1, 1, 'technician');
 
 INSERT INTO repair_statuses (code, label, label_me, color, sort_order, is_terminal) VALUES
   ('pending',     'Pending',     'Na čekanju', '#888780', 1, 0),
