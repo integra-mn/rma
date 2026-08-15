@@ -94,14 +94,21 @@ function rma_receipt_recipients(array $rma): array {
 /**
  * Build HTML receipt email body
  */
-function build_receipt_html(array $rma, string $tracking_url, string $qr_base64, string $lang = 'me'): string {
-    $device = trim(($rma['brand_name'] ?? '') . ' ' . ($rma['model_name'] ?? ''));
-    $date   = format_date($rma['created_at']);
-    // Customers know the business by this name, not by the app's internal one.
-    // Settings → General → Naziv firme.
+/**
+ * The frame every email from this app shares: styles, dark header with the
+ * company name, and the footer.
+ *
+ * Templates in Sabloni hold words, not markup. Anything typed there arrives
+ * escaped and is dropped into $content here, so a stray tag cannot break the
+ * message and nobody editing wording has to know that email HTML means tables
+ * and inline styles rather than the HTML they know.
+ *
+ * The receipt builds its own $content and passes it through the same frame, so
+ * a customer who gets a receipt and then a status update sees one sender rather
+ * than two.
+ */
+function email_shell(string $content, string $lang = 'me'): string {
     $company = htmlspecialchars(company_name(), ENT_QUOTES, 'UTF-8');
-
-    // Short alias — this template calls it a dozen times.
     $t = fn(string $key, array $r = []): string => __in($lang, $key, $r);
 
     return "<!DOCTYPE html>
@@ -123,6 +130,9 @@ function build_receipt_html(array $rma, string $tracking_url, string $qr_base64,
   .qr-section { text-align: center; padding: 24px; background: #f4f4f0; border-radius: 8px; margin-bottom: 24px; }
   .qr-section p { font-size: 13px; color: #5f5e5a; margin: 12px 0 4px; }
   .qr-section a { font-size: 12px; color: #1D9E75; word-break: break-all; }
+  .msg { font-size: 15px; line-height: 1.6; color: #2c2c2a; margin: 0 0 24px; }
+  .cta { display: inline-block; background: #1D9E75; color: #fff !important; text-decoration: none;
+         font-size: 14px; font-weight: 600; padding: 11px 22px; border-radius: 8px; }
   .footer { padding: 20px 32px; background: #f4f4f0; font-size: 12px; color: #888780; text-align: center; }
 </style>
 </head>
@@ -132,7 +142,30 @@ function build_receipt_html(array $rma, string $tracking_url, string $qr_base64,
     <span style='color:#fff;font-size:18px;font-weight:600;letter-spacing:0.02em;'>{$company}</span>
   </div>
   <div class='body'>
-    <p style='font-size:13px;color:#888780;margin:0 0 8px;'>" . $t('receipt.title') . "</p>
+{$content}
+  </div>
+  <div class='footer'>
+    &copy; " . date('Y') . " {$company} &nbsp;&middot;&nbsp; " . $t('receipt.automated') . "
+  </div>
+</div>
+</body>
+</html>";
+}
+
+function build_receipt_html(array $rma, string $tracking_url, string $qr_base64, string $lang = 'me'): string {
+    $device = trim(($rma['brand_name'] ?? '') . ' ' . ($rma['model_name'] ?? ''));
+    $date   = format_date($rma['created_at']);
+    // Customers know the business by this name, not by the app's internal one.
+    // Settings → General → Naziv firme.
+    $company = htmlspecialchars(company_name(), ENT_QUOTES, 'UTF-8');
+
+    // Short alias — this template calls it a dozen times.
+    $t = fn(string $key, array $r = []): string => __in($lang, $key, $r);
+
+    // Only the middle. The frame around it — styles, header, footer —
+    // comes from email_shell(), so a receipt and a status update arrive
+    // looking like the same sender.
+    $content = "<p style='font-size:13px;color:#888780;margin:0 0 8px;'>" . $t('receipt.title') . "</p>
     <p class='rma-number'>{$rma['rma_number']}</p>
     <p class='meta'>" . $t('receipt.submitted', ['date' => $date, 'location' => $rma['location_name'] ?? '']) . "</p>
 
@@ -155,14 +188,9 @@ function build_receipt_html(array $rma, string $tracking_url, string $qr_base64,
       " . $t('receipt.questions') . "
       " . htmlspecialchars($rma['location_phone'] ?? '') . "
       " . ($rma['location_email'] ? "" . $t('receipt.or') . " <a href='mailto:" . htmlspecialchars($rma['location_email']) . "'>" . htmlspecialchars($rma['location_email']) . "</a>" : '') . "
-    </p>
-  </div>
-  <div class='footer'>
-    &copy; " . date('Y') . " {$company} &nbsp;·&nbsp; " . $t('receipt.automated') . "
-  </div>
-</div>
-</body>
-</html>";
+    </p>";
+
+    return email_shell($content, $lang);
 }
 
 /**
@@ -317,7 +345,7 @@ function notify_rma_status(int $rma_id): void {
         ];
         $mail = notification_text($code, 'email', $lang, $repl, 'notify.status_subject', 'notify.status_body');
         $text = notification_text($code, 'sms',   $lang, $repl, '',                      'notify.status_sms');
-        return [$mail['subject'], $mail['body'], $text['body']];
+        return [$mail['subject'], $mail['body'], $text['body'], $status];
     };
 
     $customer_lang = customer_lang($rma['customer_lang'] ?? null);
@@ -325,12 +353,13 @@ function notify_rma_status(int $rma_id): void {
 
     // Partner, by whichever channels the grid allows for partners.
     if (!empty($rma['partner_id'])) {
-        [$subject, $body, $sms] = $for($partner_lang);
+        [$subject, $body, $sms, $status_name] = $for($partner_lang);
         if (setting_on('notify_partner_email', true)
             && !empty($rma['partner_email']) && !is_placeholder_email($rma['partner_email'])) {
             send_email($rma['partner_email'],
                        ($rma['partner_contact'] ?? '') ?: ($rma['partner_name'] ?? ''),
-                       $subject, nl2br(htmlspecialchars($body)));
+                       $subject,
+                       notification_email_html($rma, $status_name, $body, $url, $partner_lang));
         }
     }
 
@@ -339,11 +368,12 @@ function notify_rma_status(int $rma_id): void {
                   || (int) ($rma['partner_notify_customer'] ?? 1) === 1;
     if (!$tell_customer) return;
 
-    [$subject, $body, $sms] = $for($customer_lang);
+    [$subject, $body, $sms, $status_name] = $for($customer_lang);
 
     if (setting_on('notify_customer_email', true)
         && !empty($rma['customer_email']) && !is_placeholder_email($rma['customer_email'])) {
-        send_email($rma['customer_email'], $rma['customer_name'], $subject, nl2br(htmlspecialchars($body)));
+        send_email($rma['customer_email'], $rma['customer_name'], $subject,
+                   notification_email_html($rma, $status_name, $body, $url, $customer_lang));
     }
 
     if (setting_on('notify_customer_sms', true)) {
@@ -395,4 +425,37 @@ function fill_tokens(string $text, array $repl): string {
         $text = str_replace(':' . $k, (string) $v, $text);
     }
     return $text;
+}
+
+/**
+ * A status notification, dressed in the app's email frame.
+ *
+ * The template supplies words only. They arrive escaped — a stray tag in a
+ * template cannot break the message — with line breaks kept, and the tracking
+ * link is drawn as a button rather than left as a bare URL in the middle of a
+ * sentence.
+ *
+ * The link is also dropped from the body when it appears there: the template
+ * text ends with the URL, and printing it twice, once as text and once as a
+ * button, reads like a mistake.
+ */
+function notification_email_html(array $rma, string $status, string $body, string $url, string $lang): string {
+    $t = fn(string $k, array $r = []): string => __in($lang, $k, $r);
+
+    $words = trim(str_replace($url, '', $body));
+    $words = nl2br(htmlspecialchars(rtrim($words, ": 	
+")));
+
+    $content = "<p style='font-size:13px;color:#888780;margin:0 0 8px;'>"
+             . htmlspecialchars($t('receipt.title')) . "</p>"
+             . "<p class='rma-number'>" . htmlspecialchars($rma['rma_number']) . "</p>"
+             . "<p class='meta'>" . htmlspecialchars($status) . "</p>"
+             . "<p class='msg'>" . $words . "</p>";
+
+    if ($url !== '') {
+        $content .= "<p style='margin:0 0 8px;'><a class='cta' href='" . htmlspecialchars($url) . "'>"
+                  . htmlspecialchars($t('track.title')) . "</a></p>";
+    }
+
+    return email_shell($content, $lang);
 }
