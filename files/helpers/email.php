@@ -142,8 +142,12 @@ function email_shell(string $content, string $lang = 'me'): string {
 <style>
   body { font-family: {$font}; background: #F4F4F4; margin: 0; padding: 24px; color: #2c2c2a; }
   .shell { max-width: 560px; margin: 0 auto; }
-  .logo-bar { margin-bottom: 18px; }
-  .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 28px 32px; }
+  /* Inside the card, on white. integra-email.png has a solid white background
+     — no alpha — so on the F4F4F4 page it showed as a pale rectangle. White on
+     white hides the edge without touching the asset, which the 2FA email also
+     uses. */
+  .logo-bar { margin-bottom: 22px; }
+  .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 26px 32px 30px; }
   .rma-number { font-size: 28px; font-weight: 600; color: #1D9E75; margin: 0 0 4px; }
   .meta { font-size: 13px; color: #888780; margin-bottom: 24px; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
@@ -160,10 +164,10 @@ function email_shell(string $content, string $lang = 'me'): string {
 </head>
 <body>
 <div class='shell'>
-  <div class='logo-bar'>
-    <img src='cid:integralogo' alt='{$company}' height='36' style='height:36px;width:auto;display:block;border:0;'>
-  </div>
   <div class='card'>
+    <div class='logo-bar'>
+      <img src='cid:integralogo' alt='{$company}' height='36' style='height:36px;width:auto;display:block;border:0;'>
+    </div>
 {$content}
   </div>
   <p class='footer'>&copy; " . date('Y') . " {$legal}</p>
