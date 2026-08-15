@@ -6,22 +6,31 @@
 -- status added in Administracija had no wording of its own and no way to be
 -- given any without a deploy.
 --
--- One row per notifying status, per channel, per language. The wording seeded
--- here is exactly what the language files produce today, so switching the code
--- over to templates changes nothing that is sent — it only makes the text
--- editable. Anything an admin then changes is their own.
+-- One row per notifying status, per channel, per language. The wording here is
+-- exactly what the language files produce today, so moving the code onto
+-- templates changes nothing that is sent — it only makes the text editable.
 --
--- Channels: email and sms carry real text. WhatsApp is seeded too, matching the
--- SMS wording, so its tab is not empty if the channel is ever switched on.
+-- WhatsApp is seeded too, matching the SMS wording, so its tab is not empty if
+-- the channel is ever switched on.
 --
--- Tokens: :number :status :tracking_url :customer :device
+-- Tokens: :number :status :tracking_url :customer
+--
+-- Line breaks are real newlines inside the quotes. Postgres treats a backslash
+-- in an ordinary string literal literally, so an escape sequence would be
+-- stored as two characters and printed that way in the email.
 
 INSERT INTO notification_templates (code, channel, lang, subject, body) VALUES
--- ── Uredjaj primljen ────────────────────────────────────────────────
+-- Uredjaj primljen
 ('status.device_received', 'email', 'me', 'Reklamacija :number — :status',
- 'Vaša reklamacija :number je sada: :status.\n\nStatus popravke pratite ovdje:\n:tracking_url'),
+ 'Vaša reklamacija :number je sada: :status.
+
+Status popravke pratite ovdje:
+:tracking_url'),
 ('status.device_received', 'email', 'en', 'RMA :number — :status',
- 'Your RMA :number is now: :status.\n\nTrack the repair here:\n:tracking_url'),
+ 'Your RMA :number is now: :status.
+
+Track the repair here:
+:tracking_url'),
 ('status.device_received', 'sms', 'me', NULL,
  ':status. Pratite status popravke: :tracking_url'),
 ('status.device_received', 'sms', 'en', NULL,
@@ -31,11 +40,17 @@ INSERT INTO notification_templates (code, channel, lang, subject, body) VALUES
 ('status.device_received', 'whatsapp', 'en', NULL,
  ':status. Track the repair: :tracking_url'),
 
--- ── Ceka se odobrenje ───────────────────────────────────────────────
+-- Ceka se odobrenje
 ('status.awaiting_approval', 'email', 'me', 'Reklamacija :number — :status',
- 'Vaša reklamacija :number je sada: :status.\n\nStatus popravke pratite ovdje:\n:tracking_url'),
+ 'Vaša reklamacija :number je sada: :status.
+
+Status popravke pratite ovdje:
+:tracking_url'),
 ('status.awaiting_approval', 'email', 'en', 'RMA :number — :status',
- 'Your RMA :number is now: :status.\n\nTrack the repair here:\n:tracking_url'),
+ 'Your RMA :number is now: :status.
+
+Track the repair here:
+:tracking_url'),
 ('status.awaiting_approval', 'sms', 'me', NULL,
  ':status. Pratite status popravke: :tracking_url'),
 ('status.awaiting_approval', 'sms', 'en', NULL,
@@ -45,11 +60,17 @@ INSERT INTO notification_templates (code, channel, lang, subject, body) VALUES
 ('status.awaiting_approval', 'whatsapp', 'en', NULL,
  ':status. Track the repair: :tracking_url'),
 
--- ── Popravljeno ─────────────────────────────────────────────────────
+-- Popravljeno
 ('status.repaired', 'email', 'me', 'Reklamacija :number — :status',
- 'Vaša reklamacija :number je sada: :status.\n\nStatus popravke pratite ovdje:\n:tracking_url'),
+ 'Vaša reklamacija :number je sada: :status.
+
+Status popravke pratite ovdje:
+:tracking_url'),
 ('status.repaired', 'email', 'en', 'RMA :number — :status',
- 'Your RMA :number is now: :status.\n\nTrack the repair here:\n:tracking_url'),
+ 'Your RMA :number is now: :status.
+
+Track the repair here:
+:tracking_url'),
 ('status.repaired', 'sms', 'me', NULL,
  ':status. Pratite status popravke: :tracking_url'),
 ('status.repaired', 'sms', 'en', NULL,
@@ -59,11 +80,17 @@ INSERT INTO notification_templates (code, channel, lang, subject, body) VALUES
 ('status.repaired', 'whatsapp', 'en', NULL,
  ':status. Track the repair: :tracking_url'),
 
--- ── Nepopravljivo ───────────────────────────────────────────────────
+-- Nepopravljivo
 ('status.unrepairable', 'email', 'me', 'Reklamacija :number — :status',
- 'Vaša reklamacija :number je sada: :status.\n\nStatus popravke pratite ovdje:\n:tracking_url'),
+ 'Vaša reklamacija :number je sada: :status.
+
+Status popravke pratite ovdje:
+:tracking_url'),
 ('status.unrepairable', 'email', 'en', 'RMA :number — :status',
- 'Your RMA :number is now: :status.\n\nTrack the repair here:\n:tracking_url'),
+ 'Your RMA :number is now: :status.
+
+Track the repair here:
+:tracking_url'),
 ('status.unrepairable', 'sms', 'me', NULL,
  ':status. Pratite status popravke: :tracking_url'),
 ('status.unrepairable', 'sms', 'en', NULL,
