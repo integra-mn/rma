@@ -40,7 +40,7 @@ function send_rma_receipt(int $rma_id): bool {
 
     $sent = false;
     foreach (rma_receipt_recipients($rma) as [$to, $name]) {
-        if (send_email($to, $name, $subject, $body)) $sent = true;
+        if (send_email($to, $name, $subject, $body, email_logo_attachment())) $sent = true;
     }
     return $sent;
 }
@@ -107,9 +107,29 @@ function rma_receipt_recipients(array $rma): array {
  * a customer who gets a receipt and then a status update sees one sender rather
  * than two.
  */
+/**
+ * The frame every email from this app shares.
+ *
+ * Follows the tracking page and the login screen rather than inventing a look
+ * of its own: the app background, the logo at 36px above a white card, and the
+ * same one-line copyright beneath it. A customer who follows the tracking link
+ * from an email should not feel they have arrived somewhere else.
+ *
+ * Templates in Sabloni hold words, not markup. Whatever is typed there arrives
+ * escaped and is dropped into $content, so a stray tag cannot break the message
+ * and nobody editing wording needs to know that email HTML means tables and
+ * inline styles.
+ *
+ * The logo is embedded, not linked: mail clients block remote images and do not
+ * render SVG. Callers must pass email_logo_attachment() to send_email() or the
+ * image will not appear — see notification_email_html() and send_rma_receipt().
+ */
 function email_shell(string $content, string $lang = 'me'): string {
     $company = htmlspecialchars(company_name(), ENT_QUOTES, 'UTF-8');
-    $t = fn(string $key, array $r = []): string => __in($lang, $key, $r);
+
+    // Montserrat first with web-safe fallbacks: mail clients cannot load web
+    // fonts, so anyone without it installed lands on Arial rather than a serif.
+    $font = "'Montserrat',-apple-system,'Segoe UI',Arial,sans-serif";
 
     return "<!DOCTYPE html>
 <html>
@@ -117,39 +137,47 @@ function email_shell(string $content, string $lang = 'me'): string {
 <meta charset='UTF-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
 <style>
-  body { font-family: Arial, sans-serif; background: #f4f4f0; margin: 0; padding: 20px; }
-  .wrap { max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; }
-  .header { background: #1A1A1F; padding: 24px 32px; }
-  .header img { height: 28px; }
-  .body { padding: 32px; }
+  body { font-family: {$font}; background: #F4F4F4; margin: 0; padding: 24px; color: #2c2c2a; }
+  .shell { max-width: 560px; margin: 0 auto; }
+  .logo-bar { margin-bottom: 18px; }
+  .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 28px 32px; }
   .rma-number { font-size: 28px; font-weight: 600; color: #1D9E75; margin: 0 0 4px; }
   .meta { font-size: 13px; color: #888780; margin-bottom: 24px; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
   td { padding: 10px 0; border-bottom: 0.5px solid #e8e6e0; font-size: 14px; }
   td:first-child { color: #888780; width: 140px; }
-  .qr-section { text-align: center; padding: 24px; background: #f4f4f0; border-radius: 8px; margin-bottom: 24px; }
+  .qr-section { text-align: center; padding: 24px; background: #F4F4F4; border-radius: 8px; margin-bottom: 24px; }
   .qr-section p { font-size: 13px; color: #5f5e5a; margin: 12px 0 4px; }
   .qr-section a { font-size: 12px; color: #1D9E75; word-break: break-all; }
   .msg { font-size: 15px; line-height: 1.6; color: #2c2c2a; margin: 0 0 24px; }
   .cta { display: inline-block; background: #1D9E75; color: #fff !important; text-decoration: none;
          font-size: 14px; font-weight: 600; padding: 11px 22px; border-radius: 8px; }
-  .footer { padding: 20px 32px; background: #f4f4f0; font-size: 12px; color: #888780; text-align: center; }
+  .footer { text-align: center; font-size: 11.5px; color: #888780; margin-top: 24px; }
 </style>
 </head>
 <body>
-<div class='wrap'>
-  <div class='header'>
-    <span style='color:#fff;font-size:18px;font-weight:600;letter-spacing:0.02em;'>{$company}</span>
+<div class='shell'>
+  <div class='logo-bar'>
+    <img src='cid:integralogo' alt='{$company}' height='36' style='height:36px;width:auto;display:block;border:0;'>
   </div>
-  <div class='body'>
+  <div class='card'>
 {$content}
   </div>
-  <div class='footer'>
-    &copy; " . date('Y') . " {$company} &nbsp;&middot;&nbsp; " . $t('receipt.automated') . "
-  </div>
+  <p class='footer'>&copy; " . date('Y') . " {$company}</p>
 </div>
 </body>
 </html>";
+}
+
+/**
+ * The logo, ready to embed. Empty when the file is missing, so a send never
+ * fails over a picture.
+ */
+function email_logo_attachment(): array {
+    $logo = dirname(__DIR__) . '/assets/integra-email.png';
+    return is_readable($logo)
+        ? [['path' => $logo, 'cid' => 'integralogo', 'name' => 'integra.png']]
+        : [];
 }
 
 function build_receipt_html(array $rma, string $tracking_url, string $qr_base64, string $lang = 'me'): string {
@@ -359,7 +387,8 @@ function notify_rma_status(int $rma_id): void {
             send_email($rma['partner_email'],
                        ($rma['partner_contact'] ?? '') ?: ($rma['partner_name'] ?? ''),
                        $subject,
-                       notification_email_html($rma, $status_name, $body, $url, $partner_lang));
+                       notification_email_html($rma, $status_name, $body, $url, $partner_lang),
+                       email_logo_attachment());
         }
     }
 
@@ -373,7 +402,8 @@ function notify_rma_status(int $rma_id): void {
     if (setting_on('notify_customer_email', true)
         && !empty($rma['customer_email']) && !is_placeholder_email($rma['customer_email'])) {
         send_email($rma['customer_email'], $rma['customer_name'], $subject,
-                   notification_email_html($rma, $status_name, $body, $url, $customer_lang));
+                   notification_email_html($rma, $status_name, $body, $url, $customer_lang),
+                   email_logo_attachment());
     }
 
     if (setting_on('notify_customer_sms', true)) {
