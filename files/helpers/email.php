@@ -140,38 +140,53 @@ function email_shell(string $content, string $lang = 'me'): string {
 <meta charset='UTF-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
 <style>
-  body { font-family: {$font}; background: #F4F4F4; margin: 0; padding: 24px; color: #2c2c2a; }
-  .shell { max-width: 560px; margin: 0 auto; }
-  /* Inside the card, on white. integra-email.png has a solid white background
-     — no alpha — so on the F4F4F4 page it showed as a pale rectangle. White on
-     white hides the edge without touching the asset, which the 2FA email also
-     uses. */
+  html, body { height: 100%; margin: 0; padding: 0; }
+  body { font-family: {$font}; background: #F4F4F4; color: #2c2c2a; }
+  .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px;
+          padding: 30px 32px 34px; text-align: center; }
   .logo-bar { margin-bottom: 22px; }
-  .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 26px 32px 30px; }
+  .logo-bar img { margin: 0 auto; }
   .rma-number { font-size: 28px; font-weight: 600; color: #1D9E75; margin: 0 0 4px; }
   .meta { font-size: 13px; color: #888780; margin-bottom: 24px; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-  td { padding: 10px 0; border-bottom: 0.5px solid #e8e6e0; font-size: 14px; }
-  td:first-child { color: #888780; width: 140px; }
+  table.details { width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left; }
+  table.details td { padding: 10px 0; border-bottom: 0.5px solid #e8e6e0; font-size: 14px; }
+  table.details td:first-child { color: #888780; width: 140px; }
   .qr-section { text-align: center; padding: 24px; background: #F4F4F4; border-radius: 8px; margin-bottom: 24px; }
   .qr-section p { font-size: 13px; color: #5f5e5a; margin: 12px 0 4px; }
   .qr-section a { font-size: 12px; color: #1D9E75; word-break: break-all; }
   .msg { font-size: 15px; line-height: 1.6; color: #2c2c2a; margin: 0 0 24px; }
   .cta { display: inline-block; background: #1D9E75; color: #fff !important; text-decoration: none;
          font-size: 14px; font-weight: 600; padding: 11px 22px; border-radius: 8px; }
-  .footer { text-align: center; font-size: 11.5px; color: #888780; margin-top: 24px; }
+  .footer { text-align: center; font-size: 11.5px; color: #888780; margin: 24px 0 0; }
 </style>
 </head>
 <body>
-<div class='shell'>
-  <div class='card'>
-    <div class='logo-bar'>
-      <img src='cid:integralogo' alt='{$company}' height='36' style='height:36px;width:auto;display:block;border:0;'>
-    </div>
+<!-- Vertical centring in email only works through a full-height table cell with
+     valign=middle: flexbox and margin:auto are not supported, and Outlook
+     renders through Word, which ignores most CSS positioning. Where a client
+     sizes the message to its content instead of a full pane — most webmail —
+     this degrades to balanced padding, which is what you want there anyway. -->
+<table role='presentation' width='100%' height='100%' cellpadding='0' cellspacing='0'
+       style='height:100%;min-height:100%;background:#F4F4F4;'>
+  <tr>
+    <td align='center' valign='middle' style='padding:24px;'>
+      <table role='presentation' width='100%' cellpadding='0' cellspacing='0'
+             style='width:100%;max-width:560px;margin:0 auto;'>
+        <tr>
+          <td>
+            <div class='card'>
+              <div class='logo-bar'>
+                <img src='cid:integralogo' alt='{$company}' height='36' style='height:36px;width:auto;display:inline-block;border:0;'>
+              </div>
 {$content}
-  </div>
-  <p class='footer'>&copy; " . date('Y') . " {$legal}</p>
-</div>
+            </div>
+            <p class='footer'>&copy; " . date('Y') . " {$legal}</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 </body>
 </html>";
 }
@@ -204,7 +219,7 @@ function build_receipt_html(array $rma, string $tracking_url, string $qr_base64,
     <p class='rma-number'>{$rma['rma_number']}</p>
     <p class='meta'>" . $t('receipt.submitted', ['date' => $date, 'location' => $rma['location_name'] ?? '']) . "</p>
 
-    <table>
+    <table class='details'>
       <tr><td>" . $t('receipt.customer') . "</td><td><strong>" . htmlspecialchars($rma['customer_name'] ?? '—') . "</strong></td></tr>
       " . ($device ? "<tr><td>" . $t('receipt.device') . "</td><td>" . htmlspecialchars($device) . "</td></tr>" : '') . "
       " . ($rma['serial_number'] ? "<tr><td>" . $t('receipt.serial') . "</td><td style='font-family:monospace;'>" . htmlspecialchars($rma['serial_number']) . "</td></tr>" : '') . "
