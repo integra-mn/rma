@@ -447,7 +447,7 @@ function notification_email_html(array $rma, string $status, string $body, strin
 ")));
 
     $content = "<p style='font-size:13px;color:#888780;margin:0 0 8px;'>"
-             . htmlspecialchars($t('receipt.title')) . "</p>"
+             . htmlspecialchars($t('label.rma')) . "</p>"
              . "<p class='rma-number'>" . htmlspecialchars($rma['rma_number']) . "</p>"
              . "<p class='meta'>" . htmlspecialchars($status) . "</p>"
              . "<p class='msg'>" . $words . "</p>";
