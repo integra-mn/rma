@@ -126,6 +126,9 @@ function rma_receipt_recipients(array $rma): array {
  */
 function email_shell(string $content, string $lang = 'me'): string {
     $company = htmlspecialchars(company_name(), ENT_QUOTES, 'UTF-8');
+    // The footer signs off with the legal name, matching the tracking page:
+    // "Integra", not the customer-facing "Integra Service".
+    $legal   = htmlspecialchars(company_legal_name(), ENT_QUOTES, 'UTF-8');
 
     // Montserrat first with web-safe fallbacks: mail clients cannot load web
     // fonts, so anyone without it installed lands on Arial rather than a serif.
@@ -163,7 +166,7 @@ function email_shell(string $content, string $lang = 'me'): string {
   <div class='card'>
 {$content}
   </div>
-  <p class='footer'>&copy; " . date('Y') . " {$company}</p>
+  <p class='footer'>&copy; " . date('Y') . " {$legal}</p>
 </div>
 </body>
 </html>";
@@ -479,7 +482,6 @@ function notification_email_html(array $rma, string $status, string $body, strin
     $content = "<p style='font-size:13px;color:#888780;margin:0 0 8px;'>"
              . htmlspecialchars($t('label.rma')) . "</p>"
              . "<p class='rma-number'>" . htmlspecialchars($rma['rma_number']) . "</p>"
-             . "<p class='meta'>" . htmlspecialchars($status) . "</p>"
              . "<p class='msg'>" . $words . "</p>";
 
     if ($url !== '') {

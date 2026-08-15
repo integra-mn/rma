@@ -15,6 +15,10 @@
 --
 -- Tokens: :number :status :tracking_url :customer
 --
+-- The email bodies do not use :number: the shell already prints it as the
+-- headline, and saying it twice reads like a mistake. It stays available
+-- for anyone who wants it in their own wording.
+--
 -- Line breaks are real newlines inside the quotes. Postgres treats a backslash
 -- in an ordinary string literal literally, so an escape sequence would be
 -- stored as two characters and printed that way in the email.
@@ -22,12 +26,12 @@
 INSERT INTO notification_templates (code, channel, lang, subject, body) VALUES
 -- Uredjaj primljen
 ('status.device_received', 'email', 'me', 'Reklamacija :number — :status',
- 'Vaša reklamacija :number je sada: :status.
+ 'Vaša reklamacija je sada: :status.
 
 Status popravke pratite ovdje:
 :tracking_url'),
 ('status.device_received', 'email', 'en', 'RMA :number — :status',
- 'Your RMA :number is now: :status.
+ 'Your RMA is now: :status.
 
 Track the repair here:
 :tracking_url'),
@@ -42,12 +46,12 @@ Track the repair here:
 
 -- Ceka se odobrenje
 ('status.awaiting_approval', 'email', 'me', 'Reklamacija :number — :status',
- 'Vaša reklamacija :number je sada: :status.
+ 'Vaša reklamacija je sada: :status.
 
 Status popravke pratite ovdje:
 :tracking_url'),
 ('status.awaiting_approval', 'email', 'en', 'RMA :number — :status',
- 'Your RMA :number is now: :status.
+ 'Your RMA is now: :status.
 
 Track the repair here:
 :tracking_url'),
@@ -62,12 +66,12 @@ Track the repair here:
 
 -- Popravljeno
 ('status.repaired', 'email', 'me', 'Reklamacija :number — :status',
- 'Vaša reklamacija :number je sada: :status.
+ 'Vaša reklamacija je sada: :status.
 
 Status popravke pratite ovdje:
 :tracking_url'),
 ('status.repaired', 'email', 'en', 'RMA :number — :status',
- 'Your RMA :number is now: :status.
+ 'Your RMA is now: :status.
 
 Track the repair here:
 :tracking_url'),
@@ -82,12 +86,12 @@ Track the repair here:
 
 -- Nepopravljivo
 ('status.unrepairable', 'email', 'me', 'Reklamacija :number — :status',
- 'Vaša reklamacija :number je sada: :status.
+ 'Vaša reklamacija je sada: :status.
 
 Status popravke pratite ovdje:
 :tracking_url'),
 ('status.unrepairable', 'email', 'en', 'RMA :number — :status',
- 'Your RMA :number is now: :status.
+ 'Your RMA is now: :status.
 
 Track the repair here:
 :tracking_url'),
