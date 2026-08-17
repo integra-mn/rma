@@ -764,6 +764,13 @@ function evLbStep(by) {
   evLbRender();
 }
 
+// The caption says 52174_001, not 52174_001.webp — the extension is how the
+// file is stored, not what the photo is called. Only a short trailing
+// extension is taken, so a name that simply contains a dot survives.
+function evLbLabel(name) {
+  return String(name || '').replace(/\.[A-Za-z0-9]{2,5}$/, '');
+}
+
 function evLbRender() {
   const lb = document.getElementById('ev-lightbox');
   if (!lb) return;
@@ -782,7 +789,7 @@ function evLbRender() {
       '<div style="position:relative;display:flex;flex-direction:column;align-items:center;">'
     +   '<img src="' + shot.src + '" style="max-width:90vw;max-height:85vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.6);">'
     +   '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:12px;">'
-    +     (shot.name || '') + (many ? ' &nbsp;·&nbsp; ' + (evLbAt + 1) + ' / ' + evLbShots.length : '')
+    +     evLbLabel(shot.name) + (many ? ' &nbsp;·&nbsp; ' + (evLbAt + 1) + ' / ' + evLbShots.length : '')
     +   '</p>'
     + '</div>'
     + (many ? arrow('prev') + arrow('next') : '');
