@@ -55,6 +55,7 @@ $routes = [
         '/rma'                         => 'rma/index',
         '/rma/create'                  => 'rma/create',
         '/rma/device-search'           => 'rma/device_search',
+        '/device/([A-Za-z0-9-]+)'      => 'rma/device_history',
         '/rma/customer-search'         => 'rma/customer_search',
         '/rma/([0-9]+)'                => 'rma/view',
         '/rma/([0-9]+)/edit'           => 'rma/edit',

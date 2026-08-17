@@ -817,6 +817,32 @@ class RmaController {
         exit;
     }
 
+    /**
+     * Every case this physical device has been through.
+     *
+     * Addressed by IMEI or serial, never by devices.id: the identifier is what
+     * identifies a phone, and one phone can hold several device rows.
+     */
+    public function device_history(string $ident): void {
+        require_login();
+        require_permission('rma', 'view');
+
+        $ident  = trim($ident);
+        $device = device_by_identifier($ident);
+        $cases  = device_cases($ident);
+
+        if (!$device) { http_response_code(404); include views_path('errors/404.php'); return; }
+
+        $page_title            = trim(($device['brand_name'] ?? '') . ' ' . ($device['model_name'] ?? ''))
+                                 ?: __('rma.device_history');
+        $breadcrumb_parent     = __('rma.title');
+        $breadcrumb_parent_url = '/rma';
+
+        include views_path('layout/header.php');
+        include views_path('rma/device_history.php');
+        include views_path('layout/footer.php');
+    }
+
     public function device_search(): void {
         require_login();
         $sn   = trim($_GET['sn'] ?? '');

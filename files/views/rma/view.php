@@ -70,6 +70,16 @@
               <?php if (($rma['imei'] ?? null) && ($rma['serial_number'] ?? null)): ?> &nbsp;·&nbsp; <?php endif; ?>
               <?php if ($rma['serial_number'] ?? null): ?><span style="color:var(--text-secondary);"><?= __('rma.sn') ?>:</span> <?= htmlspecialchars($rma['serial_number']) ?><?php endif; ?>
             </span>
+            <?php // Addressed by what is written on the device, since one phone
+                  // can hold more than one device row. IMEI first, serial if it
+                  // has no IMEI. ?>
+            <?php $ident = $rma['imei'] ?: ($rma['serial_number'] ?? ''); ?>
+            <?php if ($ident !== ''): ?>
+              <a href="/device/<?= rawurlencode($ident) ?>"
+                 style="font-size:11px;color:var(--accent);text-decoration:none;border:0.5px solid var(--accent);border-radius:6px;padding:3px 10px;">
+                <?= __('rma.device_history') ?>
+              </a>
+            <?php endif; ?>
             <?php
               // The "Provjeri garanciju" button appears for Apple devices when
               // Apple's "Warranty check" toggle is on (Settings → Integrations → Apple).
