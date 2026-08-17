@@ -320,6 +320,7 @@ CREATE TABLE rma_requests (
   sla_due_at TIMESTAMP DEFAULT NULL,
   sla_breached SMALLINT DEFAULT 0,
   estimated_completion DATE DEFAULT NULL,
+  dispatched_at TIMESTAMP DEFAULT NULL,
   completed_at TIMESTAMP DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -350,6 +350,11 @@ CREATE TABLE rma_requests (
   sla_breached           TINYINT(1) DEFAULT 0,
   estimated_completion   DATE DEFAULT NULL,
   completed_at           DATETIME DEFAULT NULL,
+  -- When the device left Integra: the clock a repeated repair is measured
+  -- from. Stamped from the first outbound shipment or the move to Otpremljeno
+  -- (helpers/device_history.php), not from when the customer collected it —
+  -- a partner may hold a phone for a month and that is not Integra's doing.
+  dispatched_at          DATETIME DEFAULT NULL,
   created_at             DATETIME DEFAULT NOW(),
   updated_at             DATETIME DEFAULT NOW() ON UPDATE NOW(),
   deleted_at             DATETIME DEFAULT NULL,

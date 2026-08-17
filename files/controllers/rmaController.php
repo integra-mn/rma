@@ -449,6 +449,11 @@ class RmaController {
                 ]);
                 audit_change('rma', (int)$id, ['status_id' => $rma['status_id']], ['status_id' => $status_id]);
 
+                // Recomputed rather than set here: the case may have left by
+                // shipment earlier, and this way a corrected date is picked up
+                // whichever way round the two happen.
+                stamp_rma_dispatch((int)$id);
+
                 // After the write, never before: a gateway refusing a message
                 // must not undo a status the technician has already set.
                 notify_rma_status((int)$id);
@@ -682,6 +687,9 @@ class RmaController {
         $data = $this->shipment_data();
         $data['rma_id'] = $rid;
         db_insert('delivery_shipments', $data);
+        // An outbound shipment with a dispatch date is the device leaving —
+        // the clock a repeated repair is measured from.
+        stamp_rma_dispatch($rid);
         audit('shipment_created', 'rma', $rid);
         $_SESSION['form_success'] = __('ship.saved');
         header("Location: /rma/{$rid}");
@@ -695,6 +703,7 @@ class RmaController {
         $sid = (int) ($_POST['id'] ?? 0);
         if (db_row('SELECT id FROM delivery_shipments WHERE id = ? AND rma_id = ?', [$sid, $rid])) {
             db_update('delivery_shipments', $this->shipment_data(), 'id = ?', [$sid]);
+            stamp_rma_dispatch($rid);
             audit('shipment_updated', 'rma', $rid);
             $_SESSION['form_success'] = __('ship.saved');
         }
@@ -708,6 +717,9 @@ class RmaController {
         $rid = (int) $rma_id;
         $sid = (int) ($_POST['id'] ?? 0);
         db()->prepare('DELETE FROM delivery_shipments WHERE id = ? AND rma_id = ?')->execute([$sid, $rid]);
+        // A shipment entered by mistake and removed should not leave the case
+        // looking dispatched, so this recomputes downwards too.
+        stamp_rma_dispatch($rid);
         audit('shipment_deleted', 'rma', $rid);
         header("Location: /rma/{$rid}");
         exit;
