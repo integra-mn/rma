@@ -16,7 +16,8 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
                           d.serial_number, d.imei,
                           l.name as location_name, l.phone as location_phone,
                           l.email as location_email, l.address as location_address,
-                          l.city as location_city, l.postal_code as location_postal
+                          l.city as location_city, l.postal_code as location_postal,
+                          rj.description as repair_findings, rj.resolution as repair_works
                    FROM rma_requests r
                    JOIN rma_statuses s ON s.id = r.status_id
                    LEFT JOIN customers c ON c.id = r.customer_id
@@ -24,6 +25,16 @@ function generate_rma_receipt_pdf(int $rma_id, string $mode = 'download', ?strin
                    LEFT JOIN device_models dm ON dm.id = d.model_id
                    LEFT JOIN device_brands db2 ON db2.id = dm.brand_id
                    LEFT JOIN locations l ON l.id = r.location_id
+                   -- The technician's findings and the work done, for the two
+                   -- sections below the complaint. A case can have more than one
+                   -- repair job, so this takes the newest; an intake receipt,
+                   -- printed before anybody has looked at the device, has none
+                   -- and simply prints without those sections.
+                   LEFT JOIN repair_jobs rj ON rj.id = (
+                       SELECT id FROM repair_jobs
+                        WHERE rma_id = r.id AND deleted_at IS NULL
+                        ORDER BY created_at DESC, id DESC LIMIT 1
+                   )
                    WHERE r.id = ?", [$rma_id]);
 
     if (!$rma) { http_response_code(404); echo 'RMA not found'; return; }
@@ -372,6 +383,16 @@ function generate_rma_pdf_html(array $rma, string $tracking_url, string $qr_base
   <div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>
   ' : '') . '
 
+  ' . (trim((string)($rma['repair_findings'] ?? '')) !== '' ? '
+  <p class="section-title">' . $t('pdf.diagnostic_findings') . '</p>
+  <div class="complaint-box">' . nl2br(htmlspecialchars($rma['repair_findings'])) . '</div>
+  ' : '') . '
+
+  ' . (trim((string)($rma['repair_works'] ?? '')) !== '' ? '
+  <p class="section-title">' . $t('pdf.works_done') . '</p>
+  <div class="complaint-box">' . nl2br(htmlspecialchars($rma['repair_works'])) . '</div>
+  ' : '') . '
+
   ' . ($tracking_url ? '
   <div class="qr-section">
     ' . ($qr_base64 ? '<img class="qr-screen" src="' . $qr_base64 . '" alt="QR Code">' : '') . '
@@ -702,6 +723,8 @@ function generate_rma_pdf_html_string(array $rma, string $device, string $date, 
     ' . (($acc = format_rma_accessories($rma, customer_lang($rma['customer_lang'] ?? null))) ? '<p class="section-title">' . $t('pdf.accessories') . '</p><div class="complaint-box">' . htmlspecialchars($acc) . '</div>' : '') . '
 
     ' . ($rma['complaint'] ? '<p class="section-title">' . $t('pdf.reported_issue') . '</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['complaint'])) . '</div>' : '') . '
+    ' . (trim((string)($rma['repair_findings'] ?? '')) !== '' ? '<p class="section-title">' . $t('pdf.diagnostic_findings') . '</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['repair_findings'])) . '</div>' : '') . '
+    ' . (trim((string)($rma['repair_works'] ?? '')) !== '' ? '<p class="section-title">' . $t('pdf.works_done') . '</p><div class="complaint-box">' . nl2br(htmlspecialchars($rma['repair_works'])) . '</div>' : '') . '
 
     ' . ($qr_base64 ? '<table width="100%" style="margin-top:12px;background:#F4F4F4;" cellpadding="8"><tr>
       <td style="vertical-align:top;padding-right:12px;width:100px;"><img src="' . $qr_base64 . '" width="90" height="90"></td>
