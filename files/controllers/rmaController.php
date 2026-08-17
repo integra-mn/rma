@@ -465,6 +465,24 @@ class RmaController {
                 }
             }
 
+            // The phone is where the SMS goes and half of what /track asks for,
+            // so a wrong number means the customer hears nothing and cannot look
+            // the case up. It writes to the customers row for the same reason
+            // the name does. Blank is left alone rather than treated as "clear
+            // it": emptying somebody's only contact is far more likely to be a
+            // slip than an intention, and SN/IMEI above are the fields that
+            // genuinely need clearing.
+            $cc    = preg_replace('/\D/', '', $_POST['customer_phone_country_code'] ?? '382');
+            $phone = normalize_phone(trim($_POST['customer_phone'] ?? ''), $cc ?: '382');
+            if ($phone !== '' && $rma['customer_id']) {
+                $old = db_row('SELECT phone FROM customers WHERE id = ?', [(int)$rma['customer_id']]);
+                if ($old && $old['phone'] !== $phone) {
+                    db_update('customers', ['phone' => $phone], 'id = ?', [(int)$rma['customer_id']]);
+                    audit_change('customer', (int)$rma['customer_id'],
+                                 ['phone' => $old['phone']], ['phone' => $phone]);
+                }
+            }
+
             if ($rma['device_id']) {
                 $sn   = trim($_POST['serial_number'] ?? '');
                 $imei = trim($_POST['imei'] ?? '');
@@ -484,13 +502,28 @@ class RmaController {
         }
 
         if ($action === 'details') {
-            db_update('rma_requests', [
-                'priority'             => $_POST['priority'] ?? $rma['priority'],
-                'estimated_completion' => $_POST['estimated_completion'] ?: null,
-                'assigned_tech'        => (int)($_POST['assigned_tech'] ?? 0) ?: null,
-                'is_warranty'          => isset($_POST['is_warranty']) ? 1 : 0,
-                'diagnosis'            => trim($_POST['diagnosis'] ?? ''),
-            ], 'id = ?', [(int)$id]);
+            // Only what the form actually sent. It posts a priority and a
+            // technician and nothing else, so writing the rest from absent POST
+            // keys quietly emptied them: every press of Azuriraj blanked the
+            // diagnosis and the estimated date, and set is_warranty to 0 —
+            // turning Pod garancijom into a refusal nobody had made.
+            //
+            // Warranty is not settable from here at all. It has three states
+            // and rules about which may follow which (helpers/warranty.php);
+            // this card has no way to express either, so it leaves them alone.
+            $data = ['priority' => $_POST['priority'] ?? $rma['priority']];
+
+            if (array_key_exists('assigned_tech', $_POST)) {
+                $data['assigned_tech'] = (int)$_POST['assigned_tech'] ?: null;
+            }
+            if (array_key_exists('estimated_completion', $_POST)) {
+                $data['estimated_completion'] = $_POST['estimated_completion'] ?: null;
+            }
+            if (array_key_exists('diagnosis', $_POST)) {
+                $data['diagnosis'] = trim((string)$_POST['diagnosis']);
+            }
+
+            db_update('rma_requests', $data, 'id = ?', [(int)$id]);
             $_SESSION['flash'] = ['type'=>'success','message'=>__('rma.details_updated')];
         }
 

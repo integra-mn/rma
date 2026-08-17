@@ -382,6 +382,13 @@
         <p style="font-size:11px;color:var(--text-muted);margin-top:4px;"><?= __('rma.identity_customer_hint') ?></p>
       </div>
       <div class="field">
+        <label><?= __('label.phone') ?></label>
+        <!-- Same country-code + number control as the intake form, so a number
+             corrected here is stored in exactly the shape one typed there. -->
+        <?= phone_input('customer_phone', $rma['customer_phone'] ?? '') ?>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:4px;"><?= __('rma.identity_phone_hint') ?></p>
+      </div>
+      <div class="field">
         <label><?= __('rma.sn') ?></label>
         <input type="text" name="serial_number" value="<?= htmlspecialchars($rma['serial_number'] ?? '') ?>"
                <?= $rma['device_id'] ? '' : 'disabled' ?>>
