@@ -86,12 +86,12 @@
           <!-- Result panel populated by fetch() below -->
           <div id="warranty-result" style="display:none;font-size:12px;margin:6px 0 4px;padding:8px 10px;border-radius:6px;border:0.5px solid transparent;line-height:1.5;"></div>
         <?php endif; ?>
-        <?php if (!empty($rma['service_box'])): ?>
-          <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('rma.service_box') ?>:</span> <?= htmlspecialchars($rma['service_box']) ?></div>
-        <?php endif; ?>
         <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('rma.partner') ?>:</span> <?= htmlspecialchars($rma['partner_name'] ?? '—') ?></div>
         <?php if (!empty($rma['partner_branch_name'])): ?>
           <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('partners.branch') ?>:</span> <?= htmlspecialchars($rma['partner_branch_name']) ?></div>
+        <?php endif; ?>
+        <?php if (!empty($rma['service_box'])): ?>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('rma.service_box') ?>:</span> <?= htmlspecialchars($rma['service_box']) ?></div>
         <?php endif; ?>
         <div style="font-size:13px;color:var(--text-muted);"><span style="color:var(--text-secondary);"><?= __('rma.technician') ?>:</span> <?= $rma['tech_name'] ? htmlspecialchars($rma['tech_name']) : __('rma.unassigned') ?></div>
       </div>
