@@ -53,6 +53,11 @@ const PERMISSION_MATRIX = [
     // whole Administration section (locations, couriers, statuses) to do it.
     'devices'   => ['view', 'edit'],
     'reports'   => ['view'],
+    // Evidence photos. Delete alone: uploading follows whoever may work the
+    // case, but removing a photo destroys the record of how the device arrived,
+    // so it is granted on purpose. How long staff keep that ability is a
+    // separate question, answered by the evidence_delete_hours setting.
+    'evidence'  => ['delete'],
     'invoicing' => ['view'],
     // Administration = Users, Locations, Couriers, Statuses.
     //
@@ -162,6 +167,30 @@ function statuses_for_user(array $statuses, ?array $user = null): array {
     ));
 }
 
+// ── Deleting an evidence photo ────────────────────────────────
+//
+// Two gates. The tick in Podesavanja -> Dozvole says whether a role deletes
+// photos at all; the window says for how long after the photo was taken. A bad
+// angle or a blurred shot is spotted and retaken the same day — after that the
+// photo is the record of how the device arrived, and only Super Admin removes
+// it.
+//
+// Super Admin skips both, as everywhere else. `evidence_delete_hours` at 0
+// means staff never delete; a large number means no practical limit.
+function can_delete_evidence(?string $taken_at, ?array $user = null): bool {
+    $user = $user ?? current_user();
+    if (!$user) return false;
+    if (is_super_admin($user)) return true;
+    if (!can('evidence', 'delete')) return false;
+
+    $hours = (int) setting('evidence_delete_hours', '24');
+    if ($hours <= 0) return false;
+    if (!$taken_at) return false;   // undated photo: no way to judge its age
+
+    $age = time() - strtotime($taken_at);
+    return $age >= 0 && $age <= $hours * 3600;
+}
+
 /**
  * Editable role -> list of "module.action" grants. Reads the role_permissions
  * table; if that table doesn't exist yet (pre-migration) it falls back to the
@@ -265,6 +294,7 @@ function location_scope_sql(string $alias = ''): string {
 // ── Fixed role permission maps ────────────────────────────────
 
 const TECHNICIAN_PERMISSIONS = [
+    'evidence.delete',
     'rma.view', 'rma.edit',
     'repair.view', 'repair.create', 'repair.edit',
     'parts.view',
@@ -275,6 +305,7 @@ const TECHNICIAN_PERMISSIONS = [
 ];
 
 const RECEPTION_PERMISSIONS = [
+    'evidence.delete',
     'rma.view', 'rma.create', 'rma.edit',
     'repair.view',
     'customers.view', 'customers.create', 'customers.edit',

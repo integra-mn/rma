@@ -108,6 +108,10 @@ class SettingsController {
             'session_max_minutes'  => ['int',
                 max(max(5, min(1440, (int)($_POST['session_idle_minutes'] ?? 120))),
                     min(10080, (int)($_POST['session_max_minutes'] ?? 480)))],
+            // Long enough to notice a bad angle and retake it, short enough
+            // that the photos stay the record of how the device arrived. 0
+            // means staff never delete; Super Admin is not bound either way.
+            'evidence_delete_hours' => ['int', max(0, min(8760, (int)($_POST['evidence_delete_hours'] ?? 24)))],
             'pdf_engine'        => ['string', in_array($_POST['pdf_engine']??'',['html','mpdf']) ? $_POST['pdf_engine'] : 'html'],
             'pdf_paper_size'    => ['string', in_array($_POST['pdf_paper_size']??'',['A4','A5','Letter']) ? $_POST['pdf_paper_size'] : 'A4'],
         ];

@@ -558,6 +558,15 @@ window.addEventListener('popstate', function() {
             return;
         }
 
+        // Who may delete, and for how long after the photo was taken. Both
+        // gates live in can_delete_evidence(); the button hides itself on the
+        // same rule, but a hidden button is decoration and this is the fence.
+        if (!can_delete_evidence($photo['created_at'] ?? null)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => __('evidence.delete_window_passed')]);
+            return;
+        }
+
         // Authorization: verify user's location scope allows access to the
         // RMA this photo belongs to. Without this, any logged-in user can
         // delete any evidence photo by ID.
@@ -565,14 +574,20 @@ window.addEventListener('popstate', function() {
         if (!$owner_rma_id && !empty($photo['repair_job_id'])) {
             $owner_rma_id = (int) db_val('SELECT rma_id FROM repair_jobs WHERE id = ?', [(int)$photo['repair_job_id']]);
         }
-        if ($owner_rma_id) {
-            $rma_row = db_row('SELECT location_id FROM rma_requests WHERE id = ? AND deleted_at IS NULL', [$owner_rma_id]);
-            $allowed_locs = allowed_location_ids();
-            if (!$rma_row || ($allowed_locs !== null && !in_array((int)$rma_row['location_id'], array_map('intval', $allowed_locs), true))) {
-                http_response_code(403);
-                echo json_encode(['success' => false, 'error' => 'Forbidden']);
-                return;
-            }
+        // A photo tied to neither an RMA nor a job used to skip the scope check
+        // altogether, so anybody signed in could delete it. Nothing legitimate
+        // creates one; refusing is the safe reading.
+        if (!$owner_rma_id) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Forbidden']);
+            return;
+        }
+        $rma_row = db_row('SELECT location_id FROM rma_requests WHERE id = ? AND deleted_at IS NULL', [$owner_rma_id]);
+        $allowed_locs = allowed_location_ids();
+        if (!$rma_row || ($allowed_locs !== null && !in_array((int)$rma_row['location_id'], array_map('intval', $allowed_locs), true))) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Forbidden']);
+            return;
         }
 
         db_update('repair_evidence', ['deleted_at' => date('Y-m-d H:i:s')], 'id = ?', [(int)$id]);

@@ -45,10 +45,15 @@ $ev_count = count($ev_photos);
           data-name="<?= htmlspecialchars($ev['original_name']) ?>"
           style="width:100%;height:100%;object-fit:cover;cursor:pointer;"
           onclick="evLightbox(this, '<?= htmlspecialchars(addslashes($ev['original_name'])) ?>')">
+        <?php // Gone once the window has passed, or for a role that may not
+              // delete at all. The server checks the same rule — this only
+              // stops people reaching for a button that would refuse them. ?>
+        <?php if (can_delete_evidence($ev['created_at'] ?? null)): ?>
         <button onclick="evDelete(<?= $ev['id'] ?>, '<?= $ev_card_id ?>')"
           class="ev-del-btn" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.55);border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;opacity:0;transition:opacity 0.15s;">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
+        <?php endif; ?>
       </div>
     <?php endforeach; ?>
   </div>

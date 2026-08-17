@@ -1362,6 +1362,9 @@ CREATE TABLE role_permissions (
 );
 
 INSERT INTO role_permissions (role, module, action) VALUES
+  -- Deleting an evidence photo. Partner is absent on purpose; the window that
+  -- limits staff to the first hours lives in the evidence_delete_hours setting.
+  ('admin','evidence','delete'),('reception','evidence','delete'),('technician','evidence','delete'),
   ('reception','rma','view'),('reception','rma','create'),('reception','rma','edit'),
   ('reception','repair','view'),
   ('reception','customers','view'),('reception','customers','create'),('reception','customers','edit'),
