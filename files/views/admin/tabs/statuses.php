@@ -51,7 +51,7 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
           <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars($s['code']) ?></td>
           <td style="text-align:center;">
             <?php if (!empty($s['notify'])): ?>
-              <span class="badge" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('label.yes') ?></span>
+              <span class="badge badge-pill-fixed" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('label.yes') ?></span>
             <?php else: ?>
               <span style="color:var(--text-muted);">&mdash;</span>
             <?php endif; ?>
@@ -63,7 +63,7 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
                 <span style="color:var(--text-muted);"><?= __('admin.status_roles_all') ?></span>
               <?php else: ?>
                 <?php foreach ($roles as $r): ?>
-                  <span class="badge" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin-right:4px;">
+                  <span class="badge badge-pill-fixed" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin-right:4px;">
                     <?= htmlspecialchars(role_label($r)) ?>
                   </span>
                 <?php endforeach; ?>

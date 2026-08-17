@@ -459,6 +459,16 @@ label { display: block; font-size: 12px; color: var(--text-secondary); margin-bo
   text-align: center;
 }
 
+/* The same argument, one column over: the pills on Administracija -> Statusi
+   say who may set a status and whether it notifies, and they are read down the
+   column too. Widest of the four words in either language is "Technician" at
+   about 62px, so 84px carries it with the badge's own padding and leaves room
+   for a longer role name later. */
+.data-table .badge-pill-fixed {
+  min-width: 84px;
+  text-align: center;
+}
+
 /* ── Stat cards ──────────────────────────────────────────────── */
 .stat-card { background: var(--bg-subtle); border-radius: 8px; padding: 1rem; }
 .stat-card .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
