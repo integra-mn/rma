@@ -86,7 +86,11 @@
           <!-- Result panel populated by fetch() below -->
           <div id="warranty-result" style="display:none;font-size:12px;margin:6px 0 4px;padding:8px 10px;border-radius:6px;border:0.5px solid transparent;line-height:1.5;"></div>
         <?php endif; ?>
-        <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('rma.partner') ?>:</span> <?= htmlspecialchars($rma['partner_name'] ?? '—') ?></div>
+        <?php // A walk-in has no partner, so the row is left out rather than
+              // printed with a dash. Poslovnica below already worked this way. ?>
+        <?php if (!empty($rma['partner_name'])): ?>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('rma.partner') ?>:</span> <?= htmlspecialchars($rma['partner_name']) ?></div>
+        <?php endif; ?>
         <?php if (!empty($rma['partner_branch_name'])): ?>
           <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('partners.branch') ?>:</span> <?= htmlspecialchars($rma['partner_branch_name']) ?></div>
         <?php endif; ?>
