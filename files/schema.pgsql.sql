@@ -287,6 +287,7 @@ CREATE TABLE rma_statuses (
   sort_order SMALLINT DEFAULT 0,
   notify SMALLINT NOT NULL DEFAULT 0,
   roles VARCHAR(120) NULL,
+  can_recur SMALLINT NOT NULL DEFAULT 1,
   is_terminal SMALLINT DEFAULT 0,
   is_system SMALLINT DEFAULT 1
 );
@@ -1086,7 +1087,6 @@ INSERT INTO vat_rates (label, rate, is_default) VALUES
 -- `roles` splits the workflow between the counter and the bench; see
 -- migrations/2026_08_15_status_roles.sql for why each one sits where it does.
 INSERT INTO rma_statuses (code, label, label_me, color, sort_order, is_terminal, is_system, roles) VALUES
-  ('draft',             'Draft',              'Nacrt',             '#888780', 1,  0, 1, 'reception'),
   ('submitted',         'Submitted',          'Podneseno',         '#378ADD', 2,  0, 1, 'reception'),
   ('awaiting_device',   'Awaiting device',    'Čeka se uredjaj',    '#EF9F27', 3,  0, 1, 'reception'),
   ('device_received',   'Device received',    'Uredjaj primljen',   '#1D9E75', 4,  0, 1, 'reception'),

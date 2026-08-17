@@ -312,6 +312,10 @@ CREATE TABLE rma_statuses (
   -- codes ('reception', 'technician'). Empty means every role. Admin and
   -- Super Admin always see all of them.
   roles       VARCHAR(120) NULL,
+  -- Can a case come back to this status? Ceka se dio can (a second part), an
+  -- entry point cannot. A status that cannot recur drops out of the dropdown
+  -- once the case has left it.
+  can_recur   TINYINT(1) NOT NULL DEFAULT 1,
   is_terminal TINYINT(1) DEFAULT 0,
   is_system   TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -1121,7 +1125,6 @@ INSERT INTO vat_rates (label, rate, is_default) VALUES
 -- `roles` splits the workflow between the counter and the bench; see
 -- migrations/2026_08_15_status_roles.sql for why each one sits where it does.
 INSERT INTO rma_statuses (code, label, label_me, color, sort_order, is_terminal, is_system, roles) VALUES
-  ('draft',             'Draft',              'Nacrt',             '#888780', 1,  0, 1, 'reception'),
   ('submitted',         'Submitted',          'Podneseno',         '#378ADD', 2,  0, 1, 'reception'),
   ('awaiting_device',   'Awaiting device',    'Čeka se uredjaj',    '#EF9F27', 3,  0, 1, 'reception'),
   ('device_received',   'Device received',    'Uredjaj primljen',   '#1D9E75', 4,  0, 1, 'reception'),

@@ -579,7 +579,13 @@ class AdminController {
         // role, which is what a new status should do until somebody narrows it.
         // Repair statuses carry no split — the bench job is the technician's
         // either way — so the column only exists on rma_statuses.
-        if ($type === 'rma') $data['roles'] = $this->status_roles_input();
+        if ($type === 'rma') {
+            $data['roles'] = $this->status_roles_input();
+            // Unticked means a case can never come back here, so the status
+            // leaves the dropdown once passed. Ticked by default: a new status
+            // hides from nobody until somebody says so.
+            $data['can_recur'] = isset($_POST['can_recur']) ? 1 : 0;
+        }
 
         db_insert($table, $data);
 
@@ -622,8 +628,11 @@ class AdminController {
             'is_terminal' => $term,
             'notify'      => $notify,
         ];
-        // See status_store(): the split is an RMA-status property only.
-        if ($type === 'rma') $data['roles'] = $this->status_roles_input();
+        // See status_store(): both are RMA-status properties only.
+        if ($type === 'rma') {
+            $data['roles']     = $this->status_roles_input();
+            $data['can_recur'] = isset($_POST['can_recur']) ? 1 : 0;
+        }
 
         db_update($table, $data, 'id = ?', [$id]);
 

@@ -35,6 +35,7 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         <th style="width:110px;text-align:center;"><?= __('admin.status_notify') ?></th>
         <?php if ($sub === 'rma'): ?>
           <th style="width:190px;"><?= __('admin.status_roles') ?></th>
+          <th style="width:110px;text-align:center;"><?= __('admin.status_recur') ?></th>
         <?php endif; ?>
         <th style="width:100px;text-align:center;"><?= __('label.sort_order') ?></th>
         <th style="text-align:right;"><?= __('label.actions') ?></th>
@@ -67,6 +68,13 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
                     <?= htmlspecialchars(role_label($r)) ?>
                   </span>
                 <?php endforeach; ?>
+              <?php endif; ?>
+            </td>
+            <td style="text-align:center;">
+              <?php if ((int)($s['can_recur'] ?? 1) === 1): ?>
+                <span style="color:var(--text-muted);">&mdash;</span>
+              <?php else: ?>
+                <span class="badge badge-pill-fixed" style="background:#faeeda;color:#633806;border:0.5px solid #ef9f27;"><?= __('admin.status_recur_once') ?></span>
               <?php endif; ?>
             </td>
           <?php endif; ?>
@@ -146,6 +154,14 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         </div>
         <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_roles_hint') ?></p>
       </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+          <input type="checkbox" name="can_recur" id="f-recur" value="1"
+                 style="width:auto;height:auto;">
+          <?= __('admin.status_recur_label') ?>
+        </label>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_recur_hint') ?></p>
+      </div>
       <?php endif; ?>
       <div style="display:flex;gap:8px;margin-top:1rem;">
         <button type="submit" class="btn btn-primary" style="min-width:100px;" id="modal-save"><?= __('btn.save') ?></button>
@@ -166,6 +182,11 @@ const SAVE_CHANGES_LABEL = <?= json_encode(__('btn.save_changes')) ?>;
 
 // The role boxes only exist on the RMA sub-tab — repair statuses are not
 // split — so every caller here tolerates them being absent.
+function setRecur(on) {
+  var box = document.getElementById('f-recur');
+  if (box) box.checked = !!on;
+}
+
 function setRoles(csv) {
   const picked = (csv || '').split(',').map(s => s.trim()).filter(Boolean);
   document.querySelectorAll('.f-role').forEach(cb => {
@@ -187,6 +208,7 @@ function openModal(type) {
   document.getElementById('f-terminal').checked = false;
   document.getElementById('f-notify').checked = false;
   setRoles('');
+  setRecur(true);
   document.getElementById('modal-save').textContent = SAVE_LABEL;
   document.getElementById('status-modal').style.display = 'flex';
   document.getElementById('f-label').focus();
@@ -206,6 +228,9 @@ function editStatus(type, s) {
   document.getElementById('f-terminal').checked = !!parseInt(s.is_terminal);
   document.getElementById('f-notify').checked = !!parseInt(s.notify);
   setRoles(s.roles);
+  // Absent on repair statuses and on a database that has not run the migration;
+  // both mean "can recur", which is the harmless answer.
+  setRecur(s.can_recur === undefined || !!parseInt(s.can_recur));
   document.getElementById('modal-save').textContent = SAVE_CHANGES_LABEL;
   document.getElementById('status-modal').style.display = 'flex';
   document.getElementById('f-label').focus();

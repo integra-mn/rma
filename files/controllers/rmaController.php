@@ -358,19 +358,35 @@ class RmaController {
 
         // The dropdown offers what this desk may set — reception the counter
         // steps, the bench the ones in between (Administracija -> Statusi).
-        // The status the RMA is already in stays in the list whoever is
-        // looking, or the box would show somebody else's case as sitting
-        // somewhere it isn't. Re-picking it changes nothing, so that is safe.
         $all_statuses = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order');
         $statuses     = statuses_for_user($all_statuses);
         $current_id   = (int)$rma['status_id'];
-        if (!array_filter($statuses, fn($s) => (int)$s['id'] === $current_id)) {
-            $statuses = array_merge(
-                array_filter($all_statuses, fn($s) => (int)$s['id'] === $current_id),
-                $statuses
-            );
-            usort($statuses, fn($a, $b) => (int)$a['sort_order'] <=> (int)$b['sort_order']);
+
+        // A status the case has already been in and can never return to drops
+        // out: an entry point is not somewhere a case goes back to. Ones that do
+        // come round again — Ceka se dio for a second part, Na popravci after
+        // each wait — are marked as recurring and stay. Admins keep the whole
+        // list, so a wrong turn can always be undone by somebody.
+        if (!is_admin_user()) {
+            $visited = array_map('intval', array_column(
+                db_rows('SELECT DISTINCT status_id FROM rma_status_history WHERE rma_id = ?', [(int)$id]),
+                'status_id'
+            ));
+            $statuses = array_values(array_filter($statuses, fn($s) =>
+                (int)$s['id'] === $current_id
+                || (int)($s['can_recur'] ?? 1) === 1
+                || !in_array((int)$s['id'], $visited, true)
+            ));
         }
+
+        // Where the case stands is said by the badge in the header and by the
+        // timeline. It is offered in the dropdown only when this desk could set
+        // it — otherwise the box opens on "no change" and lists this desk's own
+        // statuses, rather than showing a technician Uredjaj primljen as though
+        // it were theirs to set. Posting nothing changes nothing.
+        $status_current_offered = (bool) array_filter(
+            $statuses, fn($s) => (int)$s['id'] === $current_id
+        );
 
         $technicians = db_rows("SELECT id, name FROM users WHERE role = 'technician' AND is_active = 1 ORDER BY name");
 

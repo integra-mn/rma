@@ -290,6 +290,11 @@
       <?= csrf_field() ?>
           <input type="hidden" name="action" value="status">
           <select name="status_id" class="custom-select">
+            <?php if (empty($status_current_offered)): ?>
+              <!-- The case's own status is not this desk's to set, so the box
+                   opens here rather than on a status they cannot choose. -->
+              <option value=""><?= __('rma.status_keep') ?></option>
+            <?php endif; ?>
             <?php foreach ($statuses as $st): ?>
               <option value="<?= (int)$st['id'] ?>" <?= (int)$rma['status_id'] === (int)$st['id'] ? 'selected' : '' ?>>
                 <?= status_label((string)($st['code'] ?? ''), $st['label']) ?>
