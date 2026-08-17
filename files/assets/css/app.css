@@ -162,7 +162,7 @@ body.theme-focus {
      `background: color-mix(in srgb, var(--accent) 16%, var(--sidebar-bg));`.) */
   background: var(--sidebar-hover);
   color: var(--sidebar-active);
-  font-weight: 600;   /* per the sidebar-layout skill; the colours stay themed */
+  font-weight: 500;   /* per the sidebar-layout skill; the colours stay themed */
   /* Full-width active row reaching both sidebar edges (negating the sidebar's
      12px side padding), with a 5px accent bar down the left. */
   margin-left: -12px;
