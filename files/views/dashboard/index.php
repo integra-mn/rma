@@ -19,6 +19,7 @@
     $dcards = [
       ['label'=> __('dashboard.open_rmas'),       'value'=> (int)$stats['open_rmas'],       'color'=>'var(--accent)'],
       ['label'=> __('dashboard.in_repair'),        'value'=> (int)$stats['in_repair'],        'color'=>'#e8860a'],
+      ['label'=> __('dashboard.for_pickup'),       'value'=> (int)$stats['for_pickup'],       'color'=>'#1D9E75'],
       ['label'=> __('dashboard.sla_breached'),     'value'=> (int)$stats['sla_breached'],     'color'=> $stats['sla_breached'] > 0 ? '#a32d2d' : 'var(--accent)'],
       ['label'=> __('dashboard.pending_invoices'), 'value'=> (int)$stats['pending_invoices'], 'color'=>'var(--text-secondary)'],
     ];

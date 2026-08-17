@@ -678,7 +678,7 @@ function evAddThumb(card, id, url, name) {
   thumb.className = 'ev-thumb';
   thumb.dataset.id = id;
   thumb.style.cssText = 'position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--bg-subtle);';
-  thumb.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;cursor:pointer;" onclick="evLightbox(this.src,\'' + (name||'').replace(/'/g,"\\'") + '\')">'
+  thumb.innerHTML = '<img src="' + url + '" data-name="' + (name||'').replace(/"/g,'&quot;') + '" style="width:100%;height:100%;object-fit:cover;cursor:pointer;" onclick="evLightbox(this,\'' + (name||'').replace(/'/g,"\\'") + '\')">'
     + '<button onclick="evDelete(' + id + ',\'' + card + '\')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.55);border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
   grid.appendChild(thumb);
   const h2 = document.querySelector('#ev-card-' + card + ' h2');
@@ -708,18 +708,84 @@ function evDelete(id, card) {
   });
 }
 
-function evLightbox(src, name) {
+// The open photo and the ones beside it. A card's grid is the set you page
+// through: the RMA and repair screens can both show more than one card, and
+// arrows that jumped between them would be a surprise.
+let evLbShots = [], evLbAt = 0;
+
+function evLightbox(target, name) {
+  // Called with the clicked <img>, so its neighbours are known. Older markup
+  // passed a src string; then the image is found by matching that src.
+  const img = (typeof target === 'string')
+    ? Array.from(document.querySelectorAll('.ev-thumb img')).find(function (i) { return i.src === target; })
+    : target;
+  const src = (typeof target === 'string') ? target : (img ? img.src : '');
+
+  const grid = img ? img.closest('[id^="ev-grid-"]') : null;
+  evLbShots = grid
+    ? Array.from(grid.querySelectorAll('.ev-thumb img')).map(function (i) {
+        return { src: i.src, name: i.dataset.name || '' };
+      })
+    : [];
+  if (!evLbShots.length) evLbShots = [{ src: src, name: name || '' }];
+  const at = evLbShots.findIndex(function (s) { return s.src === src; });
+  evLbAt = at < 0 ? 0 : at;
+
   let lb = document.getElementById('ev-lightbox');
   if (!lb) {
     lb = document.createElement('div');
     lb.id = 'ev-lightbox';
-    lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;';
-    lb.onclick = function() { lb.remove(); };
+    lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+    lb.onclick = function (e) { if (e.target === lb) evLbClose(); };
     document.body.appendChild(lb);
+    document.addEventListener('keydown', evLbKey);
   }
-  lb.innerHTML = '<img src="' + src + '" style="max-width:90vw;max-height:85vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.6);">'
-    + '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:12px;">' + (name||'') + ' &nbsp;·&nbsp; click to close</p>';
   lb.style.display = 'flex';
+  evLbRender();
+}
+
+function evLbClose() {
+  const lb = document.getElementById('ev-lightbox');
+  if (lb) lb.remove();
+  document.removeEventListener('keydown', evLbKey);
+}
+
+function evLbKey(e) {
+  if (!document.getElementById('ev-lightbox')) return;
+  if (e.key === 'Escape')     evLbClose();
+  if (e.key === 'ArrowLeft')  evLbStep(-1);
+  if (e.key === 'ArrowRight') evLbStep(1);
+}
+
+// Wraps around, so the arrows never dead-end on a set of three.
+function evLbStep(by) {
+  if (evLbShots.length < 2) return;
+  evLbAt = (evLbAt + by + evLbShots.length) % evLbShots.length;
+  evLbRender();
+}
+
+function evLbRender() {
+  const lb = document.getElementById('ev-lightbox');
+  if (!lb) return;
+  const shot = evLbShots[evLbAt] || { src: '', name: '' };
+  const many = evLbShots.length > 1;
+  const chev = 'position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.45);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;';
+  const arrow = function (dir) {
+    return '<button onclick="event.stopPropagation();evLbStep(' + (dir === 'prev' ? -1 : 1) + ')" '
+      + 'aria-label="' + dir + '" style="' + chev + (dir === 'prev' ? 'left:24px;' : 'right:24px;') + '">'
+      + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" '
+      + 'stroke-linecap="round" stroke-linejoin="round"><polyline points="'
+      + (dir === 'prev' ? '15 18 9 12 15 6' : '9 18 15 12 9 6') + '"/></svg></button>';
+  };
+
+  lb.innerHTML =
+      '<div style="position:relative;display:flex;flex-direction:column;align-items:center;">'
+    +   '<img src="' + shot.src + '" style="max-width:90vw;max-height:85vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.6);">'
+    +   '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:12px;">'
+    +     (shot.name || '') + (many ? ' &nbsp;·&nbsp; ' + (evLbAt + 1) + ' / ' + evLbShots.length : '')
+    +   '</p>'
+    + '</div>'
+    + (many ? arrow('prev') + arrow('next') : '');
 }
 
 // ── Evidence: QR / mobile upload ─────────────────────────────────────────

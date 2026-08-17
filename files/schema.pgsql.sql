@@ -1088,7 +1088,7 @@ INSERT INTO vat_rates (label, rate, is_default) VALUES
 -- migrations/2026_08_15_status_roles.sql for why each one sits where it does.
 INSERT INTO rma_statuses (code, label, label_me, color, sort_order, is_terminal, is_system, roles) VALUES
   ('submitted',         'Submitted',          'Podneseno',         '#378ADD', 2,  0, 1, 'reception'),
-  ('awaiting_device',   'Awaiting device',    'Čeka se uredjaj',    '#EF9F27', 3,  0, 1, 'reception'),
+  ('awaiting_device',   'Awaiting device',    'Uredjaj u dolasku',  '#EF9F27', 3,  0, 1, 'reception'),
   ('device_received',   'Device received',    'Uredjaj primljen',   '#1D9E75', 4,  0, 1, 'reception'),
   ('in_diagnosis',      'In diagnosis',       'Na dijagnostici',   '#7F77DD', 5,  0, 1, 'technician'),
   ('awaiting_parts',    'Awaiting parts',     'Čeka se dio',       '#EF9F27', 6,  0, 1, 'technician'),

@@ -20,10 +20,31 @@ class DashboardController {
             'open_rmas'    => db_val("SELECT COUNT(*) FROM rma_requests r
                                       JOIN rma_statuses s ON s.id = r.status_id
                                       WHERE s.is_terminal = 0 AND r.deleted_at IS NULL{$fr}"),
-            'in_repair'    => db_val("SELECT COUNT(*) FROM repair_jobs j
+            // Devices on the premises: one count per device with a repair job
+            // still open, whether it is being worked on, waiting to be started
+            // or paused for a part — a job exists, so the device is here.
+            // Counting jobs in 'in_progress' alone read 0 while four devices sat
+            // on the bench, and disagreed with the Otvorene popravke list below
+            // it, which has always counted every non-terminal job.
+            'in_repair'    => db_val("SELECT COUNT(DISTINCT j.rma_id) FROM repair_jobs j
                                       JOIN repair_statuses s ON s.id = j.status_id
                                       JOIN rma_requests r ON r.id = j.rma_id
-                                      WHERE s.code = 'in_progress' AND j.deleted_at IS NULL{$fr}"),
+                                      WHERE s.is_terminal = 0 AND j.deleted_at IS NULL
+                                        AND r.deleted_at IS NULL{$fr}"),
+            // Work finished, device still here: every repair job on the case is
+            // in a terminal status while the case itself is still open. Same
+            // rule as the Servisirano — ceka preuzimanje list further down, so
+            // the card and the list can never disagree.
+            'for_pickup'   => db_val("SELECT COUNT(*) FROM (
+                                        SELECT r.id
+                                          FROM rma_requests r
+                                          JOIN rma_statuses rs ON rs.id = r.status_id
+                                          JOIN repair_jobs j ON j.rma_id = r.id AND j.deleted_at IS NULL
+                                          JOIN repair_statuses js ON js.id = j.status_id
+                                         WHERE r.deleted_at IS NULL AND rs.is_terminal = 0{$fr}
+                                         GROUP BY r.id
+                                        HAVING SUM(CASE WHEN js.is_terminal = 0 THEN 1 ELSE 0 END) = 0
+                                      ) ready"),
             'sla_breached' => db_val("SELECT COUNT(*) FROM rma_requests
                                       WHERE sla_breached = 1 AND deleted_at IS NULL{$fp}"),
             'pending_invoices' => db_val("SELECT COUNT(*) FROM invoices

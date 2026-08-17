@@ -165,6 +165,7 @@ return [
     'dashboard.in_repair'        => 'In repair',
     'dashboard.sla_breached'     => 'SLA breached',
     'dashboard.pending_invoices' => 'Pending invoices',
+    'dashboard.for_pickup'       => 'Devices for pickup',
     'dashboard.recent_rmas'      => 'Recent RMAs',
     'dashboard.view_all'         => 'View all',
 

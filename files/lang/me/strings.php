@@ -165,6 +165,7 @@ return [
     'dashboard.in_repair'        => 'U servisu',
     'dashboard.sla_breached'     => 'Prekoračen SLA',
     'dashboard.pending_invoices' => 'Računi na čekanju',
+    'dashboard.for_pickup'       => 'Uredjaji za preuzimanje',
     'dashboard.recent_rmas'      => 'Nedavne reklamacije',
     'dashboard.view_all'         => 'Prikaži sve',
 
