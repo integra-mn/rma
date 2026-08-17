@@ -38,7 +38,7 @@
                         JOIN rma_statuses s ON s.id = r.status_id
                         LEFT JOIN customers c ON c.id = r.customer_id
                         WHERE r.deleted_at IS NULL
-                        ORDER BY r.created_at DESC LIMIT 8");
+                        ORDER BY r.created_at DESC LIMIT 10");
   ?>
   <?php if (!empty($recent)): ?>
   <div class="card">
