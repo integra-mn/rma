@@ -13,6 +13,7 @@ require_once ROOT . '/helpers/audit.php';
 require_once ROOT . '/helpers/image.php';
 require_once ROOT . '/helpers/sku.php';
 require_once ROOT . '/helpers/phone.php';
+require_once ROOT . '/helpers/warranty.php';
 require_once ROOT . '/helpers/qr.php';
 require_once ROOT . '/helpers/totp.php';   // needs qr.php for the enrolment QR
 require_once ROOT . '/helpers/shipping.php';

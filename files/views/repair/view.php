@@ -153,6 +153,17 @@
       'unauthorized_repair' => __('repair.refuse_unauthorized'),
     ];
     $current_refusals = $job['warranty_refusal'] ? json_decode($job['warranty_refusal'], true) : [];
+    // out_of_warranty stored on its own is the third state rather than a
+    // refusal reason — which is how it was already recorded, so nothing in the
+    // database changes shape. Worked out here rather than beside the buttons
+    // because the form needs it too: "out" and "refused" both carry
+    // is_warranty = 0, so that column alone cannot tell them apart.
+    $war_mode = warranty_mode($job['is_warranty'], $current_refusals);
+    $war_out  = $war_mode === 'out';
+    // Van garancije is the end of the line — an expired period cannot become
+    // unexpired — so the whole card is read-only there.
+    $war_locked = warranty_is_locked($war_mode);
+    $btn_off    = 'opacity:0.45;cursor:not-allowed;pointer-events:none;';
     $btn_style = "display:inline-flex;align-items:center;padding:7px 12px;font-size:13px;border-radius:8px;cursor:pointer;border:0.5px solid var(--border,#d3d1c7);background:#fff;color:var(--text-secondary,#5f5e5a);user-select:none;line-height:1;box-sizing:border-box;min-height:34px;font-family:inherit;";
     $btn_active = "background:var(--accent-bg,#e1f5ee);color:var(--accent-text,#085041);border-color:var(--accent,#1D9E75);";
     $btn_ref_active = "background:#fcebeb;color:#a32d2d;border-color:#f09595;";
@@ -162,32 +173,40 @@
     <form method="POST" action="/repair/<?= (int)$job['id'] ?>/update">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="warranty">
-      <input type="hidden" name="is_warranty" id="war-val" value="<?= (int)$job['is_warranty'] ?>">
+      <input type="hidden" name="is_warranty" id="war-val" value="<?= (int)$job['is_warranty'] ?>"
+             data-mode="<?= $war_mode ?>">
 
       <!-- Under Warranty / Warranty Refused toggle -->
       <div style="display:flex;gap:10px;margin-bottom:1rem;">
         <?php
-          // out_of_warranty stored on its own is the third state rather than a
-          // refusal reason — which is how it was already recorded, so nothing
-          // in the database changes shape.
-          $war_out  = $current_refusals === ['out_of_warranty'];
-          $war_mode = $job['is_warranty'] ? 'yes' : ($war_out ? 'out' : 'refused');
+          // A state you cannot move to is shown but not offered — greyed rather
+          // than hidden, so the three states stay visible as a set and it is
+          // obvious which one this case is in.
+          $can_yes = warranty_can_change($war_mode, 'yes');
+          $can_out = warranty_can_change($war_mode, 'out');
+          $can_ref = warranty_can_change($war_mode, 'refused');
         ?>
-        <button type="button" id="war-yes" onclick="setWarrantyRepair('yes')"
-                style="<?= $btn_style ?><?= $war_mode === 'yes' ? $btn_active : '' ?>">
+        <button type="button" id="war-yes" onclick="setWarrantyRepair('yes')" <?= $can_yes ? '' : 'disabled' ?>
+                style="<?= $btn_style ?><?= $war_mode === 'yes' ? $btn_active : '' ?><?= $can_yes ? '' : $btn_off ?>">
           <?= __('repair.under_warranty') ?>
         </button>
-        <button type="button" id="war-out" onclick="setWarrantyRepair('out')"
-                style="<?= $btn_style ?><?= $war_mode === 'out' ? 'background:#e8f3ff;color:#185fa5;border-color:#c5dcf5;' : '' ?>">
+        <button type="button" id="war-out" onclick="setWarrantyRepair('out')" <?= $can_out ? '' : 'disabled' ?>
+                style="<?= $btn_style ?><?= $war_mode === 'out' ? 'background:#e8f3ff;color:#185fa5;border-color:#c5dcf5;' : '' ?><?= $can_out ? '' : $btn_off ?>">
           <?= __('repair.refuse_out_of_warranty') ?>
         </button>
-        <button type="button" id="war-no" onclick="setWarrantyRepair('refused')"
-                style="<?= $btn_style ?><?= $war_mode === 'refused' ? 'background:#fcebeb;color:#a32d2d;border-color:#f09595;' : '' ?>">
+        <button type="button" id="war-no" onclick="setWarrantyRepair('refused')" <?= $can_ref ? '' : 'disabled' ?>
+                style="<?= $btn_style ?><?= $war_mode === 'refused' ? 'background:#fcebeb;color:#a32d2d;border-color:#f09595;' : '' ?><?= $can_ref ? '' : $btn_off ?>">
           <?= __('repair.warranty_refused') ?>
         </button>
       </div>
 
-      <!-- Refusal reasons + Save in same row -->
+      <?php if ($war_locked): ?>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:0;"><?= __('repair.warranty_locked') ?></p>
+      <?php endif; ?>
+
+      <!-- Refusal reasons + Save in same row. Both are left out entirely when
+           the state can no longer change — there is nothing left to save. -->
+      <?php if (!$war_locked): ?>
       <div id="war-reasons">
         <p style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:10px;"><?= __('repair.refusal_reason') ?></p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
@@ -195,8 +214,13 @@
             <button type="button" id="ref-<?= $key ?>"
                     onclick="toggleRefRepair('<?= $key ?>')"
                     data-active="<?= in_array($key, $current_refusals) ? '1' : '0' ?>"
-                    <?= $job['is_warranty'] ? 'disabled' : '' ?>
-                    style="<?= $btn_style ?><?= in_array($key, $current_refusals) ? $btn_ref_active : '' ?><?= $job['is_warranty'] ? 'opacity:1;cursor:not-allowed;pointer-events:none;' : '' ?>">
+                    <?php // Reasons belong to a refusal alone — the same rule the
+                          // JS applies when a state button is pressed. Keyed off
+                          // is_warranty before, which left them live on a job
+                          // saved as Van garancije, where ticking one silently
+                          // turned it into a refusal. ?>
+                    <?= $war_mode !== 'refused' ? 'disabled' : '' ?>
+                    style="<?= $btn_style ?><?= in_array($key, $current_refusals) ? $btn_ref_active : '' ?><?= $war_mode !== 'refused' ? 'opacity:1;cursor:not-allowed;pointer-events:none;' : '' ?>">
               <?= $label ?>
             </button>
           <?php endforeach; ?>
@@ -210,6 +234,7 @@
           <?php endforeach; ?>
         </div>
       </div>
+      <?php endif; ?>
 
     </form>
   </div>
@@ -319,7 +344,28 @@
         b.style.borderColor = dBorder;
       }
     });
-    if (val) document.getElementById('war-ref-inputs').innerHTML = '';
+    // What each state posts, rebuilt from scratch every time so switching
+    // between them cannot leave the previous state's rows behind:
+    //   yes      is_warranty=1, nothing else
+    //   out      is_warranty=0 and the single out_of_warranty marker, which is
+    //            what makes it readable as its own state on the way back in
+    //   refused  is_warranty=0 and whichever reasons are ticked
+    document.getElementById('war-val').dataset.mode = mode;
+    var box = document.getElementById('war-ref-inputs');
+    box.innerHTML = '';
+    if (mode === 'out') {
+      var marker = document.createElement('input');
+      marker.type = 'hidden'; marker.name = 'warranty_refusal[]';
+      marker.value = 'out_of_warranty';
+      box.appendChild(marker);
+    } else if (mode === 'refused') {
+      document.querySelectorAll('#war-reasons button[id^="ref-"][data-active="1"]').forEach(function (b) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'warranty_refusal[]';
+        inp.value = b.id.replace('ref-', '');
+        box.appendChild(inp);
+      });
+    }
   }
   function toggleRefRepair(key) {
     const btn = document.getElementById('ref-' + key);
@@ -340,13 +386,17 @@
     });
   }
   function validateWarranty() {
-    const val = parseInt(document.getElementById('war-val').value);
-    if (val === 0) {
-      const selected = document.querySelectorAll('#war-reasons button[id^="ref-"][data-active="1"]');
-      if (selected.length === 0) {
-        appAlert(<?= json_encode(__('rma.err_refusal_reason')) ?>);
-        return false;
-      }
+    // Only a refusal needs justifying. Van garancije is a fact about the
+    // device, like Pod garancijom, and saves with nothing else filled in —
+    // asking why it is out of warranty has no answer to give. Checked on the
+    // mode rather than is_warranty, because "out" and "refused" share the
+    // same 0 and only the mode separates them.
+    if (document.getElementById('war-val').dataset.mode !== 'refused') return true;
+
+    const selected = document.querySelectorAll('#war-reasons button[id^="ref-"][data-active="1"]');
+    if (selected.length === 0) {
+      appAlert(<?= json_encode(__('rma.err_refusal_reason')) ?>);
+      return false;
     }
     return true;
   }

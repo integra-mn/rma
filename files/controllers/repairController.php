@@ -288,6 +288,20 @@ class RepairController {
         if ($action === 'warranty') {
             $is_warranty     = (int)($_POST['is_warranty'] ?? 0);
             $refusals        = $_POST['warranty_refusal'] ?? [];
+
+            // Warranty state decides who pays, so the rules are enforced here
+            // and not only by greying out buttons: Pod garancijom may become
+            // Garancija odbijena, Van garancije may become nothing at all.
+            $now  = db_row('SELECT is_warranty, warranty_refusal FROM rma_requests WHERE id = ?',
+                           [$job['rma_id']]);
+            $from = warranty_mode($now['is_warranty'] ?? 0, $now['warranty_refusal'] ?? null);
+            $to   = warranty_mode($is_warranty, $refusals);
+            if (!warranty_can_change($from, $to)) {
+                $_SESSION['flash'] = ['type' => 'danger', 'message' => __('repair.warranty_change_refused')];
+                header("Location: /repair/{$id}");
+                exit;
+            }
+
             db_update('rma_requests', [
                 'is_warranty'      => $is_warranty,
                 'warranty_refusal' => !empty($refusals) ? json_encode($refusals) : null,
