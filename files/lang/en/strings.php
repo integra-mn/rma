@@ -614,7 +614,6 @@ return [
     'repair.log_time'             => 'Log Time',
     'dashboard.open_repairs'      => 'Open Repairs',
     'dashboard.started'           => 'Started',
-    'dashboard.waiting_pickup'    => 'Repaired — Waiting Pickup',
     'dashboard.repaired'          => 'Repaired',
     'dashboard.days_open'         => 'Days open',
     'profile.preferences'         => 'Preferences',

@@ -121,7 +121,9 @@
   <?php if (!empty($waiting_pickup)): ?>
   <div class="card" style="margin-top:1rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);"><?= __('dashboard.waiting_pickup') ?></h2>
+      <!-- Same key as the card above it: one name for one thing, in both
+           languages, so the two can never drift apart. -->
+      <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);"><?= __('dashboard.for_pickup') ?></h2>
       <a href="/rma" style="font-size:12px;color:var(--accent);text-decoration:none;"><?= __('dashboard.view_all') ?></a>
     </div>
     <table class="data-table dash-table">

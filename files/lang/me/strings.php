@@ -614,7 +614,6 @@ return [
     'repair.log_time'             => 'Sačuvaj',
     'dashboard.open_repairs'      => 'Otvorene popravke',
     'dashboard.started'           => 'Započeto',
-    'dashboard.waiting_pickup'    => 'Servisirano — čeka preuzimanje',
     'dashboard.repaired'          => 'Servisirano',
     'dashboard.days_open'         => 'Dana otvoreno',
     'profile.preferences'         => 'Podešavanja',
