@@ -109,13 +109,19 @@ class RepairController {
         $job = db_row("SELECT j.*,
                               s.label as status_label, s.color as status_color, s.code as status_code,
                               r.rma_number, r.complaint, r.priority, r.is_warranty, r.warranty_refusal, r.partner_id,
+                              -- Which box the device is sitting in, and which of
+                              -- the partner's branches sent it. Both are on the
+                              -- RMA; the bench needs them just as much, one to
+                              -- find the device and one to know where it goes back.
+                              r.service_box,
                               c.name as customer_name,
                               u.name as tech_name,
                               l.name as location_name,
                               dm.name as model_name, dm.category_id AS device_category_id,
                               db2.id AS device_brand_id, db2.name as brand_name,
                               d.serial_number, d.imei,
-                              p.name as partner_name
+                              p.name as partner_name,
+                              pb.name as partner_branch_name
                        FROM repair_jobs j
                        JOIN rma_requests r ON r.id = j.rma_id
                        JOIN repair_statuses s ON s.id = j.status_id
@@ -126,6 +132,7 @@ class RepairController {
                        LEFT JOIN device_models dm ON dm.id = d.model_id
                        LEFT JOIN device_brands db2 ON db2.id = dm.brand_id
                        LEFT JOIN partners p ON p.id = r.partner_id
+                       LEFT JOIN partner_branches pb ON pb.id = r.partner_branch_id
                        WHERE j.id = ? AND j.deleted_at IS NULL", [(int)$id]);
 
         if (!$job) { http_response_code(404); include views_path('errors/404.php'); return; }

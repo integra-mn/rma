@@ -33,7 +33,13 @@
           <?php if ($job['serial_number'] ?? null): ?><span style="color:var(--text-secondary);">S/N:</span> <?= htmlspecialchars($job['serial_number']) ?><?php endif; ?>
         </div>
       <?php endif; ?>
+      <?php if (!empty($job['service_box'])): ?>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('rma.service_box') ?>:</span> <?= htmlspecialchars($job['service_box']) ?></div>
+      <?php endif; ?>
       <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('rma.partner') ?>:</span> <?= htmlspecialchars($job['partner_name'] ?? '—') ?></div>
+      <?php if (!empty($job['partner_branch_name'])): ?>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;"><span style="color:var(--text-secondary);"><?= __('partners.branch') ?>:</span> <?= htmlspecialchars($job['partner_branch_name']) ?></div>
+      <?php endif; ?>
       <div style="font-size:13px;color:var(--text-muted);"><span style="color:var(--text-secondary);"><?= __('rma.technician') ?>:</span> <?= htmlspecialchars($job['tech_name'] ?? '') ?: __('rma.unassigned') ?></div>
 
     </div>
