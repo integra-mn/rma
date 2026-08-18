@@ -204,9 +204,15 @@ function nav_active(string $prefix): string {
 
   <?php if (can('repair', 'view')): ?>
   <a href="/repair" class="sidebar-link<?= nav_active('/repair') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M10.5 2.5a3 3 0 0 1 0 4.24l-6 6a1.5 1.5 0 0 1-2.12-2.12l6-6A3 3 0 0 1 10.5 2.5z"/>
-      <circle cx="11" cy="4" r="1" fill="currentColor" stroke="none"/>
+    <?php // A wrench reads as one because of the jaw. What stood here was a
+          // shaft with a round head and no opening, which is a screwdriver at
+          // best.
+          //
+          // 24-unit box and stroke 2.25 for the same reason as the gear: at
+          // 20px on screen a 24-box unit is smaller, so 1.5 would draw this
+          // thinner than the icons beside it. Both land on 1.875px. ?>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
     </svg>
     <?= __('nav.repairs') ?>
   </a>
