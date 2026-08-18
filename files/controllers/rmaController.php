@@ -740,7 +740,10 @@ class RmaController {
      */
     public function claim_update(string $id): void {
         require_login();
-        require_permission('rma', 'edit');
+        // claims.edit, not rma.edit: following a claim is the office's job, and
+        // the tick for it existed on the Dozvole screen while nothing checked
+        // it. A technician may move the case along; the claim is not theirs.
+        require_permission('claims', 'edit');
         $this->guard_rma_location((int)$id);
 
         $claim = claim_for_rma((int)$id);

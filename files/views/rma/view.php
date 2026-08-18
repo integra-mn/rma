@@ -262,7 +262,7 @@
             <div style="font-size:13px;color:var(--text-muted);white-space:pre-wrap;margin-top:6px;"><?= htmlspecialchars($claim['notes']) ?></div>
           <?php endif; ?>
 
-          <?php if ($cl_next && can('rma', 'edit')): ?>
+          <?php if ($cl_next && can('claims', 'edit')): ?>
             <form method="POST" action="/rma/<?= (int)$rma['id'] ?>/claim" style="margin-top:12px;">
               <?= csrf_field() ?>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
