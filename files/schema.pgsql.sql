@@ -1394,6 +1394,12 @@ INSERT INTO role_permissions (role, module, action) VALUES
   ('admin','preferences','theme'),('admin','preferences','lang'),('admin','preferences','integrations');
 
 -- Indexes (inline in MySQL, standalone in Postgres)
+-- Reklamacije lists newest-number-first, ordered by the padded number so that
+-- 100000 sorts above 52150 rather than below it. The sort is on an expression,
+-- so a plain index on rma_number cannot serve it — this one can, and must spell
+-- the expression exactly as the query does.
+CREATE INDEX idx_rma_number_padded ON rma_requests ((LPAD(rma_number, 12, '0')));
+
 CREATE INDEX locations_idx_code ON locations (code);
 CREATE INDEX auth_attempts_idx_identifier ON auth_attempts (identifier);
 CREATE INDEX auth_attempts_idx_ip ON auth_attempts (ip_address);

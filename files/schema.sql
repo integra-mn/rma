@@ -364,6 +364,11 @@ CREATE TABLE rma_requests (
   INDEX idx_customer (customer_id),
   INDEX idx_partner (partner_id),
   INDEX idx_rma_number (rma_number),
+  -- The list sorts on LPAD(rma_number, 12, '0') so a sixth digit does not
+  -- reorder it. Serving that order needs a functional index, which MySQL only
+  -- supports from 8.0.13, so it is not declared here:
+  --   ALTER TABLE rma_requests ADD INDEX idx_rma_number_padded ((LPAD(rma_number, 12, '0')));
+  -- Postgres is the deployment target and has it (schema.pgsql.sql).
   INDEX idx_created (created_at),
   FOREIGN KEY (location_id) REFERENCES locations(id),
   FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE SET NULL,
