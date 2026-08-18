@@ -178,7 +178,7 @@ return [
     'rma.device'             => 'Device',
     'rma.complaint'          => 'Customer Complaint',
     'rma.diagnosis'          => 'Diagnosis',
-    'rma.warranty'           => 'Warranty',
+    'rma.warranty'           => 'Under warranty',
     'rma.sla_breached'       => 'SLA breached',
     'rma.tracking_page'      => 'Tracking page',
     'rma.technician'         => 'Technician',
