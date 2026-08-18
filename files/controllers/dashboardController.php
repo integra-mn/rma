@@ -41,7 +41,13 @@ class DashboardController {
                                           JOIN rma_statuses rs ON rs.id = r.status_id
                                           JOIN repair_jobs j ON j.rma_id = r.id AND j.deleted_at IS NULL
                                           JOIN repair_statuses js ON js.id = j.status_id
-                                         WHERE r.deleted_at IS NULL AND rs.is_terminal = 0{$fr}
+                                         WHERE r.deleted_at IS NULL AND rs.is_terminal = 0
+                                           -- A device that has gone is not waiting to be
+                                           -- collected. Otpremljeno is not a terminal status —
+                                           -- the case stays open until it is closed — so
+                                           -- is_terminal alone left dispatched devices here.
+                                           AND r.dispatched_at IS NULL
+                                           AND rs.code <> 'dispatched'{$fr}
                                          GROUP BY r.id
                                         HAVING SUM(CASE WHEN js.is_terminal = 0 THEN 1 ELSE 0 END) = 0
                                       ) ready"),
@@ -83,7 +89,10 @@ class DashboardController {
             JOIN repair_jobs  j  ON j.rma_id = r.id AND j.deleted_at IS NULL
             JOIN repair_statuses js ON js.id = j.status_id
             LEFT JOIN customers c ON c.id = r.customer_id
-            WHERE r.deleted_at IS NULL AND rs.is_terminal = 0{$fr}
+            WHERE r.deleted_at IS NULL AND rs.is_terminal = 0
+              -- See the card above: dispatched devices have left the building.
+              AND r.dispatched_at IS NULL
+              AND rs.code <> 'dispatched'{$fr}
             GROUP BY r.id, c.name, rs.code, rs.label, rs.color
             HAVING SUM(CASE WHEN js.is_terminal = 0 THEN 1 ELSE 0 END) = 0
             ORDER BY last_completed_at DESC
