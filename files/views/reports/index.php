@@ -406,15 +406,21 @@
       uasort($by_model, fn($a, $b) => $b['count'] <=> $a['count']);
     ?>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem;">
-      <div class="card" style="text-align:center;">
-        <div style="font-size:28px;font-weight:600;color:#e8860a;"><?= count($repeat_rows) ?></div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('reports.repeat_count') ?></div>
-      </div>
-      <div class="card" style="text-align:center;">
-        <div style="font-size:28px;font-weight:600;color:var(--text-secondary);"><?= repeat_repair_window() ?></div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('reports.repeat_window') ?></div>
-      </div>
+    <!-- Summary cards. Same grid and card rules as the other tabs — the rows
+         stretch and the card centres its contents, so a two-line label does not
+         make one card taller than the rest. -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem;align-items:stretch;grid-auto-rows:1fr;">
+      <?php
+      $cards = [
+        ['label'=>__('reports.repeat_count'),  'value'=> count($repeat_rows),   'color'=>'#e8860a'],
+        ['label'=>__('reports.repeat_window'), 'value'=> repeat_repair_window(), 'color'=>'var(--text-secondary)'],
+      ];
+      foreach ($cards as $c): ?>
+        <div class="card" style="text-align:center;display:flex;flex-direction:column;justify-content:center;margin-top:0;">
+          <div style="font-size:28px;font-weight:600;color:<?= $c['color'] ?>;"><?= $c['value'] ?></div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= $c['label'] ?></div>
+        </div>
+      <?php endforeach; ?>
     </div>
 
     <?php if (!$repeat_rows): ?>
