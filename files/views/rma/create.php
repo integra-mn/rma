@@ -627,6 +627,7 @@ function checkDeviceMatch() {
 // is usually a second case for a device already on the shelf.
 const REPEAT_TEXT = {
   repeat: <?= json_encode(__('rma.repeat_warning')) ?>,
+  today:  <?= json_encode(__('rma.repeat_warning_today')) ?>,
   seen:   <?= json_encode(__('rma.seen_before')) ?>,
   open:   <?= json_encode(__('rma.open_case_warning')) ?>,
   link:   <?= json_encode(__('rma.device_history')) ?>
@@ -641,7 +642,9 @@ function showRepeat(rep) {
     text  = REPEAT_TEXT.open.replace(':rma', rep.open);
     style = 'background:#fcebeb;border:0.5px solid #f09595;color:#791f1f;';
   } else if (rep.level === 'repeat') {
-    text  = REPEAT_TEXT.repeat.replace(':days', rep.days).replace(':rma', rep.case || '');
+    // "nakon 0 dana" is not something anyone says.
+    text  = (rep.days === 0 ? REPEAT_TEXT.today : REPEAT_TEXT.repeat)
+              .replace(':days', rep.days).replace(':rma', rep.case || '');
     style = 'background:#faeeda;border:0.5px solid #ef9f27;color:#633806;';
   } else {
     text  = REPEAT_TEXT.seen.replace(':count', rep.visits);

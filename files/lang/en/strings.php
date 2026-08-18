@@ -1300,6 +1300,7 @@ Track the repair here:
     'rma.status_keep' => '— keep current status —',
     'rma.device_history'    => 'Device history',
     'rma.repeat_warning'    => 'Repeated repair — back after :days days (:rma).',
+    'rma.repeat_warning_today' => 'Repeated repair — back the same day (:rma).',
     'rma.seen_before'       => 'This device has been in service before — :count time(s).',
     'rma.open_case_warning' => 'This device already has an open case (:rma).',
     'rma.device_visits'     => 'Times in service',

@@ -1300,6 +1300,7 @@ Status popravke pratite ovdje:
     'rma.status_keep' => '— bez promjene statusa —',
     'rma.device_history'    => 'Istorija uredjaja',
     'rma.repeat_warning'    => 'Ponovljena popravka — vraćen nakon :days dana (:rma).',
+    'rma.repeat_warning_today' => 'Ponovljena popravka — vraćen istog dana (:rma).',
     'rma.seen_before'       => 'Ovaj uredjaj je već bio u servisu — :count put(a).',
     'rma.open_case_warning' => 'Ovaj uredjaj već ima otvorenu reklamaciju (:rma).',
     'rma.device_visits'     => 'Broj dolazaka u servis',

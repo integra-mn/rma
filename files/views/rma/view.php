@@ -48,7 +48,10 @@
         $rp_text  = __('rma.open_case_warning', ['rma' => $rp['open']['rma_number']]);
         $rp_style = 'background:#fcebeb;border:0.5px solid #f09595;color:#791f1f;';
     } elseif (($rp['level'] ?? 'none') === 'repeat') {
-        $rp_text  = __('rma.repeat_warning', ['days' => (int)$rp['days'], 'rma' => $rp['case']['rma_number'] ?? '']);
+        // "nakon 0 dana" is not something anyone says.
+        $rp_text  = (int)$rp['days'] === 0
+            ? __('rma.repeat_warning_today', ['rma' => $rp['case']['rma_number'] ?? ''])
+            : __('rma.repeat_warning', ['days' => (int)$rp['days'], 'rma' => $rp['case']['rma_number'] ?? '']);
         $rp_style = 'background:#faeeda;border:0.5px solid #ef9f27;color:#633806;';
     } elseif (($rp['level'] ?? 'none') === 'seen') {
         $rp_text  = __('rma.seen_before', ['count' => (int)$rp['visits']]);
