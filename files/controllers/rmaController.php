@@ -231,6 +231,22 @@ class RmaController {
             }
         }
 
+        // A handset already in Reklamacije or Popravke is here, so a second
+        // case is somebody entering it twice. Only once every case for it has
+        // reached a final status may it be booked in again. The check is on the
+        // status, so it follows whatever is marked terminal in Administracija.
+        if ($twin_ident !== '') {
+            $open = device_open_case($twin_ident);
+            if ($open) {
+                $_SESSION['form_error'] = __('rma.device_already_open', [
+                    'rma'    => $open['rma_number'],
+                    'status' => status_label((string)$open['status_code'], (string)$open['status_label']),
+                ]);
+                header('Location: /rma/create');
+                exit;
+            }
+        }
+
         // Device: use existing or create new
         $device_id = null;
         if ($existing_device_id) {
@@ -937,6 +953,13 @@ class RmaController {
         // been here before, and did it go out recently. Keyed on the identifier
         // typed in, so it reads across duplicate device rows.
         $state = device_repeat_state($param);
+        // Unscoped, and the same call the save handler makes, so what the form
+        // says and what the server does cannot disagree.
+        $blocking = device_open_case($param);
+        $device['blocked'] = $blocking ? [
+            'rma'    => $blocking['rma_number'],
+            'status' => status_label((string)$blocking['status_code'], (string)$blocking['status_label']),
+        ] : null;
         $device['repeat'] = [
             'level'  => $state['level'],
             'visits' => $state['visits'],

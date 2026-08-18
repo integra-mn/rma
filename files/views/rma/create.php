@@ -571,6 +571,10 @@ function lockSubmit(form) {
 }
 
 function validateRmaForm() {
+  if (deviceBlocked) {
+    appAlert(BLOCKED_TEXT.replace(':rma', deviceBlocked.rma).replace(':status', deviceBlocked.status));
+    return false;
+  }
   const sn      = document.getElementById('serial-number-input').value.trim();
   const imei    = document.getElementById('imei-input').value.trim();
   const warranty = document.getElementById('is_warranty_val').value;
@@ -629,11 +633,11 @@ function checkDeviceMatch() {
             data.brand + ' ' + data.model + ' — S/N: ' + (data.serial_number || '—');
           document.getElementById('device-match-notice').style.display = 'block';
           document.getElementById('device-match-notice').dataset.deviceId = data.id;
-          showRepeat(data.repeat);
+          showRepeat(data.repeat, data.blocked);
         } else {
           document.getElementById('device-match-notice').style.display = 'none';
           document.getElementById('device-id-input').value = '';
-          showRepeat(null);
+          showRepeat(null, null);
         }
       });
   }, 400);
@@ -642,6 +646,7 @@ function checkDeviceMatch() {
 // Amber when the device went out recently, grey when it was simply here
 // before, and firmer still when a case for it is open right now — that last one
 // is usually a second case for a device already on the shelf.
+const BLOCKED_TEXT = <?= json_encode(__('rma.device_already_open')) ?>;
 const REPEAT_TEXT = {
   repeat: <?= json_encode(__('rma.repeat_warning')) ?>,
   today:  <?= json_encode(__('rma.repeat_warning_today')) ?>,
@@ -650,8 +655,30 @@ const REPEAT_TEXT = {
   link:   <?= json_encode(__('rma.device_history')) ?>
 };
 
-function showRepeat(rep) {
+// Set while the device is already in service. The form cannot be saved then —
+// the server refuses it too, this only says so before anything is typed.
+let deviceBlocked = null;
+
+function setBlocked(blocked) {
+  deviceBlocked = blocked || null;
+  const btn = document.querySelector('#rma-form button[type=submit]');
+  if (btn) {
+    btn.disabled = !!deviceBlocked;
+    btn.style.opacity = deviceBlocked ? '0.6' : '';
+    btn.title = deviceBlocked ? BLOCKED_TEXT.replace(':rma', deviceBlocked.rma).replace(':status', deviceBlocked.status) : '';
+  }
+}
+
+function showRepeat(rep, blocked) {
   const box = document.getElementById('device-repeat-notice');
+  setBlocked(blocked);
+
+  if (blocked) {
+    box.setAttribute('style', 'border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:block;background:#fcebeb;border:0.5px solid #f09595;color:#791f1f;');
+    box.innerHTML = '<strong>' + BLOCKED_TEXT.replace(':rma', blocked.rma).replace(':status', blocked.status) + '</strong> '
+      + '<a href="/rma/" style="color:inherit;text-decoration:underline;">' + blocked.rma + '</a>';
+    return;
+  }
   if (!rep || (rep.level === 'none' && !rep.open)) { box.style.display = 'none'; return; }
 
   let text, style;

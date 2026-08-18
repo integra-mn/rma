@@ -1306,6 +1306,7 @@ Track the repair here:
     'rma.status_keep' => '— keep current status —',
     'rma.device_history'    => 'Device history',
     'rma.dates_required'    => 'Purchase date and warranty expiry are both required.',
+    'rma.device_already_open' => 'This device is already in service as :rma (:status). It can only be booked in again once that case is closed.',
     'rma.duplicate_avoided' => 'This device was just taken in as :rma — opened instead of creating a second case.',
     'rma.repeat_warning'    => 'Repeated repair — back after :days days (:rma).',
     'rma.repeat_warning_today' => 'Repeated repair — back the same day (:rma).',

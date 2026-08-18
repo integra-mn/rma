@@ -76,13 +76,17 @@ function stamp_rma_dispatch(int $rma_id): ?string {
  * Location scope and the partner restriction apply as they do on the RMA list:
  * a device's history is only ever the part of it this user could already see.
  */
-function device_cases(string $identifier): array {
+/**
+ * Every device row that is this same physical handset.
+ *
+ * Rows carrying the identifier, then rows carrying any identifier those rows
+ * carry — a duplicate entered by IMEI may hold a serial the original does not,
+ * and both are the same phone.
+ */
+function device_row_ids(string $identifier): array {
     $identifier = trim($identifier);
     if ($identifier === '') return [];
 
-    // Rows carrying this identifier, then rows carrying any identifier those
-    // rows carry — a duplicate entered by IMEI may hold a serial the original
-    // does not, and both are the same phone.
     $rows = db_rows('SELECT id, imei, serial_number FROM devices WHERE imei = ? OR serial_number = ?',
                     [$identifier, $identifier]);
     if (!$rows) return [];
@@ -95,11 +99,16 @@ function device_cases(string $identifier): array {
     }
     $idents = array_values(array_unique($idents));
     $ph     = implode(',', array_fill(0, count($idents), '?'));
-    $ids    = array_column(
+
+    return array_map('intval', array_column(
         db_rows("SELECT id FROM devices WHERE imei IN ({$ph}) OR serial_number IN ({$ph})",
                 array_merge($idents, $idents)),
         'id'
-    );
+    ));
+}
+
+function device_cases(string $identifier): array {
+    $ids = device_row_ids($identifier);
     if (!$ids) return [];
 
     $where  = 'r.device_id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')';
@@ -285,4 +294,42 @@ function device_repeat_verdict(array $cases): array {
     // reported on its own, and it is a firmer message than "been here before".
 
     return $state;
+}
+
+/**
+ * The case keeping this device here, if there is one.
+ *
+ * A handset already in Reklamacije or Popravke cannot be taken in again
+ * (Rajo, 2026-08-18) — it is on the premises, so a second case is somebody
+ * entering it twice rather than a device arriving. Only once every case for it
+ * has reached a final status may it be booked in afresh.
+ *
+ * Deliberately unscoped, unlike device_cases(): whether a device is here is a
+ * fact about the device, not about who is allowed to see the case. A counter in
+ * another location would otherwise be told nothing and open the duplicate.
+ */
+function device_open_case(string $identifier): ?array {
+    $ids = device_row_ids($identifier);
+    if (!$ids) return null;
+
+    $ph = implode(',', array_fill(0, count($ids), '?'));
+    return db_row(
+        "SELECT r.id, r.rma_number, s.code AS status_code, s.label AS status_label
+           FROM rma_requests r
+           JOIN rma_statuses s ON s.id = r.status_id
+          WHERE r.device_id IN ({$ph})
+            AND r.deleted_at IS NULL
+            AND (
+                  s.is_terminal = 0
+                  -- Or the case is closed while the bench job is not, which
+                  -- still means the device has not left.
+                  OR EXISTS (
+                      SELECT 1 FROM repair_jobs j
+                        JOIN repair_statuses js ON js.id = j.status_id
+                       WHERE j.rma_id = r.id AND j.deleted_at IS NULL AND js.is_terminal = 0
+                  )
+            )
+          ORDER BY r.id DESC LIMIT 1",
+        $ids
+    );
 }

@@ -1306,6 +1306,7 @@ Status popravke pratite ovdje:
     'rma.status_keep' => '— bez promjene statusa —',
     'rma.device_history'    => 'Istorija uredjaja',
     'rma.dates_required'    => 'Datum kupovine i istek garancije su obavezni.',
+    'rma.device_already_open' => 'Ovaj uredjaj je već u servisu kao :rma (:status). Može se ponovo primiti tek kada se ta reklamacija zatvori.',
     'rma.duplicate_avoided' => 'Ovaj uredjaj je upravo primljen kao :rma — otvorena je ta reklamacija umjesto nove.',
     'rma.repeat_warning'    => 'Ponovljena popravka — vraćen nakon :days dana (:rma).',
     'rma.repeat_warning_today' => 'Ponovljena popravka — vraćen istog dana (:rma).',
