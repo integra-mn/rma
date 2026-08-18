@@ -130,6 +130,7 @@ $routes = [
         '/profile/totp-disable'                => 'profile/totp_disable',
         '/rma/store'                           => 'rma/store',
         '/rma/([0-9]+)/update'                 => 'rma/update',
+        '/rma/([0-9]+)/claim'                  => 'rma/claim_update',
         '/rma/([0-9]+)/comment'                => 'rma/comment',
         '/rma/([0-9]+)/upload'                 => 'rma/upload',
         '/rma/([0-9]+)/send-receipt'           => 'rma/send_receipt',

@@ -202,6 +202,107 @@
       })();
       </script>
 
+      <!-- Insurance claim. Only on a case that is one. -->
+      <?php if (!empty($claim)): ?>
+        <?php
+          $cl_colours = [
+            'new'       => ['#f4f4f0', '#5f5e5a'],
+            'reported'  => ['#e8f3ff', '#185fa5'],
+            'more_info' => ['#faeeda', '#633806'],
+            'approved'  => ['#e1f5ee', '#085041'],
+            'refused'   => ['#fcebeb', '#a32d2d'],
+            'paid'      => ['#e1f5ee', '#085041'],
+            'closed'    => ['#f4f4f0', '#5f5e5a'],
+          ];
+          [$cl_bg, $cl_fg] = $cl_colours[$claim['status']] ?? ['#f4f4f0', '#5f5e5a'];
+          $cl_next = CLAIM_FLOW[$claim['status']] ?? [];
+
+          // Overdue is worth shouting about: a claim reported late is refused,
+          // and nothing else on this page would say so.
+          $cl_due  = $claim['report_due_at'] ?? null;
+          $cl_late = $cl_due && empty($claim['reported_at']) && strtotime($cl_due) < time();
+        ?>
+        <div style="background:#fff;border:0.5px solid <?= $cl_late ? '#f09595' : '#d3d1c7' ?>;border-radius:12px;padding:1.25rem;margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <h2 style="font-size:14px;font-weight:500;color:#5f5e5a;margin:0;"><?= __('ins.claim') ?></h2>
+            <span class="badge" style="background:<?= $cl_bg ?>;color:<?= $cl_fg ?>;"><?= __('ins.claim_' . $claim['status']) ?></span>
+            <?php if ($cl_late): ?>
+              <span class="badge" style="background:#fcebeb;color:#a32d2d;"><?= __('ins.claim_overdue') ?></span>
+            <?php endif; ?>
+            <span style="margin-left:auto;font-size:12px;color:var(--text-muted);">
+              <?= htmlspecialchars($claim['insurer_name']) ?> &nbsp;·&nbsp; <?= htmlspecialchars($claim['policy_number']) ?>
+            </span>
+          </div>
+
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">
+            <span style="color:var(--text-secondary);"><?= __('ins.incident_date') ?>:</span>
+            <?= $claim['incident_date'] ? format_date($claim['incident_date']) : '—' ?>
+            <?php if ($cl_due): ?>
+              &nbsp;·&nbsp; <span style="color:var(--text-secondary);"><?= __('ins.claim_due') ?>:</span> <?= format_datetime($cl_due) ?>
+            <?php endif; ?>
+          </div>
+          <?php if (!empty($claim['claim_number'])): ?>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">
+              <span style="color:var(--text-secondary);"><?= __('ins.claim_number') ?>:</span> <?= htmlspecialchars($claim['claim_number']) ?>
+            </div>
+          <?php endif; ?>
+          <?php if (!empty($claim['approved_amount'])): ?>
+            <?php $cl_split = claim_split((float)$claim['approved_amount'], (float)$claim['participation_pct']); ?>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">
+              <span style="color:var(--text-secondary);"><?= __('ins.claim_approved_amount') ?>:</span>
+              <?= number_format((float)$claim['approved_amount'], 2, ',', '.') ?> &euro;
+              &nbsp;·&nbsp; <?= __('ins.claim_split', [
+                    'insurer'  => number_format($cl_split['insurer'], 2, ',', '.'),
+                    'customer' => number_format($cl_split['customer'], 2, ',', '.'),
+                    'pct'      => rtrim(rtrim(number_format((float)$claim['participation_pct'], 2, '.', ''), '0'), '.'),
+              ]) ?>
+            </div>
+          <?php endif; ?>
+          <?php if (!empty($claim['notes'])): ?>
+            <div style="font-size:13px;color:var(--text-muted);white-space:pre-wrap;margin-top:6px;"><?= htmlspecialchars($claim['notes']) ?></div>
+          <?php endif; ?>
+
+          <?php if ($cl_next && can('rma', 'edit')): ?>
+            <form method="POST" action="/rma/<?= (int)$rma['id'] ?>/claim" style="margin-top:12px;">
+              <?= csrf_field() ?>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
+                <div class="field" style="margin:0;">
+                  <label style="font-size:12px;"><?= __('ins.claim_move_to') ?></label>
+                  <select name="status" id="claim-status" class="custom-select" onchange="claimFields()">
+                    <?php foreach ($cl_next as $st): ?>
+                      <option value="<?= $st ?>"><?= __('ins.claim_' . $st) ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="field" style="margin:0;" id="claim-number-field">
+                  <label style="font-size:12px;"><?= __('ins.claim_number') ?></label>
+                  <input type="text" name="claim_number" value="<?= htmlspecialchars($claim['claim_number'] ?? '') ?>">
+                </div>
+                <div class="field" style="margin:0;display:none;" id="claim-amount-field">
+                  <label style="font-size:12px;"><?= __('ins.claim_approved_amount') ?></label>
+                  <input type="text" name="approved_amount" placeholder="0,00">
+                </div>
+              </div>
+              <input type="text" name="notes" placeholder="<?= __('rma.optional_note') ?>"
+                     style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid #d3d1c7;border-radius:8px;outline:none;margin-bottom:10px;">
+              <div style="display:flex;justify-content:flex-end;">
+                <button type="submit" class="btn btn-primary" style="min-width:120px;"><?= __('btn.save') ?></button>
+              </div>
+            </form>
+            <script>
+            // The portal number belongs to reporting; the amount to a decision.
+            // Showing both at once invites one to be filled in at the wrong step.
+            function claimFields() {
+              var to = document.getElementById('claim-status').value;
+              document.getElementById('claim-number-field').style.display = (to === 'reported') ? '' : 'none';
+              document.getElementById('claim-amount-field').style.display = (to === 'approved') ? '' : 'none';
+            }
+            claimFields();
+            </script>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
+
       <!-- Complaint -->
       <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:1.25rem;margin-bottom:1rem;">
         <h2 style="font-size:14px;font-weight:500;color:#5f5e5a;margin-bottom:8px;"><?= __('rma.complaint') ?></h2>

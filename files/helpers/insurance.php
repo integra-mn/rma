@@ -155,3 +155,53 @@ function insurance_check(string $identifier, ?string $incident_date, ?string $da
     $out['reason']  = '';
     return $out;
 }
+
+// ── A claim's life ────────────────────────────────────────────
+//
+//   nova       recorded here, not yet in the insurer's portal
+//   prijavljena reported, waiting on them
+//   dopuna     they asked US for something — the state everyone forgets, and
+//              the one that quietly rots if it looks like "waiting"
+//   odobrena / odbijena   their answer
+//   isplacena  settled
+//   zatvorena  done
+//
+// Forward only, with the one loop that matters: dopuna goes back to prijavljena
+// when the missing thing has been sent.
+const CLAIM_FLOW = [
+    'new'       => ['reported'],
+    'reported'  => ['more_info', 'approved', 'refused'],
+    'more_info' => ['reported', 'approved', 'refused'],
+    'approved'  => ['paid', 'closed'],
+    'refused'   => ['closed'],
+    'paid'      => ['closed'],
+    'closed'    => [],
+];
+
+function claim_can_move(string $from, string $to): bool {
+    return in_array($to, CLAIM_FLOW[$from] ?? [], true);
+}
+
+/** The claim on a case, with its policy and insurer. */
+function claim_for_rma(int $rma_id): ?array {
+    return db_row(
+        "SELECT c.*, p.policy_number, p.participation_pct, p.claims_allowed, p.ends_on,
+                i.name AS insurer_name, i.portal_url
+           FROM insurance_claims c
+           JOIN insurance_policies p ON p.id = c.policy_id
+           JOIN insurers i ON i.id = p.insurer_id
+          WHERE c.rma_id = ? AND c.deleted_at IS NULL
+          ORDER BY c.id DESC LIMIT 1",
+        [$rma_id]
+    );
+}
+
+/**
+ * What the customer pays of an approved amount, and what the insurer covers.
+ * Participation is a percentage of the repair including PDV, collected by
+ * Integra at handover (Rajo, 2026-08-15).
+ */
+function claim_split(float $approved, float $participation_pct): array {
+    $customer = round($approved * $participation_pct / 100, 2);
+    return ['customer' => $customer, 'insurer' => round($approved - $customer, 2)];
+}

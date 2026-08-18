@@ -539,6 +539,9 @@ class RmaController {
 
         $technicians = db_rows("SELECT id, name FROM users WHERE role = 'technician' AND is_active = 1 ORDER BY name");
 
+        // The insurance claim, when this case is one.
+        $claim = claim_for_rma((int)$id);
+
         // For the identity modal: correcting the device the case was opened
         // against, not just the numbers written on it.
         $brands = db_rows('SELECT id, name FROM device_brands WHERE is_active = 1 ORDER BY name');
@@ -724,6 +727,63 @@ class RmaController {
             $_SESSION['flash'] = ['type'=>'success','message'=>__('rma.details_updated')];
         }
 
+        header("Location: /rma/{$id}");
+        exit;
+    }
+
+    /**
+     * Move a claim along, and record what the insurer said.
+     *
+     * Forward-only with one loop — dopuna back to prijavljena once the missing
+     * thing has been sent. Anything else is refused here rather than merely
+     * being absent from the buttons, since this decides who pays.
+     */
+    public function claim_update(string $id): void {
+        require_login();
+        require_permission('rma', 'edit');
+        $this->guard_rma_location((int)$id);
+
+        $claim = claim_for_rma((int)$id);
+        if (!$claim) { http_response_code(404); return; }
+
+        $to = trim($_POST['status'] ?? '');
+        if (!claim_can_move((string)$claim['status'], $to)) {
+            $_SESSION['form_error'] = __('ins.claim_bad_move');
+            header("Location: /rma/{$id}"); exit;
+        }
+
+        $data = ['status' => $to];
+
+        if ($to === 'reported') {
+            // The portal's own number is the key to their side of it, and the
+            // only thing anybody can chase this with later.
+            $number = trim($_POST['claim_number'] ?? '');
+            if ($number !== '') $data['claim_number'] = $number;
+            if (empty($claim['reported_at'])) {
+                $data['reported_at'] = date('Y-m-d H:i:s');
+                $data['reported_by'] = current_user_id();
+            }
+        }
+
+        if ($to === 'approved') {
+            $amount = (float) str_replace(',', '.', (string)($_POST['approved_amount'] ?? '0'));
+            if ($amount > 0) {
+                $split = claim_split($amount, (float)$claim['participation_pct']);
+                $data['approved_amount']      = $amount;
+                $data['participation_amount'] = $split['customer'];
+            }
+            $data['decided_at'] = date('Y-m-d H:i:s');
+        }
+
+        if ($to === 'refused') $data['decided_at'] = date('Y-m-d H:i:s');
+
+        $note = trim($_POST['notes'] ?? '');
+        if ($note !== '') $data['notes'] = $note;
+
+        db_update('insurance_claims', $data, 'id = ?', [(int)$claim['id']]);
+        audit_change('insurance_claim', (int)$claim['id'], ['status' => $claim['status']], $data);
+
+        $_SESSION['form_success'] = __('ins.claim_saved');
         header("Location: /rma/{$id}");
         exit;
     }
