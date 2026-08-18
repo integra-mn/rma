@@ -177,10 +177,14 @@ function nav_active(string $prefix): string {
   <!-- Staff sidebar — permissions-gated per module. -->
   <a href="/" class="sidebar-link<?= $uri === '/' ? ' active' : '' ?>" style="margin-top:7px;">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <rect x="1" y="1" width="6" height="6" rx="1"/>
-      <rect x="9" y="1" width="6" height="6" rx="1"/>
-      <rect x="1" y="9" width="6" height="6" rx="1"/>
-      <rect x="9" y="9" width="6" height="6" rx="1"/>
+      <?php // Inset to 2 -> 14 like every other icon in this menu. Drawn
+            // 1 -> 15 before, which is a 14-unit shape in a box the others fill
+            // to 12 — same frame, artwork 17% larger, and it read heavier than
+            // its neighbours. ?>
+      <rect x="2" y="2" width="5" height="5" rx="1"/>
+      <rect x="9" y="2" width="5" height="5" rx="1"/>
+      <rect x="2" y="9" width="5" height="5" rx="1"/>
+      <rect x="9" y="9" width="5" height="5" rx="1"/>
     </svg>
     <?= __('nav.dashboard') ?>
   </a>
