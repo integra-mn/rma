@@ -9,7 +9,7 @@ defined('RMS') or die('Direct access not permitted');
     <div style="background:#fcebeb;color:#791f1f;border:0.5px solid #f09595;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:1rem;"><?= htmlspecialchars($error) ?></div>
   <?php endif; ?>
 
-  <form method="POST" action="/rma/store" id="rma-form" onsubmit="return validateRmaForm()">
+  <form method="POST" action="/rma/store" id="rma-form" onsubmit="return validateRmaForm() && lockSubmit(this)">
       <?= csrf_field() ?>
 
     <!-- Section: Customer Details -->
@@ -560,6 +560,14 @@ function validateImei(el) {
   } else {
     el.style.borderColor = '#d3d1c7';
   }
+}
+
+// The first click is the only one that counts. The guard on the server is the
+// rule; this just stops the request being made twice at all.
+function lockSubmit(form) {
+  var btn = form.querySelector('button[type=submit]');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+  return true;
 }
 
 function validateRmaForm() {

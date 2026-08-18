@@ -208,6 +208,29 @@ class RmaController {
             exit;
         }
 
+        // Two cases for one phone, seconds apart, are a double-click on Save —
+        // not two arrivals. 52180/52181 and 52184/52185 were made that way, 3
+        // and 4 seconds apart, same customer and same complaint. Nobody opens a
+        // second case for the same handset within a minute, so the earlier one
+        // is opened instead of a twin being created.
+        $twin_ident = $submitted_imei ?: $submitted_serial;
+        if ($twin_ident !== '') {
+            $twin = db_row(
+                "SELECT r.id, r.rma_number FROM rma_requests r
+                   JOIN devices d ON d.id = r.device_id
+                  WHERE (d.imei = ? OR d.serial_number = ?)
+                    AND r.deleted_at IS NULL
+                    AND r.created_at > ?
+                  ORDER BY r.id DESC LIMIT 1",
+                [$twin_ident, $twin_ident, date('Y-m-d H:i:s', time() - 60)]
+            );
+            if ($twin) {
+                $_SESSION['form_success'] = __('rma.duplicate_avoided', ['rma' => $twin['rma_number']]);
+                header('Location: /rma/' . (int)$twin['id']);
+                exit;
+            }
+        }
+
         // Device: use existing or create new
         $device_id = null;
         if ($existing_device_id) {
