@@ -562,6 +562,8 @@ class RepairController {
      *   on_hold     -> awaiting_parts
      *   completed   -> repaired
      *   no_fault    -> no_fault
+     *   cancelled   -> cancelled (only if no other job is open and the
+     *                  device is still here)
      *
      * Rules:
      *  - Never moves the RMA backward (uses sort_order to compare).
@@ -580,9 +582,28 @@ class RepairController {
             // the job beneath it was finished — the two disagreed, and the
             // dashboard believed the job.
             'no_fault_found' => 'no_fault',
+            // Work called off: the device is going back untouched, so the case
+            // is over too. Guarded below, unlike the others.
+            'cancelled'      => 'cancelled',
         ];
         $target_code = $map[$repair_event] ?? null;
         if (!$target_code) return;
+
+        // Cancelling one job is not the same as cancelling the case. A second
+        // job may still be running — a quote refused on one repair while
+        // another proceeds — and Otkazano is terminal, so getting this wrong
+        // ends a live case. Two things must hold: nothing else is open on the
+        // bench, and the device has not already gone home.
+        if ($repair_event === 'cancelled') {
+            $still_open = (int) db_val(
+                "SELECT COUNT(*) FROM repair_jobs j
+                   JOIN repair_statuses s ON s.id = j.status_id
+                  WHERE j.rma_id = ? AND j.deleted_at IS NULL AND s.is_terminal = 0",
+                [$rma_id]
+            );
+            if ($still_open > 0) return;
+            if (db_val('SELECT dispatched_at FROM rma_requests WHERE id = ?', [$rma_id])) return;
+        }
 
         $rma = db_row(
             "SELECT r.id, r.status_id, s.code AS cur_code, s.sort_order AS cur_order, s.is_terminal

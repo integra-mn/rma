@@ -16,6 +16,15 @@ class DashboardController {
         $fr = $is_partner ? " AND r.partner_id = {$pid}" : '';        // when "r" alias is present
         $fp = $is_partner ? " AND partner_id = {$pid}"   : '';        // when querying a table directly
 
+        // Otkazano is the one status on the pickup list that does not prove the
+        // device is here: a case can be called off at the counter before
+        // anything arrives. rma_requests has no received_at column, so the
+        // proof is the case having passed through Uredjaj primljen — the step
+        // the counter takes when it accepts a device.
+        $received = "EXISTS (SELECT 1 FROM rma_status_history h
+                               JOIN rma_statuses hs ON hs.id = h.status_id
+                              WHERE h.rma_id = r.id AND hs.code = 'device_received')";
+
         $stats = [
             'open_rmas'    => db_val("SELECT COUNT(*) FROM rma_requests r
                                       JOIN rma_statuses s ON s.id = r.status_id
@@ -31,10 +40,6 @@ class DashboardController {
                                       JOIN rma_requests r ON r.id = j.rma_id
                                       WHERE s.is_terminal = 0 AND j.deleted_at IS NULL
                                         AND r.deleted_at IS NULL{$fr}"),
-            // Work finished, device still here: every repair job on the case is
-            // in a terminal status while the case itself is still open. Same
-            // rule as the Servisirano — ceka preuzimanje list further down, so
-            // the card and the list can never disagree.
             // Asked of the case, not of the repair jobs beneath it. Counting
             // jobs answered "has the workshop nothing left to do", which is not
             // the same question: a case whose only job was closed as Nema kvara
@@ -50,7 +55,8 @@ class DashboardController {
                                         JOIN rma_statuses rs ON rs.id = r.status_id
                                        WHERE r.deleted_at IS NULL
                                          AND r.dispatched_at IS NULL
-                                         AND rs.code IN ('repaired', 'no_fault', 'unrepairable'){$fr}"),
+                                         AND (rs.code IN ('repaired', 'no_fault', 'unrepairable')
+                                              OR (rs.code = 'cancelled' AND {$received})){$fr}"),
             'sla_breached' => db_val("SELECT COUNT(*) FROM rma_requests
                                       WHERE sla_breached = 1 AND deleted_at IS NULL{$fp}"),
             'pending_invoices' => db_val("SELECT COUNT(*) FROM invoices
@@ -94,7 +100,8 @@ class DashboardController {
             LEFT JOIN customers c ON c.id = r.customer_id
             WHERE r.deleted_at IS NULL
               AND r.dispatched_at IS NULL
-              AND rs.code IN ('repaired', 'no_fault', 'unrepairable'){$fr}
+              AND (rs.code IN ('repaired', 'no_fault', 'unrepairable')
+                   OR (rs.code = 'cancelled' AND {$received})){$fr}
             GROUP BY r.id, c.name, rs.code, rs.label, rs.color
             ORDER BY COALESCE(MAX(j.completed_at), r.created_at) DESC
             LIMIT 10
