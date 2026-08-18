@@ -307,9 +307,12 @@ function nav_active(string $prefix): string {
 
   <?php if (can('reports', 'view')): ?>
   <a href="/reports" class="sidebar-link<?= nav_active('/reports') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M2 12L6 7l3 3 2-2 3 3"/>
-      <rect x="1" y="1" width="14" height="14" rx="2"/>
+    <?php // Bars on a baseline. The frame this replaces ran 1 -> 15 and read as
+          // a filled square before it read as a chart — one of the last two
+          // icons touching the edges of its box. ?>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <path d="M2.5 13.5h11"/>
+      <path d="M5 13.5V9M8 13.5V4.5M11 13.5V7"/>
     </svg>
     <?= __('nav.reports') ?>
   </a>
