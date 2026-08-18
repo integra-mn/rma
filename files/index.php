@@ -23,6 +23,7 @@ require_once ROOT . '/helpers/sku.php';
 require_once ROOT . '/helpers/phone.php';
 require_once ROOT . '/helpers/warranty.php';
 require_once ROOT . '/helpers/device_history.php';
+require_once ROOT . '/helpers/insurance.php';
 require_once ROOT . '/helpers/qr.php';
 require_once ROOT . '/helpers/totp.php';   // needs qr.php for the enrolment QR
 require_once ROOT . '/helpers/shipping.php';
