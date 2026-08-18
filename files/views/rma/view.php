@@ -39,6 +39,34 @@
 
   </div>
 
+  <?php
+    // Amber when it went out recently, grey when it was simply here before,
+    // red when a case for it is open right now — that last one usually means a
+    // second case for a device already on the shelf.
+    $rp = $repeat ?? ['level' => 'none'];
+    if (!empty($rp['open'])) {
+        $rp_text  = __('rma.open_case_warning', ['rma' => $rp['open']['rma_number']]);
+        $rp_style = 'background:#fcebeb;border:0.5px solid #f09595;color:#791f1f;';
+    } elseif (($rp['level'] ?? 'none') === 'repeat') {
+        $rp_text  = __('rma.repeat_warning', ['days' => (int)$rp['days'], 'rma' => $rp['case']['rma_number'] ?? '']);
+        $rp_style = 'background:#faeeda;border:0.5px solid #ef9f27;color:#633806;';
+    } elseif (($rp['level'] ?? 'none') === 'seen') {
+        $rp_text  = __('rma.seen_before', ['count' => (int)$rp['visits']]);
+        $rp_style = 'background:#f4f4f0;border:0.5px solid #d3d1c7;color:#5f5e5a;';
+    } else {
+        $rp_text = null;
+    }
+  ?>
+  <?php if ($rp_text): ?>
+    <?php $rp_ident = $rma['imei'] ?: ($rma['serial_number'] ?? ''); ?>
+    <div style="<?= $rp_style ?>border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:1rem;">
+      <strong><?= htmlspecialchars($rp_text) ?></strong>
+      <?php if ($rp_ident !== ''): ?>
+        <a href="/device/<?= rawurlencode($rp_ident) ?>" style="color:inherit;text-decoration:underline;"><?= __('rma.device_history') ?></a>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
+
   <?php if ($success ?? null): ?>
     <div style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:1rem;"><?= htmlspecialchars($success) ?></div>
   <?php endif; ?>

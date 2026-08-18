@@ -94,6 +94,10 @@ defined('RMS') or die('Direct access not permitted');
           <button type="button" onclick="useExistingDevice()" class="btn btn-sm" style="margin-left:10px;"><?= __('rma.use_this_device') ?></button>
           <button type="button" onclick="dismissDeviceMatch()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--accent,#1D9E75);margin-left:6px;"><?= __('rma.dismiss') ?></button>
         </div>
+        <!-- Amber: this handset has been here before, and recently. Filled by
+             the same lookup that fills the match notice above. -->
+        <div id="device-repeat-notice" style="display:none;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;"></div>
+
         <input type="hidden" name="device_id" id="device-id-input">
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
@@ -608,12 +612,46 @@ function checkDeviceMatch() {
             data.brand + ' ' + data.model + ' — S/N: ' + (data.serial_number || '—');
           document.getElementById('device-match-notice').style.display = 'block';
           document.getElementById('device-match-notice').dataset.deviceId = data.id;
+          showRepeat(data.repeat);
         } else {
           document.getElementById('device-match-notice').style.display = 'none';
           document.getElementById('device-id-input').value = '';
+          showRepeat(null);
         }
       });
   }, 400);
+}
+
+// Amber when the device went out recently, grey when it was simply here
+// before, and firmer still when a case for it is open right now — that last one
+// is usually a second case for a device already on the shelf.
+const REPEAT_TEXT = {
+  repeat: <?= json_encode(__('rma.repeat_warning')) ?>,
+  seen:   <?= json_encode(__('rma.seen_before')) ?>,
+  open:   <?= json_encode(__('rma.open_case_warning')) ?>,
+  link:   <?= json_encode(__('rma.device_history')) ?>
+};
+
+function showRepeat(rep) {
+  const box = document.getElementById('device-repeat-notice');
+  if (!rep || (rep.level === 'none' && !rep.open)) { box.style.display = 'none'; return; }
+
+  let text, style;
+  if (rep.open) {
+    text  = REPEAT_TEXT.open.replace(':rma', rep.open);
+    style = 'background:#fcebeb;border:0.5px solid #f09595;color:#791f1f;';
+  } else if (rep.level === 'repeat') {
+    text  = REPEAT_TEXT.repeat.replace(':days', rep.days).replace(':rma', rep.case || '');
+    style = 'background:#faeeda;border:0.5px solid #ef9f27;color:#633806;';
+  } else {
+    text  = REPEAT_TEXT.seen.replace(':count', rep.visits);
+    style = 'background:#f4f4f0;border:0.5px solid #d3d1c7;color:#5f5e5a;';
+  }
+
+  box.setAttribute('style', 'border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:block;' + style);
+  box.innerHTML = '<strong>' + text + '</strong> '
+    + '<a href="/device/' + encodeURIComponent(rep.ident) + '" target="_blank" style="color:inherit;text-decoration:underline;">'
+    + REPEAT_TEXT.link + '</a>';
 }
 
 function useExistingDevice() {

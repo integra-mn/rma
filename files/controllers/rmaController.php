@@ -391,6 +391,13 @@ class RmaController {
             $statuses, fn($s) => (int)$s['id'] === $current_id
         );
 
+        // Has this handset been here before? Excluding this case, or every
+        // device would report itself.
+        $repeat_ident = $rma['imei'] ?: ($rma['serial_number'] ?? '');
+        $repeat = $repeat_ident !== ''
+            ? device_repeat_state((string)$repeat_ident, (int)$rma['id'])
+            : ['level' => 'none', 'visits' => 0, 'days' => null, 'case' => null, 'open' => null];
+
         $technicians = db_rows("SELECT id, name FROM users WHERE role = 'technician' AND is_active = 1 ORDER BY name");
 
         // Logistics: shipments for this RMA + couriers for the add/edit forms.
@@ -863,7 +870,22 @@ class RmaController {
                           JOIN device_brands db2 ON db2.id = dm.brand_id
                           WHERE {$where} LIMIT 1", [$param]);
 
-        echo json_encode($device ?: ['id' => null]);
+        if (!$device) { echo json_encode(['id' => null]); exit; }
+
+        // What the counter needs to know before accepting it: has this handset
+        // been here before, and did it go out recently. Keyed on the identifier
+        // typed in, so it reads across duplicate device rows.
+        $state = device_repeat_state($param);
+        $device['repeat'] = [
+            'level'  => $state['level'],
+            'visits' => $state['visits'],
+            'days'   => $state['days'],
+            'case'   => $state['case']['rma_number'] ?? null,
+            'open'   => $state['open']['rma_number'] ?? null,
+            'ident'  => $param,
+        ];
+
+        echo json_encode($device);
         exit;
     }
 

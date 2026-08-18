@@ -199,3 +199,89 @@ function device_find_or_create(array $data): ?int {
     if (empty($data['model_id'])) return null;
     return db_insert('devices', $data);
 }
+
+// ── Has this device been here before? ─────────────────────────
+//
+// Two windows, both in Podesavanja. Inside the short one a device is coming
+// back soon after it left, which is worth stopping for — amber. Inside the long
+// one it is context, not an alarm — grey. Beyond, nothing: a device back after
+// two years is just a device.
+//
+// Measured from when Integra dispatched it, never from when the customer
+// collected it: a partner may hold a phone for a month and an owner may not
+// switch it on, and neither is Integra's doing.
+
+function repeat_repair_window(?int $brand_id = null): int {
+    // $brand_id is accepted and ignored. If a vendor ever states its own rule,
+    // it goes here and on device_brands — every caller already asks this way.
+    return max(0, (int) setting('repeat_repair_days', '30'));
+}
+
+function repeat_seen_window(?int $brand_id = null): int {
+    return max(0, (int) setting('repeat_seen_days', '180'));
+}
+
+/**
+ * What to say about a device's past, if anything.
+ *
+ * Returns level 'repeat' (amber), 'seen' (grey) or 'none', plus the case that
+ * prompted it. `open` is separate and firmer: a prior case that never left is
+ * not a repeat repair, it is usually a second case opened for a device already
+ * here.
+ */
+function device_repeat_state(string $identifier, ?int $exclude_rma_id = null): array {
+    $cases = device_cases($identifier);
+    if ($exclude_rma_id) {
+        $cases = array_values(array_filter($cases, fn($c) => (int)$c['id'] !== $exclude_rma_id));
+    }
+    return device_repeat_verdict($cases);
+}
+
+/**
+ * The verdict alone, over cases already fetched and already filtered — kept
+ * apart from the reading so the rule can be exercised without a database.
+ * Expects newest first, as device_cases() returns them.
+ */
+function device_repeat_verdict(array $cases): array {
+    $none = ['level' => 'none', 'visits' => 0, 'days' => null, 'case' => null, 'open' => null, 'cases' => []];
+    if (!$cases) return $none;
+
+    // Still here: open case, never dispatched. Terminal ones are excluded —
+    // a cancelled case is not a device sitting on a shelf.
+    $open = null;
+    foreach ($cases as $c) {
+        if (empty($c['dispatched_at'])
+            && !in_array($c['status_code'], ['closed', 'cancelled', 'unrepairable'], true)) {
+            $open = $c;
+            break;
+        }
+    }
+
+    // The most recent case that actually left is the one the clock runs from.
+    $last = null;
+    foreach ($cases as $c) {
+        if (!empty($c['dispatched_at'])) { $last = $c; break; }
+    }
+
+    $state = $none;
+    $state['visits'] = count($cases);
+    $state['cases']  = $cases;
+    $state['open']   = $open;
+
+    if ($last) {
+        $days = (int) floor((time() - strtotime($last['dispatched_at'])) / 86400);
+        if ($days < 0) $days = 0;
+        $state['days'] = $days;
+        $state['case'] = $last;
+
+        $short = repeat_repair_window();
+        $long  = repeat_seen_window();
+        if ($short > 0 && $days <= $short)     $state['level'] = 'repeat';
+        elseif ($long > 0 && $days <= $long)   $state['level'] = 'seen';
+    } elseif ($open) {
+        // Nothing has left, but the device has been here — worth saying.
+        $state['level'] = 'seen';
+    }
+
+    return $state;
+}

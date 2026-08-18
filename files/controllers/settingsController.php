@@ -112,6 +112,11 @@ class SettingsController {
             // that the photos stay the record of how the device arrived. 0
             // means staff never delete; Super Admin is not bound either way.
             'evidence_delete_hours' => ['int', max(0, min(8760, (int)($_POST['evidence_delete_hours'] ?? 24)))],
+            // Repeated repair. The short window is the one that raises amber;
+            // the long one only decides how far back "has been here before" is
+            // worth mentioning. 0 switches either off.
+            'repeat_repair_days' => ['int', max(0, min(3650, (int)($_POST['repeat_repair_days'] ?? 30)))],
+            'repeat_seen_days'   => ['int', max(0, min(3650, (int)($_POST['repeat_seen_days'] ?? 180)))],
             'pdf_engine'        => ['string', in_array($_POST['pdf_engine']??'',['html','mpdf']) ? $_POST['pdf_engine'] : 'html'],
             'pdf_paper_size'    => ['string', in_array($_POST['pdf_paper_size']??'',['A4','A5','Letter']) ? $_POST['pdf_paper_size'] : 'A4'],
         ];

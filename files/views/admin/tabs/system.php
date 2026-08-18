@@ -109,6 +109,23 @@
         </div>
       </div>
 
+      <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;margin-top:1.5rem;"><?= __('settings.repeat') ?></h2>
+
+      <div class="form-grid">
+        <div class="field">
+          <label><?= __('settings.repeat_days') ?></label>
+          <input type="number" name="repeat_repair_days" min="0" max="3650"
+                 value="<?= (int) setting('repeat_repair_days', '30') ?>">
+          <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('settings.repeat_days_hint') ?></p>
+        </div>
+        <div class="field">
+          <label><?= __('settings.seen_days') ?></label>
+          <input type="number" name="repeat_seen_days" min="0" max="3650"
+                 value="<?= (int) setting('repeat_seen_days', '180') ?>">
+          <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('settings.seen_days_hint') ?></p>
+        </div>
+      </div>
+
       <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;margin-top:1.5rem;"><?= __('settings.rma_numbering') ?></h2>
 
       <div class="field" style="max-width:320px;margin-bottom:8px;">
