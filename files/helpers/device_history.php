@@ -257,14 +257,16 @@ function device_repeat_verdict(array $cases): array {
         }
     }
 
-    // The most recent case that actually left is the one the clock runs from.
-    $last = null;
-    foreach ($cases as $c) {
-        if (!empty($c['dispatched_at'])) { $last = $c; break; }
-    }
+    // Only visits the device actually came back from are counted (Rajo,
+    // 2026-08-18): a case still open is the device being here now, not a past
+    // visit, and counting it made a first-time device read "1 put".
+    $completed = array_values(array_filter($cases, fn($c) => !empty($c['dispatched_at'])));
+
+    // The most recent of those is the one the clock runs from.
+    $last = $completed[0] ?? null;
 
     $state = $none;
-    $state['visits'] = count($cases);
+    $state['visits'] = count($completed);
     $state['cases']  = $cases;
     $state['open']   = $open;
 
@@ -278,10 +280,9 @@ function device_repeat_verdict(array $cases): array {
         $long  = repeat_seen_window();
         if ($short > 0 && $days <= $short)     $state['level'] = 'repeat';
         elseif ($long > 0 && $days <= $long)   $state['level'] = 'seen';
-    } elseif ($open) {
-        // Nothing has left, but the device has been here — worth saying.
-        $state['level'] = 'seen';
     }
+    // A device with nothing but an open case gets no grey line: `open` is
+    // reported on its own, and it is a firmer message than "been here before".
 
     return $state;
 }
