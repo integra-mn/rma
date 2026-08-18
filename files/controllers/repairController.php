@@ -561,6 +561,7 @@ class RepairController {
      *   in_progress -> in_diagnosis
      *   on_hold     -> awaiting_parts
      *   completed   -> repaired
+     *   no_fault    -> no_fault
      *
      * Rules:
      *  - Never moves the RMA backward (uses sort_order to compare).
@@ -575,6 +576,10 @@ class RepairController {
             'in_progress' => 'in_diagnosis',
             'on_hold'     => 'awaiting_parts',
             'completed'   => 'repaired',
+            // Without this the case stayed where the technician found it while
+            // the job beneath it was finished — the two disagreed, and the
+            // dashboard believed the job.
+            'no_fault_found' => 'no_fault',
         ];
         $target_code = $map[$repair_event] ?? null;
         if (!$target_code) return;

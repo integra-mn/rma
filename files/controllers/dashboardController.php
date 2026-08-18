@@ -35,22 +35,22 @@ class DashboardController {
             // in a terminal status while the case itself is still open. Same
             // rule as the Servisirano — ceka preuzimanje list further down, so
             // the card and the list can never disagree.
-            'for_pickup'   => db_val("SELECT COUNT(*) FROM (
-                                        SELECT r.id
-                                          FROM rma_requests r
-                                          JOIN rma_statuses rs ON rs.id = r.status_id
-                                          JOIN repair_jobs j ON j.rma_id = r.id AND j.deleted_at IS NULL
-                                          JOIN repair_statuses js ON js.id = j.status_id
-                                         WHERE r.deleted_at IS NULL AND rs.is_terminal = 0
-                                           -- A device that has gone is not waiting to be
-                                           -- collected. Otpremljeno is not a terminal status —
-                                           -- the case stays open until it is closed — so
-                                           -- is_terminal alone left dispatched devices here.
-                                           AND r.dispatched_at IS NULL
-                                           AND rs.code <> 'dispatched'{$fr}
-                                         GROUP BY r.id
-                                        HAVING SUM(CASE WHEN js.is_terminal = 0 THEN 1 ELSE 0 END) = 0
-                                      ) ready"),
+            // Asked of the case, not of the repair jobs beneath it. Counting
+            // jobs answered "has the workshop nothing left to do", which is not
+            // the same question: a case whose only job was closed as Nema kvara
+            // or Otkazano has no unfinished work either, and 52169 duly showed
+            // up here while its status still read Na dijagnostici.
+            //
+            // The three codes are the outcomes that mean the device is finished
+            // with and still on the shelf. Nepopravljivo is terminal — the case
+            // is over — but the device must still go back to its owner, so it
+            // belongs on this list. dispatched_at is what says it has left.
+            'for_pickup'   => db_val("SELECT COUNT(*)
+                                        FROM rma_requests r
+                                        JOIN rma_statuses rs ON rs.id = r.status_id
+                                       WHERE r.deleted_at IS NULL
+                                         AND r.dispatched_at IS NULL
+                                         AND rs.code IN ('repaired', 'no_fault', 'unrepairable'){$fr}"),
             'sla_breached' => db_val("SELECT COUNT(*) FROM rma_requests
                                       WHERE sla_breached = 1 AND deleted_at IS NULL{$fp}"),
             'pending_invoices' => db_val("SELECT COUNT(*) FROM invoices
@@ -75,9 +75,13 @@ class DashboardController {
             LIMIT 10
         ");
 
-        // Repaired — Waiting Pickup. RMA is still alive, but every repair
-        // job on it is already in a terminal status (work done; case open
-        // pending pickup / invoice / delivery).
+        // Devices the workshop has finished with that are still here: repaired,
+        // found fault-free, or beyond repair. Same rule as the card above —
+        // read the case, not the jobs.
+        //
+        // The job join stays only to date the row (a device with no job at all,
+        // marked Nepopravljivo at the counter, keeps a LEFT JOIN and falls back
+        // to when the case was raised).
         $waiting_pickup = db_rows("
             SELECT r.id, r.rma_number, r.created_at,
                    c.name AS customer_name,
@@ -86,16 +90,13 @@ class DashboardController {
                    DATEDIFF(NOW(), r.created_at) AS days_open
             FROM rma_requests r
             JOIN rma_statuses rs ON rs.id = r.status_id
-            JOIN repair_jobs  j  ON j.rma_id = r.id AND j.deleted_at IS NULL
-            JOIN repair_statuses js ON js.id = j.status_id
+            LEFT JOIN repair_jobs j ON j.rma_id = r.id AND j.deleted_at IS NULL
             LEFT JOIN customers c ON c.id = r.customer_id
-            WHERE r.deleted_at IS NULL AND rs.is_terminal = 0
-              -- See the card above: dispatched devices have left the building.
+            WHERE r.deleted_at IS NULL
               AND r.dispatched_at IS NULL
-              AND rs.code <> 'dispatched'{$fr}
+              AND rs.code IN ('repaired', 'no_fault', 'unrepairable'){$fr}
             GROUP BY r.id, c.name, rs.code, rs.label, rs.color
-            HAVING SUM(CASE WHEN js.is_terminal = 0 THEN 1 ELSE 0 END) = 0
-            ORDER BY last_completed_at DESC
+            ORDER BY COALESCE(MAX(j.completed_at), r.created_at) DESC
             LIMIT 10
         ");
 
