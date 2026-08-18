@@ -7,9 +7,8 @@
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <p style="font-size:13px;color:var(--text-muted);margin:0;"><?= __('label.created') ?> <?= format_datetime($job['created_at']) ?><?= ($job['location_name'] ?? null) ? ' &nbsp;&middot;&nbsp; '.htmlspecialchars($job['location_name']) : '' ?></p>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-          <span class="badge" style="<?= ($job['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;' : (($job['status_code'] ?? '') === 'completed' ? 'background:var(--accent-bg);color:var(--accent-text);' : 'background:'.htmlspecialchars($job['status_color']).'22;color:'.htmlspecialchars($job['status_color']).';') ?>">
-            <?= status_label((string)($job['status_code'] ?? ''), $job['status_label']) ?>
-          </span>
+          <?php // One line — see the RMA header: the whitespace would render. ?>
+          <span class="badge" style="<?= ($job['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;' : (($job['status_code'] ?? '') === 'completed' ? 'background:var(--accent-bg);color:var(--accent-text);' : 'background:'.htmlspecialchars($job['status_color']).'22;color:'.htmlspecialchars($job['status_color']).';') ?>"><?= status_label((string)($job['status_code'] ?? ''), $job['status_label']) ?></span>
           <?php
             // Three states, not two. This header asked is_warranty and nothing
             // else, so a device whose period had simply expired was labelled

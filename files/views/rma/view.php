@@ -12,9 +12,11 @@
         <?php if ($rma['location_name'] ?? null): ?>&nbsp;&middot;&nbsp;<?= htmlspecialchars($rma['location_name']) ?><?php endif; ?>
       </p>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-          <span class="badge" style="<?= ($rma['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;' : 'background:'.htmlspecialchars($rma['status_color']).'22;color:'.htmlspecialchars($rma['status_color']).';' ?>">
-            <?= status_label((string)($rma['status_code'] ?? ''), $rma['status_label']) ?>
-          </span>
+          <?php // On one line on purpose: a newline inside an inline-block
+                // renders as a space, so a pill written across three lines is
+                // wider than its padding and does not match the flat pills
+                // beside it. ?>
+          <span class="badge" style="<?= ($rma['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;' : 'background:'.htmlspecialchars($rma['status_color']).'22;color:'.htmlspecialchars($rma['status_color']).';' ?>"><?= status_label((string)($rma['status_code'] ?? ''), $rma['status_label']) ?></span>
           <?php if ($rma['is_warranty']): ?>
             <span class="badge" style="background:#e1f5ee;color:#085041;"><?= __('rma.warranty') ?></span>
           <?php else: ?>
