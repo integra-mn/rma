@@ -155,6 +155,92 @@ defined('RMS') or die('Direct access not permitted');
       </div>
     </div>
 
+    <!-- Section: Insurance -->
+    <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:500;color:#5f5e5a;">
+        <input type="checkbox" name="is_insured" id="is-insured" value="1" style="width:auto;height:auto;"
+               onchange="toggleInsurance()">
+        <?= __('ins.case_insured') ?>
+      </label>
+
+      <!-- Nothing below is asked of the vast majority of cases, so it stays out
+           of the way until the tick says otherwise. -->
+      <div id="insurance-section" style="display:none;margin-top:1.25rem;">
+
+        <!-- Filled by the device lookup when this handset already carries a
+             policy: the second visit should need no typing at all. -->
+        <div id="policy-known" style="display:none;background:#e1f5ee;border:0.5px solid #5dcaa5;color:#085041;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:1rem;"></div>
+
+        <div id="policy-entry">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div>
+              <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.insurer') ?></label>
+              <select name="insurer_id" id="ins-insurer" class="custom-select">
+                <option value=""><?= __('ins.select_insurer') ?></option>
+                <?php foreach ($insurers as $i): ?>
+                  <option value="<?= (int)$i['id'] ?>"><?= htmlspecialchars($i['name']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.policy_number') ?></label>
+              <input type="text" name="policy_number" id="ins-policy-no" style="width:100%;">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.participation') ?></label>
+              <input type="number" name="participation_pct" id="ins-participation" min="0" max="100" step="0.01" value="10" style="width:100%;">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div>
+              <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.policy_from') ?></label>
+              <input type="text" class="datefield" data-name="policy_starts_on" style="width:100%;">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.policy_to') ?></label>
+              <input type="text" class="datefield" data-name="policy_ends_on" style="width:100%;">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.claims_allowed') ?></label>
+              <input type="number" name="claims_allowed" id="ins-allowed" min="0" max="99" value="1" style="width:100%;">
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:6px;"><?= __('ins.covers') ?></label>
+            <div style="display:flex;flex-wrap:wrap;gap:14px;">
+              <?php foreach ($coverage_items as $c): ?>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;">
+                  <input type="checkbox" name="coverage[]" value="<?= htmlspecialchars($c['code']) ?>" style="width:auto;height:auto;">
+                  <?= htmlspecialchars(coverage_label($c)) ?>
+                </label>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        </div>
+
+        <!-- Asked whether the policy is new or already known: they belong to the
+             damage, not to the policy. The incident date decides which policy
+             applies and whether the reporting window has run out. -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.incident_date') ?> *</label>
+            <input type="text" class="datefield" data-name="incident_date" style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.damage') ?> *</label>
+            <select name="damage_code" id="ins-damage" class="custom-select">
+              <option value=""><?= __('ins.select_damage') ?></option>
+              <?php foreach ($coverage_items as $c): ?>
+                <option value="<?= htmlspecialchars($c['code']) ?>"><?= htmlspecialchars(coverage_label($c)) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Section: Accessories -->
     <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
       <h2 style="font-size:14px;font-weight:500;color:#5f5e5a;margin-bottom:1rem;"><?= __('rma.accessories_with_device') ?></h2>
@@ -570,7 +656,41 @@ function lockSubmit(form) {
   return true;
 }
 
+function toggleInsurance() {
+  const on = document.getElementById('is-insured').checked;
+  document.getElementById('insurance-section').style.display = on ? 'block' : 'none';
+}
+
+// A handset that already carries a policy needs none of it typed again: the
+// device lookup returns what is on file and the entry fields fold away.
+function showPolicy(policy) {
+  const known = document.getElementById('policy-known');
+  const entry = document.getElementById('policy-entry');
+  if (!policy) {
+    known.style.display = 'none';
+    entry.style.display = '';
+    return;
+  }
+  known.innerHTML = '<strong>' + POLICY_KNOWN
+      .replace(':number', policy.policy_number)
+      .replace(':insurer', policy.insurer_name)
+      .replace(':to', policy.ends_on) + '</strong>';
+  known.style.display = 'block';
+  entry.style.display = 'none';
+  // Tick the box for them — a device arriving with a policy on file is an
+  // insurance case whether or not anyone remembered to say so.
+  const box = document.getElementById('is-insured');
+  if (!box.checked) { box.checked = true; toggleInsurance(); }
+}
+
 function validateRmaForm() {
+  if (document.getElementById('is-insured').checked) {
+    const incident = (document.querySelector('input[type=hidden][name="incident_date"]') || {}).value || '';
+    if (!incident || !document.getElementById('ins-damage').value) {
+      appAlert(INS_REQUIRED);
+      return false;
+    }
+  }
   if (deviceBlocked) {
     appAlert(BLOCKED_TEXT.replace(':rma', deviceBlocked.rma).replace(':status', deviceBlocked.status));
     return false;
@@ -634,10 +754,12 @@ function checkDeviceMatch() {
           document.getElementById('device-match-notice').style.display = 'block';
           document.getElementById('device-match-notice').dataset.deviceId = data.id;
           showRepeat(data.repeat, data.blocked);
+          showPolicy(data.policy || null);
         } else {
           document.getElementById('device-match-notice').style.display = 'none';
           document.getElementById('device-id-input').value = '';
           showRepeat(null, null);
+          showPolicy(null);
         }
       });
   }, 400);
@@ -647,6 +769,8 @@ function checkDeviceMatch() {
 // before, and firmer still when a case for it is open right now — that last one
 // is usually a second case for a device already on the shelf.
 const BLOCKED_TEXT = <?= json_encode(__('rma.device_already_open')) ?>;
+const POLICY_KNOWN = <?= json_encode(__('ins.policy_on_file')) ?>;
+const INS_REQUIRED = <?= json_encode(__('ins.incident_required')) ?>;
 const REPEAT_TEXT = {
   repeat: <?= json_encode(__('rma.repeat_warning')) ?>,
   today:  <?= json_encode(__('rma.repeat_warning_today')) ?>,

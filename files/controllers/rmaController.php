@@ -125,6 +125,12 @@ class RmaController {
         $locations  = db_rows('SELECT * FROM locations WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
         $statuses   = db_rows("SELECT * FROM rma_statuses WHERE is_terminal = 0 ORDER BY sort_order");
 
+        // Insurance. The counter is where a policy is first seen — Integra does
+        // not sell the cover, so nothing exists until the paper arrives with the
+        // device — and where it is checked on every visit after that.
+        $insurers       = db_rows('SELECT id, name FROM insurers WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
+        $coverage_items = db_rows('SELECT * FROM insurance_coverage_items WHERE is_active = 1 ORDER BY sort_order, label');
+
         $user       = current_user();
         $error      = $_SESSION['form_error'] ?? null;
         unset($_SESSION['form_error']);
@@ -312,6 +318,71 @@ class RmaController {
                                         ? date('Y-m-d', strtotime("+{$days} days"))
                                         : null),
         ]);
+
+        // ── Insurance ────────────────────────────────────────────
+        //
+        // A policy is born here. Integra never sees one until a device arrives
+        // carrying it, so there is nothing to look up in advance — but once
+        // recorded it answers by itself every time that handset comes back.
+        if (!empty($_POST['is_insured'])) {
+            $ins_ident   = $submitted_imei ?: $submitted_serial;
+            $incident    = $this->parse_date($_POST['incident_date'] ?? '');
+            $damage_code = trim($_POST['damage_code'] ?? '') ?: null;
+
+            // An existing policy for this handset wins over anything typed: the
+            // second visit should need no typing, and two rows for one policy
+            // would split its allowance in half.
+            $policy = $ins_ident !== '' ? policy_for_device($ins_ident, $incident) : null;
+
+            if (!$policy && trim($_POST['policy_number'] ?? '') !== '' && (int)($_POST['insurer_id'] ?? 0)) {
+                $starts = $this->parse_date($_POST['policy_starts_on'] ?? '');
+                $ends   = $this->parse_date($_POST['policy_ends_on'] ?? '');
+                if ($starts && $ends) {
+                    $policy_id = db_insert('insurance_policies', [
+                        'insurer_id'        => (int)$_POST['insurer_id'],
+                        'policy_number'     => trim($_POST['policy_number']),
+                        'customer_id'       => $customer_id ?: null,
+                        'partner_id'        => $partner_id ?: null,
+                        'device_id'         => $device_id ?: null,
+                        'imei'              => $submitted_imei ?: null,
+                        'serial_number'     => $submitted_serial ?: null,
+                        'starts_on'         => $starts,
+                        'ends_on'           => $ends,
+                        // Coverage is a list of ticks, because Full and Limited
+                        // are names people use rather than rules.
+                        'coverage'          => implode(',', array_map('trim', (array)($_POST['coverage'] ?? []))) ?: null,
+                        'participation_pct' => max(0, min(100, (float)($_POST['participation_pct'] ?? 0))),
+                        'claims_allowed'    => max(0, min(99, (int)($_POST['claims_allowed'] ?? 1))),
+                    ]);
+                    audit('created', 'insurance_policy', $policy_id);
+                    $policy = db_row('SELECT * FROM insurance_policies WHERE id = ?', [$policy_id]);
+                }
+            }
+
+            db_update('rma_requests', [
+                'incident_date' => $incident,
+                'damage_code'   => $damage_code,
+                'policy_id'     => $policy['id'] ?? null,
+            ], 'id = ?', [$rma_id]);
+
+            // The case is itself the claim against that policy. It starts as
+            // 'new' — recorded, not yet reported to the insurer — and the
+            // reporting queue picks it up from there.
+            if ($policy) {
+                $claim_id = db_insert('insurance_claims', [
+                    'policy_id'     => (int)$policy['id'],
+                    'rma_id'        => $rma_id,
+                    'status'        => 'new',
+                    'damage_code'   => $damage_code,
+                    'incident_date' => $incident,
+                    // Only when the insurer has told us their window; 0 means
+                    // nobody has asked, and an invented deadline is worse than
+                    // none.
+                    'report_due_at' => $this->claim_due_at($policy, $incident),
+                ]);
+                audit('created', 'insurance_claim', $claim_id);
+            }
+        }
 
         // Tracking token. 64 hex characters was 94 characters of URL in a text
         // message, on its own enough to push every SMS into a second segment.
@@ -973,6 +1044,16 @@ class RmaController {
             'rma'    => $blocking['rma_number'],
             'status' => status_label((string)$blocking['status_code'], (string)$blocking['status_label']),
         ] : null;
+        // A policy already on file for this handset. The counter should type
+        // none of it a second time — and a device arriving with cover is an
+        // insurance case whether or not anyone remembered to tick the box.
+        $known = policy_for_device($param);
+        $device['policy'] = $known ? [
+            'policy_number' => $known['policy_number'],
+            'insurer_name'  => $known['insurer_name'],
+            'ends_on'       => format_date($known['ends_on']),
+        ] : null;
+
         $device['repeat'] = [
             'level'  => $state['level'],
             'visits' => $state['visits'],
@@ -988,7 +1069,17 @@ class RmaController {
 
     // ── Helpers ───────────────────────────────────────────────
 
-    // ── Helpers ───────────────────────────────────────────────
+    /**
+     * When a claim must be reported by, or null while the insurer's window is
+     * unknown. Counted from the incident, which is the date every insurer
+     * measures from and the one thing the counter must ask for.
+     */
+    private function claim_due_at(array $policy, ?string $incident): ?string {
+        $hours = (int) db_val('SELECT report_hours FROM insurers WHERE id = ?', [(int)$policy['insurer_id']]);
+        if ($hours <= 0 || !$incident) return null;
+        return date('Y-m-d H:i:s', strtotime($incident) + $hours * 3600);
+    }
+
 
     private function parse_date(string $val): ?string {
         $val = trim($val);

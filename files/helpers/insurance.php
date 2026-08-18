@@ -18,6 +18,15 @@ defined('RMS') or die('Direct access not permitted');
  * Reasoning in files/docs/OSIGURANJE.md. Nothing here talks to an insurer.
  */
 
+/** A coverage item's label in the reader's language, as status_label does. */
+function coverage_label(array $item, ?string $lang = null): string {
+    $lang = $lang ?? (current_user()['lang'] ?? setting('default_lang', 'en'));
+    if ($lang === 'me' && trim((string)($item['label_me'] ?? '')) !== '') {
+        return (string)$item['label_me'];
+    }
+    return (string)($item['label'] ?? '');
+}
+
 /** Coverage is stored as comma-separated item codes, like rma_statuses.roles. */
 function insurance_coverage(?string $csv): array {
     if ($csv === null || trim($csv) === '') return [];
