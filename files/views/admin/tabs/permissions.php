@@ -15,6 +15,7 @@ $modules = [
     'devices'        => ['label' => __('nav.devices'),   'actions' => ['view', 'edit']],
     'partners'       => ['label' => __('nav.partners'),  'actions' => ['view', 'edit']],
     'customers'      => ['label' => __('nav.customers'), 'actions' => ['view', 'create', 'edit']],
+    'claims'         => ['label' => __('ins.queue'),     'actions' => ['view', 'edit']],
     'invoicing'      => ['label' => __('nav.invoices'),  'actions' => ['view']],
     'reports'        => ['label' => __('nav.reports'),   'actions' => ['view']],
     // No sidebar section of its own — evidence photos live on the RMA and

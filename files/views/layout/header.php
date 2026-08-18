@@ -205,6 +205,16 @@ function nav_active(string $prefix): string {
   </a>
   <?php endif; ?>
 
+  <?php if (can('claims', 'view')): ?>
+  <a href="/claims" class="sidebar-link<?= nav_active('/claims') ?>">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M8 1.5 2.5 3.5v4c0 3 2.3 5.6 5.5 6.9 3.2-1.3 5.5-3.9 5.5-6.9v-4L8 1.5z"/>
+      <path d="M5.8 7.8 7.3 9.3l3-3.2"/>
+    </svg>
+    <?= __('ins.queue') ?>
+  </a>
+  <?php endif; ?>
+
   <?php if (can('shipments', 'view')): ?>
   <a href="/shipments" class="sidebar-link<?= nav_active('/shipments') ?>">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">

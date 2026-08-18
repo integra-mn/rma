@@ -58,6 +58,10 @@ const PERMISSION_MATRIX = [
     // so it is granted on purpose. How long staff keep that ability is a
     // separate question, answered by the evidence_delete_hours setting.
     'evidence'  => ['delete'],
+    // The claims queue. Its own module because it is one person's work — the
+    // office follows claims, the counter and the bench do not — and because
+    // seeing it means seeing every insured customer's case at once.
+    'claims'    => ['view', 'edit'],
     'invoicing' => ['view'],
     // Administration = Users, Locations, Couriers, Statuses.
     //
@@ -306,6 +310,7 @@ const TECHNICIAN_PERMISSIONS = [
 
 const RECEPTION_PERMISSIONS = [
     'evidence.delete',
+    'claims.view', 'claims.edit',
     'rma.view', 'rma.create', 'rma.edit',
     'repair.view',
     'customers.view', 'customers.create', 'customers.edit',

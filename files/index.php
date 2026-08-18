@@ -88,6 +88,7 @@ $routes = [
         '/reports'                     => 'reports/index',
         '/reports/export'              => 'reports/export',
         '/shipments'                   => 'shipments/index',
+        '/claims'                      => 'claims/index',
         '/devices'                     => 'devices/index',
         '/administration'              => 'admin/index',
         '/settings'                    => 'admin/settings',
