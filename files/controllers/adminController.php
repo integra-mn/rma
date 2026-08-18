@@ -538,6 +538,11 @@ class AdminController {
         } elseif ($tab === 'insurance') {
             $insurers       = db_rows('SELECT * FROM insurers WHERE deleted_at IS NULL ORDER BY name');
             $coverage_items = db_rows('SELECT * FROM insurance_coverage_items ORDER BY sort_order, label');
+            $products       = db_rows('SELECT p.*, i.name AS insurer_name
+                                         FROM insurance_products p
+                                         JOIN insurers i ON i.id = p.insurer_id
+                                        WHERE p.deleted_at IS NULL
+                                        ORDER BY i.name, p.name');
         }
 
         include views_path('layout/header.php');
@@ -689,6 +694,52 @@ class AdminController {
         db_update('insurers', $data, 'id = ?', [$id]);
         audit('updated', 'insurer', $id);
         $_SESSION['flash'] = ['type' => 'success', 'message' => __('ins.insurer_saved')];
+        header('Location: /administration?tab=insurance'); exit;
+    }
+
+    /**
+     * A product is only a template — picking one fills a policy in and is never
+     * consulted again, because the policy carries its own terms. It exists so
+     * the counter types a policy number and two dates rather than everything.
+     */
+    private function product_data(): array {
+        return [
+            'insurer_id'        => (int)($_POST['insurer_id'] ?? 0),
+            'name'              => trim($_POST['name'] ?? ''),
+            'coverage'          => implode(',', array_map('trim', (array)($_POST['coverage'] ?? []))) ?: null,
+            'participation_pct' => max(0, min(100, (float)($_POST['participation_pct'] ?? 0))),
+            'claims_allowed'    => max(0, min(99, (int)($_POST['claims_allowed'] ?? 1))),
+        ];
+    }
+
+    public function product_store(): void {
+        require_login();
+        require_permission('administration', 'create');
+        $data = $this->product_data();
+        if (!$data['insurer_id'] || $data['name'] === '') {
+            $_SESSION['flash'] = ['type' => 'danger', 'message' => __('ins.product_required')];
+            header('Location: /administration?tab=insurance'); exit;
+        }
+        $id = db_insert('insurance_products', $data);
+        audit('created', 'insurance_product', $id);
+        $_SESSION['flash'] = ['type' => 'success', 'message' => __('ins.product_saved')];
+        header('Location: /administration?tab=insurance'); exit;
+    }
+
+    public function product_update(): void {
+        require_login();
+        require_permission('administration', 'edit');
+        $id   = (int)($_POST['id'] ?? 0);
+        $data = $this->product_data();
+        if (!$id || !$data['insurer_id'] || $data['name'] === '') {
+            $_SESSION['flash'] = ['type' => 'danger', 'message' => __('ins.product_required')];
+            header('Location: /administration?tab=insurance'); exit;
+        }
+        // Policies already written keep what they were given: a product is a
+        // starting point, not a rule, so editing one never reaches back.
+        db_update('insurance_products', $data, 'id = ?', [$id]);
+        audit('updated', 'insurance_product', $id);
+        $_SESSION['flash'] = ['type' => 'success', 'message' => __('ins.product_saved')];
         header('Location: /administration?tab=insurance'); exit;
     }
 

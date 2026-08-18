@@ -172,6 +172,28 @@ defined('RMS') or die('Direct access not permitted');
         <div id="policy-known" style="display:none;background:#e1f5ee;border:0.5px solid #5dcaa5;color:#085041;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:1rem;"></div>
 
         <div id="policy-entry">
+          <?php if ($ins_products): ?>
+            <!-- Typing a whole policy while a customer waits is the difference
+                 between a form people use and one they resent. Picking the
+                 product fills the insurer, the cover, the participation and the
+                 allowance; what is left is the number and two dates. -->
+            <div style="margin-bottom:12px;">
+              <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.product_pick') ?></label>
+              <select id="ins-product" class="custom-select" onchange="fillFromProduct()" style="max-width:320px;">
+                <option value=""><?= __('ins.product_none') ?></option>
+                <?php foreach ($ins_products as $pr): ?>
+                  <option value="<?= (int)$pr['id'] ?>"
+                          data-insurer="<?= (int)$pr['insurer_id'] ?>"
+                          data-coverage="<?= htmlspecialchars($pr['coverage'] ?? '') ?>"
+                          data-part="<?= htmlspecialchars((string)$pr['participation_pct']) ?>"
+                          data-allowed="<?= (int)$pr['claims_allowed'] ?>">
+                    <?= htmlspecialchars($pr['insurer_name'] . ' — ' . $pr['name']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          <?php endif; ?>
+
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
             <div>
               <label style="display:block;font-size:12px;color:#5f5e5a;margin-bottom:3px;"><?= __('ins.insurer') ?></label>
@@ -654,6 +676,25 @@ function lockSubmit(form) {
   var btn = form.querySelector('button[type=submit]');
   if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
   return true;
+}
+
+// Fills what the product knows and leaves the rest alone. The policy still
+// carries its own terms afterwards — the product is a starting point, so
+// anything typed over the top is what gets stored.
+function fillFromProduct() {
+  const sel = document.getElementById('ins-product');
+  if (!sel) return;
+  const o = sel.selectedOptions[0];
+  if (!o || !o.value) return;
+
+  document.getElementById('ins-insurer').value       = o.dataset.insurer || '';
+  document.getElementById('ins-participation').value = o.dataset.part || '0';
+  document.getElementById('ins-allowed').value       = o.dataset.allowed || '1';
+
+  const covers = (o.dataset.coverage || '').split(',').map(c => c.trim()).filter(Boolean);
+  document.querySelectorAll('input[name="coverage[]"]').forEach(cb => {
+    cb.checked = covers.includes(cb.value);
+  });
 }
 
 function toggleInsurance() {

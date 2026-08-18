@@ -130,6 +130,11 @@ class RmaController {
         // device — and where it is checked on every visit after that.
         $insurers       = db_rows('SELECT id, name FROM insurers WHERE deleted_at IS NULL AND is_active = 1 ORDER BY name');
         $coverage_items = db_rows('SELECT * FROM insurance_coverage_items WHERE is_active = 1 ORDER BY sort_order, label');
+        $ins_products   = db_rows('SELECT p.*, i.name AS insurer_name
+                                     FROM insurance_products p
+                                     JOIN insurers i ON i.id = p.insurer_id
+                                    WHERE p.deleted_at IS NULL AND p.is_active = 1
+                                    ORDER BY i.name, p.name');
 
         $user       = current_user();
         $error      = $_SESSION['form_error'] ?? null;
