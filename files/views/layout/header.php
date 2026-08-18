@@ -157,11 +157,14 @@ function nav_active(string $prefix): string {
   <?php if ($role === 'partner'): ?>
     <!-- Partner portal sidebar — only portal routes visible. -->
     <a href="/portal" class="sidebar-link<?= $uri === '/portal' ? ' active' : '' ?>" style="margin-top:7px;">
+      <?php // Inset 2 -> 14, so the portal's Pregled is drawn exactly like the
+            // staff one. Same concept, same picture — the portal is this app
+            // wearing a different hat, not a different app. ?>
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="1" y="1" width="6" height="6" rx="1"/>
-        <rect x="9" y="1" width="6" height="6" rx="1"/>
-        <rect x="1" y="9" width="6" height="6" rx="1"/>
-        <rect x="9" y="9" width="6" height="6" rx="1"/>
+        <rect x="2" y="2" width="5" height="5" rx="1"/>
+        <rect x="9" y="2" width="5" height="5" rx="1"/>
+        <rect x="2" y="9" width="5" height="5" rx="1"/>
+        <rect x="9" y="9" width="5" height="5" rx="1"/>
       </svg>
       <?= __('nav.dashboard') ?>
     </a>
