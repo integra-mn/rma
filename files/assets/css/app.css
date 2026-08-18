@@ -171,7 +171,7 @@ body.theme-focus {
   border-left: 5px solid var(--accent);
   border-radius: 0;
 }
-.sidebar-link svg { width: 24px; height: 24px; flex-shrink: 0; opacity: 0.7; }
+.sidebar-link svg { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.7; }
 .sidebar-link.active svg, .sidebar-link:hover svg { opacity: 1; }
 .sidebar-footer {
   margin-top: auto;
