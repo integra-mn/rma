@@ -310,9 +310,14 @@ function nav_active(string $prefix): string {
     <?php // Bars on a baseline. The frame this replaces ran 1 -> 15 and read as
           // a filled square before it read as a chart — one of the last two
           // icons touching the edges of its box. ?>
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-      <path d="M2.5 13.5h11"/>
-      <path d="M5 13.5V9M8 13.5V4.5M11 13.5V7"/>
+    <?php // A board on a stand with a rising line: a report being shown to
+          // somebody, rather than a chart floating on its own. The screen is
+          // 8 units deep, so it stays lighter than the full-bleed frame this
+          // section carried before today. ?>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2.5" width="12" height="8" rx="1"/>
+      <path d="M8 10.5v3M5.5 13.5h5"/>
+      <path d="M4.8 8 7 5.9l1.6 1.5L11.2 4.7"/>
     </svg>
     <?= __('nav.reports') ?>
   </a>
