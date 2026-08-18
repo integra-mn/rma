@@ -319,10 +319,20 @@ class RepairController {
         }
 
         if ($action === 'details') {
-            $data = [
-                'description' => trim($_POST['description'] ?? ''),
-                'resolution'  => trim($_POST['resolution'] ?? ''),
-            ];
+            // Only what was actually sent. Two cards on this page post
+            // action=details: the notes card carries the text, and the Trenutni
+            // status card carries only a status. Reading the text from POST
+            // regardless meant every status change wrote empty strings over
+            // Opis - Nalaz and Rjesenje - Preduzete radnje — the technician's
+            // work, gone on the next status change. Same fault the RMA details
+            // card had, in a second place.
+            $data = [];
+            if (array_key_exists('description', $_POST)) {
+                $data['description'] = trim((string)$_POST['description']);
+            }
+            if (array_key_exists('resolution', $_POST)) {
+                $data['resolution'] = trim((string)$_POST['resolution']);
+            }
 
             // Also update status if provided
             $status_id = (int)($_POST['status_id'] ?? 0);
@@ -339,8 +349,10 @@ class RepairController {
                 $new_code = $st['code'] ?? null;
             }
 
-            db_update('repair_jobs', $data, 'id = ?', [(int)$id]);
-            audit_change('repair_job', (int)$id, $job, $data);
+            if ($data) {
+                db_update('repair_jobs', $data, 'id = ?', [(int)$id]);
+                audit_change('repair_job', (int)$id, $job, $data);
+            }
             if ($new_code) {
                 $this->sync_rma_from_repair((int)$job['rma_id'], $new_code);
             }
