@@ -198,6 +198,16 @@ class RmaController {
             exit;
         }
 
+        // Both dates are required (Rajo, 2026-08-18). They are what warranty is
+        // argued from later — is_warranty is a judgement, these two are the
+        // evidence — and neither can be recovered once the customer has gone.
+        if (!$this->parse_date($_POST['purchase_date'] ?? '')
+            || !$this->parse_date($_POST['warranty_expiry'] ?? '')) {
+            $_SESSION['form_error'] = __('rma.dates_required');
+            header('Location: /rma/create');
+            exit;
+        }
+
         // Device: use existing or create new
         $device_id = null;
         if ($existing_device_id) {
@@ -320,6 +330,7 @@ class RmaController {
                               dm.name as model_name, db2.name as brand_name,
                               d.serial_number, d.imei, d.color as device_color,
                               d.purchase_date, d.warranty_expiry,
+                              d.model_id, dm.brand_id,
                               t.token as tracking_token
                        FROM rma_requests r
                        JOIN rma_statuses s ON s.id = r.status_id
@@ -399,6 +410,11 @@ class RmaController {
             : ['level' => 'none', 'visits' => 0, 'days' => null, 'case' => null, 'open' => null];
 
         $technicians = db_rows("SELECT id, name FROM users WHERE role = 'technician' AND is_active = 1 ORDER BY name");
+
+        // For the identity modal: correcting the device the case was opened
+        // against, not just the numbers written on it.
+        $brands = db_rows('SELECT id, name FROM device_brands WHERE is_active = 1 ORDER BY name');
+        $models = db_rows('SELECT id, brand_id, name FROM device_models WHERE is_active = 1 ORDER BY name');
 
         // Logistics: shipments for this RMA + couriers for the add/edit forms.
         $shipments = db_rows("SELECT sh.*, c.name AS courier_name, c.tracking_url AS courier_tracking_url
@@ -517,13 +533,35 @@ class RmaController {
             if ($rma['device_id']) {
                 $sn   = trim($_POST['serial_number'] ?? '');
                 $imei = trim($_POST['imei'] ?? '');
-                $old  = db_row('SELECT serial_number, imei FROM devices WHERE id = ?',
-                               [(int)$rma['device_id']]);
+                $old  = db_row('SELECT serial_number, imei, model_id, purchase_date, warranty_expiry
+                                  FROM devices WHERE id = ?', [(int)$rma['device_id']]);
                 // Empty clears the field — a number typed onto the wrong device
                 // has to be removable, not just correctable.
                 $new = ['serial_number' => $sn ?: null, 'imei' => $imei ?: null];
-                if ($old && ($old['serial_number'] !== $new['serial_number']
-                          || $old['imei'] !== $new['imei'])) {
+
+                // The wrong model can be picked at the counter as easily as the
+                // wrong number, and it decides which repairs the device shows up
+                // in later. Blank leaves it alone rather than unsetting it: a
+                // case must always name a model.
+                if (!empty($_POST['model_id'])) {
+                    $new['model_id'] = (int)$_POST['model_id'];
+                }
+
+                // The two dates warranty is argued from. Required at intake and
+                // correctable here — a receipt often turns up afterwards — but
+                // an empty box leaves the stored date alone rather than wiping
+                // it: intake will not accept a case without them, so clearing
+                // one afterwards could only ever be an accident.
+                foreach (['purchase_date', 'warranty_expiry'] as $df) {
+                    $parsed = $this->parse_date($_POST[$df] ?? '');
+                    if ($parsed) $new[$df] = $parsed;
+                }
+
+                $changed = false;
+                foreach ($new as $k => $v) {
+                    if ((string)($old[$k] ?? '') !== (string)($v ?? '')) { $changed = true; break; }
+                }
+                if ($old && $changed) {
                     db_update('devices', $new, 'id = ?', [(int)$rma['device_id']]);
                     audit_change('device', (int)$rma['device_id'], $old, $new);
                 }

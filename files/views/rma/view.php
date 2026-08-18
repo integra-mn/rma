@@ -430,16 +430,12 @@
         <label><?= __('rma.identity_customer') ?></label>
         <input type="text" name="customer_name" value="<?= htmlspecialchars($rma['customer_name'] ?? '') ?>"
                <?= $rma['customer_id'] ? '' : 'disabled' ?>>
-        <!-- Said out loud, because it is not obvious: this is the customer
-             record, not a label on this RMA. -->
-        <p style="font-size:11px;color:var(--text-muted);margin-top:4px;"><?= __('rma.identity_customer_hint') ?></p>
       </div>
       <div class="field">
         <label><?= __('label.phone') ?></label>
         <!-- Same country-code + number control as the intake form, so a number
              corrected here is stored in exactly the shape one typed there. -->
         <?= phone_input('customer_phone', $rma['customer_phone'] ?? '') ?>
-        <p style="font-size:11px;color:var(--text-muted);margin-top:4px;"><?= __('rma.identity_phone_hint') ?></p>
       </div>
       <div class="field">
         <label><?= __('rma.sn') ?></label>
@@ -451,6 +447,48 @@
         <input type="text" name="imei" value="<?= htmlspecialchars($rma['imei'] ?? '') ?>"
                <?= $rma['device_id'] ? '' : 'disabled' ?>>
       </div>
+
+      <?php // The device itself, not only the numbers on it: the wrong model can
+            // be picked at the counter as easily as a wrong digit, and the two
+            // dates are what warranty is argued from later. ?>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field">
+          <label><?= __('rma.brand') ?></label>
+          <select name="brand_id" id="f-brand" class="custom-select" onchange="filterIdentityModels()"
+                  <?= $rma['device_id'] ? '' : 'disabled' ?>>
+            <option value=""><?= __('rma.select_brand') ?></option>
+            <?php foreach ($brands as $b): ?>
+              <option value="<?= (int)$b['id'] ?>" <?= (int)($rma['brand_id'] ?? 0) === (int)$b['id'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($b['name']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label><?= __('rma.model') ?></label>
+          <select name="model_id" id="f-model" class="custom-select" <?= $rma['device_id'] ? '' : 'disabled' ?>>
+            <?php foreach ($models as $m): ?>
+              <option value="<?= (int)$m['id'] ?>" data-brand="<?= (int)$m['brand_id'] ?>"
+                      <?= (int)($rma['model_id'] ?? 0) === (int)$m['id'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($m['name']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field">
+          <label><?= __('rma.purchase_date') ?></label>
+          <input type="text" class="datefield" data-name="purchase_date"
+                 data-value="<?= htmlspecialchars((string)($rma['purchase_date'] ?? '')) ?>" style="width:100%;">
+        </div>
+        <div class="field">
+          <label><?= __('rma.warranty_expiry') ?></label>
+          <input type="text" class="datefield" data-name="warranty_expiry"
+                 data-value="<?= htmlspecialchars((string)($rma['warranty_expiry'] ?? '')) ?>" style="width:100%;">
+        </div>
+      </div>
     </form>
     <div class="modal-actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;">
       <button type="button" class="btn" onclick="document.getElementById('identity-modal').style.display='none'"><?= __('btn.cancel') ?></button>
@@ -459,12 +497,33 @@
   </div>
 </div>
 <script>
+// Only this brand's models, so a correction cannot pair a Samsung case with an
+// Apple model. Runs on open as well as on change, since the case may already be
+// on a brand with few models.
+function filterIdentityModels() {
+  var brand = document.getElementById('f-brand');
+  var model = document.getElementById('f-model');
+  if (!brand || !model) return;
+  var want = brand.value;
+  var firstVisible = null;
+  Array.prototype.forEach.call(model.options, function (o) {
+    var show = !want || o.dataset.brand === want;
+    o.hidden   = !show;
+    o.disabled = !show;
+    if (show && firstVisible === null) firstVisible = o;
+  });
+  if (model.selectedOptions.length && model.selectedOptions[0].hidden && firstVisible) {
+    firstVisible.selected = true;
+  }
+}
+
 (function () {
   var btn = document.getElementById('identity-edit-btn');
   var box = document.getElementById('identity-modal');
   if (!btn || !box) return;
   btn.addEventListener('click', function () {
     box.style.display = 'flex';
+    filterIdentityModels();
     var first = box.querySelector('input:not([type=hidden]):not([disabled])');
     if (first) first.focus();
   });

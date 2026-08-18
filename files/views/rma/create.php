@@ -581,6 +581,15 @@ function validateRmaForm() {
     document.getElementById('btn-warranty-yes').scrollIntoView({behavior:'smooth', block:'center'});
     return false;
   }
+  // The datefield writes into a hidden input of the same name; that is what the
+  // server reads, so that is what is checked.
+  const dateOf = n => (document.querySelector('input[type=hidden][name="' + n + '"]') || {}).value || '';
+  if (!dateOf('purchase_date') || !dateOf('warranty_expiry')) {
+    appAlert(<?= json_encode(__('rma.dates_required')) ?>);
+    const f = document.querySelector('input.datefield[data-name="purchase_date"]');
+    if (f) { f.scrollIntoView({behavior:'smooth', block:'center'}); f.focus(); }
+    return false;
+  }
   return true;
 }
 
