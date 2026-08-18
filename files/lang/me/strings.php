@@ -25,6 +25,7 @@ return [
 
     'nav.dashboard'     => 'Pregled',
     'nav.rma'           => 'Reklamacije',
+    'nav.my_rmas'       => 'Reklamacije',
     'nav.repair'        => 'Servisni nalozi',
     'nav.repairs'       => 'Popravke',
     'nav.parts'         => 'Dijelovi',

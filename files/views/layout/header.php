@@ -173,7 +173,7 @@ function nav_active(string $prefix): string {
         <rect x="2" y="2" width="12" height="12" rx="2"/>
         <path d="M5 8h6M5 5h6M5 11h4"/>
       </svg>
-      My RMAs
+      <?= __('nav.my_rmas') ?>
     </a>
 
   <?php else: ?>
@@ -225,9 +225,11 @@ function nav_active(string $prefix): string {
   <?php if (can('shipments', 'view')): ?>
   <a href="/shipments" class="sidebar-link<?= nav_active('/shipments') ?>">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M1 4h9v7H1zM10 6h3l2 2v3h-5z"/>
-      <circle cx="4" cy="13" r="1.3"/>
-      <circle cx="12" cy="13" r="1.3"/>
+      <?php // The carton Dijelovi carried until now: a parcel is what this
+            // section moves. The van it replaces was drawn 1 -> 15, wider than
+            // anything else in the menu. ?>
+      <path d="M8 2L14 5.5v5L8 14 2 10.5v-5L8 2z"/>
+      <path d="M8 2v12M2 5.5l6 3.5 6-3.5"/>
     </svg>
     <?= __('nav.shipments') ?>
   </a>
@@ -237,9 +239,11 @@ function nav_active(string $prefix): string {
   <!-- Suppliers is a Parts tab but keeps its own /suppliers URL, so the
        highlight has to cover both or the sidebar goes blank on that tab. -->
   <a href="/parts" class="sidebar-link<?= nav_active('/parts') ?: nav_active('/suppliers') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M8 2L14 5.5v5L8 14 2 10.5v-5L8 2z"/>
-      <path d="M8 2v12M2 5.5l6 3.5 6-3.5"/>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <?php // A component, not a carton — the carton has gone to Posiljke,
+            // where a parcel is the thing being described. ?>
+      <rect x="4.5" y="4.5" width="7" height="7" rx="1"/>
+      <path d="M6.5 2v2.5M9.5 2v2.5M6.5 11.5V14M9.5 11.5V14M2 6.5h2.5M2 9.5h2.5M11.5 6.5H14M11.5 9.5H14"/>
     </svg>
     <?= __('nav.parts') ?>
   </a>
@@ -284,9 +288,12 @@ function nav_active(string $prefix): string {
 
   <?php if (can('invoicing', 'view')): ?>
   <a href="/invoices" class="sidebar-link<?= nav_active('/invoices') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <rect x="3" y="1" width="10" height="14" rx="1.5"/>
-      <path d="M6 5h4M6 8h4M6 11h2"/>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <?php // A clipboard rather than a bare sheet. The old one reached
+            // 1 -> 15, taller than every icon beside it. ?>
+      <rect x="3" y="2.5" width="10" height="11.5" rx="1.5"/>
+      <path d="M6 2.5V4h4V2.5"/>
+      <path d="M5.8 7.5h4.4M5.8 10.5h3"/>
     </svg>
     <?= __('nav.invoices') ?>
   </a>

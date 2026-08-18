@@ -25,6 +25,7 @@ return [
 
     'nav.dashboard'     => 'Home',
     'nav.rma'           => 'RMA',
+    'nav.my_rmas'       => 'My RMAs',
     'nav.repair'        => 'Repair jobs',
     'nav.repairs'       => 'Repairs',
     'nav.parts'         => 'Parts',
