@@ -2,6 +2,14 @@
 define('RMS', true);
 define('ROOT', __DIR__);
 
+// Montenegro, everywhere. PHP does not follow the system clock's zone — it
+// reads date.timezone from php.ini and falls back to UTC when that is unset,
+// which is how every timestamp came to be recorded two hours behind local time.
+// Setting it here rather than in php.ini keeps it with the code, so a rebuilt
+// container cannot quietly go back to UTC. Postgres follows the container's own
+// zone, which is set to the same.
+date_default_timezone_set('Europe/Podgorica');
+
 require_once ROOT . '/config/db.php';
 require_once ROOT . '/config/settings.php';
 require_once ROOT . '/helpers/auth.php';
