@@ -24,8 +24,16 @@
             <?php if ($r['sla_breached']): ?>
               <span class="badge" style="background:#fcebeb;color:#a32d2d;margin-left:4px;">SLA</span>
             <?php endif; ?>
-            <?php if ($r['is_warranty']): ?>
+            <?php // The three states, told apart by warranty_mode() rather than
+                  // by re-reading the JSON here: out_of_warranty on its own is a
+                  // state, alongside other reasons it is a refusal. ?>
+            <?php $wm = warranty_mode($r['is_warranty'] ?? 0, $r['warranty_refusal'] ?? null); ?>
+            <?php if ($wm === 'yes'): ?>
               <span class="badge" style="background:var(--accent-bg);color:var(--accent-text);margin-left:4px;"><?= __('rma.warranty') ?></span>
+            <?php elseif ($wm === 'out'): ?>
+              <span class="badge" style="background:#e8f3ff;color:#185fa5;border:0.5px solid #c5dcf5;margin-left:4px;"><?= __('rma.ref_out_of_warranty') ?></span>
+            <?php elseif ($wm === 'refused'): ?>
+              <span class="badge" style="background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;margin-left:4px;"><?= __('rma.warranty_refused') ?></span>
             <?php endif; ?>
           </td>
           <td style="color:var(--text-secondary);"><?= htmlspecialchars($r['customer_name'] ?? '—') ?></td>

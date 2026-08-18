@@ -86,6 +86,19 @@
       <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:1.25rem;margin-bottom:1rem;min-height:170px;display:flex;flex-direction:column;">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
           <div style="font-size:16px;font-weight:500;margin-bottom:4px;"><?= htmlspecialchars($rma['customer_name'] ?? '—') ?><?= $rma['customer_phone'] ? '<span style="font-size:13px;font-weight:400;color:var(--text-muted);"> &nbsp;·&nbsp; '.$rma['customer_phone'].'</span>' : '' ?></div>
+          <?php
+            // Only worth offering when there is a history to read: this case
+            // plus at least one other, so the device has been in twice or more.
+            // $repeat already excludes this case, so one other is enough.
+            $ident       = $rma['imei'] ?: ($rma['serial_number'] ?? '');
+            $has_history = $ident !== '' && count($repeat['cases'] ?? []) >= 1;
+          ?>
+          <?php if ($has_history): ?>
+            <a href="/device/<?= rawurlencode($ident) ?>"
+               style="background:#f4f4f0;color:var(--accent);border:0.5px solid var(--accent);border-radius:6px;padding:3px 10px;font-size:11px;text-decoration:none;flex-shrink:0;white-space:nowrap;">
+              <?= __('rma.device_history') ?>
+            </a>
+          <?php endif; ?>
           <?php if (can('rma', 'edit')): ?>
             <button type="button" id="identity-edit-btn"
                     style="background:#f4f4f0;color:#2c2c2a;border:0.5px solid #d3d1c7;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0;">
@@ -101,16 +114,6 @@
               <?php if (($rma['imei'] ?? null) && ($rma['serial_number'] ?? null)): ?> &nbsp;·&nbsp; <?php endif; ?>
               <?php if ($rma['serial_number'] ?? null): ?><span style="color:var(--text-secondary);"><?= __('rma.sn') ?>:</span> <?= htmlspecialchars($rma['serial_number']) ?><?php endif; ?>
             </span>
-            <?php // Addressed by what is written on the device, since one phone
-                  // can hold more than one device row. IMEI first, serial if it
-                  // has no IMEI. ?>
-            <?php $ident = $rma['imei'] ?: ($rma['serial_number'] ?? ''); ?>
-            <?php if ($ident !== ''): ?>
-              <a href="/device/<?= rawurlencode($ident) ?>"
-                 style="font-size:11px;color:var(--accent);text-decoration:none;border:0.5px solid var(--accent);border-radius:6px;padding:3px 10px;">
-                <?= __('rma.device_history') ?>
-              </a>
-            <?php endif; ?>
             <?php
               // The "Provjeri garanciju" button appears for Apple devices when
               // Apple's "Warranty check" toggle is on (Settings → Integrations → Apple).

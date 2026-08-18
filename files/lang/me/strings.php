@@ -178,7 +178,7 @@ return [
     'rma.device'             => 'Uredjaj',
     'rma.complaint'          => 'Opis reklamacije',
     'rma.diagnosis'          => 'Dijagnoza',
-    'rma.warranty'           => 'Garantni zahtjev',
+    'rma.warranty'           => 'Garancija',
     'rma.sla_breached'       => 'Prekoračen SLA',
     'rma.tracking_page'      => 'Stranica za praćenje',
     'rma.technician'         => 'Tehničar',
