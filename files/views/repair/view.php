@@ -7,13 +7,23 @@
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <p style="font-size:13px;color:var(--text-muted);margin:0;"><?= __('label.created') ?> <?= format_datetime($job['created_at']) ?><?= ($job['location_name'] ?? null) ? ' &nbsp;&middot;&nbsp; '.htmlspecialchars($job['location_name']) : '' ?></p>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-          <span class="badge" style="<?= ($job['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;' : (($job['status_code'] ?? '') === 'completed' ? 'background:var(--accent-bg);color:var(--accent-text);border:0.5px solid var(--accent);' : 'background:'.htmlspecialchars($job['status_color']).'22;color:'.htmlspecialchars($job['status_color']).';border:0.5px solid '.htmlspecialchars($job['status_color']).'66;') ?>">
+          <span class="badge" style="<?= ($job['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;' : (($job['status_code'] ?? '') === 'completed' ? 'background:var(--accent-bg);color:var(--accent-text);' : 'background:'.htmlspecialchars($job['status_color']).'22;color:'.htmlspecialchars($job['status_color']).';') ?>">
             <?= status_label((string)($job['status_code'] ?? ''), $job['status_label']) ?>
           </span>
-          <?php if ($job['is_warranty']): ?>
-            <span class="badge" style="background:var(--accent-bg);color:var(--accent-text);border:0.5px solid var(--accent);"><?= __('rma.warranty') ?></span>
+          <?php
+            // Three states, not two. This header asked is_warranty and nothing
+            // else, so a device whose period had simply expired was labelled
+            // Garancija odbijena — a technician judging the cover void, which is
+            // a different and heavier claim. warranty_mode() tells them apart,
+            // as the RMA page and the list already do.
+            $hdr_war = warranty_mode($job['is_warranty'] ?? 0, $job['warranty_refusal'] ?? null);
+          ?>
+          <?php if ($hdr_war === 'yes'): ?>
+            <span class="badge" style="background:var(--accent-bg);color:var(--accent-text);"><?= __('rma.warranty') ?></span>
+          <?php elseif ($hdr_war === 'out'): ?>
+            <span class="badge" style="background:#e8f3ff;color:#185fa5;"><?= __('rma.ref_out_of_warranty') ?></span>
           <?php else: ?>
-            <span class="badge" style="background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;"><?= __('repair.warranty_refused') ?></span>
+            <span class="badge" style="background:#fcebeb;color:#a32d2d;"><?= __('repair.warranty_refused') ?></span>
           <?php endif; ?>
         </div>
     </div>
