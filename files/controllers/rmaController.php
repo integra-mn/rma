@@ -68,7 +68,15 @@ class RmaController {
                          LEFT JOIN users u ON u.id = r.assigned_tech
                          LEFT JOIN devices d ON d.id = r.device_id
                          WHERE {$where}
-                         ORDER BY r.created_at DESC
+                         -- Newest number first, not newest row. The two are
+                         -- normally the same, since numbers are handed out in
+                         -- order — but a renumbered case breaks that, and on
+                         -- 2026-08-18 two of them did: 52181 and 52185 were
+                         -- created after 52188 and sat above it in the list.
+                         -- The number is what people look for, so the number is
+                         -- what it sorts by. Text order matches numeric order
+                         -- while the format stays fixed-width ({SEQ5}).
+                         ORDER BY r.rma_number DESC
                          LIMIT {$per_page} OFFSET {$offset}", $params);
 
         $statuses  = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order');
