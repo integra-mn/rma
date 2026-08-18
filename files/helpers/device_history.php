@@ -319,6 +319,13 @@ function device_open_case(string $identifier): ?array {
            JOIN rma_statuses s ON s.id = r.status_id
           WHERE r.device_id IN ({$ph})
             AND r.deleted_at IS NULL
+            -- A device that has gone back cannot be held by the case it came in
+            -- on. Otpremljeno is not terminal — the case stays open until it is
+            -- closed — so reading is_terminal alone would refuse the very thing
+            -- this app now watches for: a handset returning. Same distinction as
+            -- the pickup list: the status says whether the CASE is finished, the
+            -- dispatch date says whether the DEVICE is still here.
+            AND r.dispatched_at IS NULL
             AND (
                   s.is_terminal = 0
                   -- Or the case is closed while the bench job is not, which
