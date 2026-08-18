@@ -130,9 +130,7 @@
             </td>
             <td style="text-align:center;color:var(--text-muted);"><?= (int)$p['min_stock'] ?></td>
             <td style="text-align:center;">
-              <span class="badge" style="background:<?= $p['is_active'] ? 'var(--accent-bg)' : 'var(--bg-subtle)' ?>;color:<?= $p['is_active'] ? 'var(--accent-text)' : 'var(--text-muted)' ?>;">
-                <?= $p['is_active'] ? __('label.yes') : __('label.no') ?>
-              </span>
+              <span class="badge" style="background:<?= $p['is_active'] ? 'var(--accent-bg)' : 'var(--bg-subtle)' ?>;color:<?= $p['is_active'] ? 'var(--accent-text)' : 'var(--text-muted)' ?>;"><?= $p['is_active'] ? __('label.yes') : __('label.no') ?></span>
             </td>
             <td>
               <?php if (can('parts', 'edit')): ?>

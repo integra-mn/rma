@@ -21,9 +21,7 @@
           <td style="font-weight:500;"><?= htmlspecialchars($j['rma_number']) ?></td>
           <td style="color:var(--text-secondary);"><?= htmlspecialchars($j['customer_name'] ?? '—') ?></td>
           <td>
-            <span class="badge badge-status" style="<?= ($j['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;' : 'background:'.htmlspecialchars($j['status_color']).'22;color:'.htmlspecialchars($j['status_color']).';'.'border:0.5px solid '.htmlspecialchars($j['status_color']).'66;' ?>">
-              <?= status_label((string)($j['status_code'] ?? ''), $j['status_label']) ?>
-            </span>
+            <span class="badge badge-status" style="<?= ($j['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;' : 'background:'.htmlspecialchars($j['status_color']).'22;color:'.htmlspecialchars($j['status_color']).';'.'border:0.5px solid '.htmlspecialchars($j['status_color']).'66;' ?>"><?= status_label((string)($j['status_code'] ?? ''), $j['status_label']) ?></span>
           </td>
           <td>
             <?php $pc = match($j['priority']) { 'urgent'=>'#a32d2d','high'=>'#854f0b','low'=>'#085041',default=>'var(--text-muted)' }; ?>

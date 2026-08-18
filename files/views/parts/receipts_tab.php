@@ -108,9 +108,7 @@
             <td style="text-align:center;color:var(--text-muted);"><?= (int)$r['total_units'] ?></td>
             <td style="text-align:right;">€<?= number_format((float)$r['freight_cost'], 2) ?></td>
             <td>
-              <span class="badge" style="background:<?= $r['status']==='confirmed'?'var(--accent-bg)':'#faeeda' ?>;color:<?= $r['status']==='confirmed'?'var(--accent-text)':'#633806' ?>;">
-                <?= ucfirst($r['status']) ?>
-              </span>
+              <span class="badge" style="background:<?= $r['status']==='confirmed'?'var(--accent-bg)':'#faeeda' ?>;color:<?= $r['status']==='confirmed'?'var(--accent-text)':'#633806' ?>;"><?= ucfirst($r['status']) ?></span>
             </td>
             <td style="color:var(--text-muted);text-align:right;"><?= format_date($r['created_at']) ?></td>
           </tr>

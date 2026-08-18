@@ -62,9 +62,7 @@
               <td style="font-weight:500;font-family:monospace;color:var(--accent);"><?= htmlspecialchars($pc['reference'] ?? ('#'.$pc['id'])) ?></td>
               <td><?= htmlspecialchars($pc['location_name']) ?></td>
               <td>
-                <span class="badge" style="background:<?= $pc['status']==='confirmed'?'var(--accent-bg)':'var(--bg-subtle)' ?>;color:<?= $pc['status']==='confirmed'?'var(--accent-text)':'var(--text-muted)' ?>;">
-                  <?= __('status.' . $pc['status']) ?>
-                </span>
+                <span class="badge" style="background:<?= $pc['status']==='confirmed'?'var(--accent-bg)':'var(--bg-subtle)' ?>;color:<?= $pc['status']==='confirmed'?'var(--accent-text)':'var(--text-muted)' ?>;"><?= __('status.' . $pc['status']) ?></span>
               </td>
               <td style="text-align:center;color:var(--text-muted);"><?= (int)$pc['item_count'] ?></td>
               <td style="text-align:center;color:<?= (int)$pc['total_variance'] > 0 ? '#854f0b' : 'var(--text-muted)' ?>;">

@@ -99,9 +99,7 @@
               <td><?= htmlspecialchars($u['name']) ?></td>
               <td style="color:var(--text-secondary);"><?= htmlspecialchars($u['email']) ?></td>
               <td>
-                <span class="badge" style="background:<?= $u['role']==='admin'?'#eeedfe':'var(--bg-subtle)' ?>;color:<?= $u['role']==='admin'?'#3c3489':'var(--text-secondary)' ?>;">
-                  <?= htmlspecialchars($u['role']) ?>
-                </span>
+                <span class="badge" style="background:<?= $u['role']==='admin'?'#eeedfe':'var(--bg-subtle)' ?>;color:<?= $u['role']==='admin'?'#3c3489':'var(--text-secondary)' ?>;"><?= htmlspecialchars($u['role']) ?></span>
               </td>
             </tr>
           <?php endforeach; ?>

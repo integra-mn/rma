@@ -125,9 +125,7 @@
               'main_admin'  => 'var(--text-secondary)',
               'lite_admin'  => '#185fa5',
             ]; ?>
-            <span class="badge" style="background:var(--bg-subtle);color:<?= $role_colors[$u['role']] ?? 'var(--text-muted)' ?>;">
-              <?= role_label($u['role']) ?>
-            </span>
+            <span class="badge" style="background:var(--bg-subtle);color:<?= $role_colors[$u['role']] ?? 'var(--text-muted)' ?>;"><?= role_label($u['role']) ?></span>
           </td>
           <?php
             // One column, one question: which branch does this person sit in.
@@ -144,9 +142,7 @@
           <td style="color:var(--text-secondary);"><?= htmlspecialchars($where) ?></td>
           <td style="color:var(--text-muted);"><?= strtoupper($u['lang'] ?? 'en') ?></td>
           <td style="text-align:center;">
-            <span class="badge" style="background:<?= $u['is_active']?'var(--accent-bg)':'var(--bg-subtle)' ?>;color:<?= $u['is_active']?'var(--accent-text)':'var(--text-muted)' ?>;">
-              <?= $u['is_active'] ? __('label.active') : __('label.disabled') ?>
-            </span>
+            <span class="badge" style="background:<?= $u['is_active']?'var(--accent-bg)':'var(--bg-subtle)' ?>;color:<?= $u['is_active']?'var(--accent-text)':'var(--text-muted)' ?>;"><?= $u['is_active'] ? __('label.active') : __('label.disabled') ?></span>
             <?php if (!empty($u['require_2fa'])): ?>
               <span class="badge" title="<?= __('users.require_2fa') ?>" style="background:var(--bg-subtle);color:var(--text-secondary);margin-left:4px;">2FA</span>
             <?php endif; ?>

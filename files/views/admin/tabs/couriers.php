@@ -53,9 +53,7 @@
             <td style="color:var(--text-secondary);font-size:12px;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?= htmlspecialchars($c['tracking_url'] ?: '—') ?></td>
             <td style="color:var(--text-secondary);"><?= htmlspecialchars($c['phone'] ?: '—') ?></td>
             <td style="text-align:center;">
-              <span class="badge" style="background:<?= $c['is_active'] ? 'var(--accent-bg)' : 'var(--bg-subtle)' ?>;color:<?= $c['is_active'] ? 'var(--accent-text)' : 'var(--text-muted)' ?>;">
-                <?= $c['is_active'] ? __('label.active') : __('label.disabled') ?>
-              </span>
+              <span class="badge" style="background:<?= $c['is_active'] ? 'var(--accent-bg)' : 'var(--bg-subtle)' ?>;color:<?= $c['is_active'] ? 'var(--accent-text)' : 'var(--text-muted)' ?>;"><?= $c['is_active'] ? __('label.active') : __('label.disabled') ?></span>
             </td>
             <td style="text-align:right;white-space:nowrap;">
               <?php if (can('settings','edit')): ?>

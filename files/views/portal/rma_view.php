@@ -27,11 +27,20 @@
         <?php if ($rma['location_name'] ?? null): ?>&nbsp;&middot;&nbsp;<?= htmlspecialchars($rma['location_name']) ?><?php endif; ?>
       </p>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <span class="badge" style="background:<?= htmlspecialchars($rma['status_color']) ?>22;color:<?= htmlspecialchars($rma['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($rma['status_color']) ?>66;">
-          <?= status_label((string)($rma['status_code'] ?? ''), $rma['status_label']) ?>
-        </span>
-        <?php if ($rma['is_warranty']): ?>
+        <span class="badge" style="background:<?= htmlspecialchars($rma['status_color']) ?>22;color:<?= htmlspecialchars($rma['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($rma['status_color']) ?>66;"><?= status_label((string)($rma['status_code'] ?? ''), $rma['status_label']) ?></span>
+        <?php
+          // The partner is told which of the three states their case is in, not
+          // just whether it is a warranty claim. Silence for the other two read
+          // as "not decided yet" while the answer was Van garancije — the thing
+          // a partner most wants to know, since it decides who pays.
+          $p_war = warranty_mode($rma['is_warranty'] ?? 0, $rma['warranty_refusal'] ?? null);
+        ?>
+        <?php if ($p_war === 'yes'): ?>
           <span class="badge" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('rma.warranty') ?></span>
+        <?php elseif ($p_war === 'out'): ?>
+          <span class="badge" style="background:#e8f3ff;color:#185fa5;border:0.5px solid #c5dcf5;"><?= __('rma.ref_out_of_warranty') ?></span>
+        <?php elseif ($p_war === 'refused'): ?>
+          <span class="badge" style="background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;"><?= __('rma.warranty_refused') ?></span>
         <?php endif; ?>
       </div>
     </div>

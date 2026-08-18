@@ -73,9 +73,7 @@
             <td style="color:var(--text-secondary);"><?= htmlspecialchars($loc['city'] ?? '—') ?></td>
             <td style="color:var(--text-secondary);"><?= htmlspecialchars($loc['phone'] ?? '—') ?></td>
             <td style="text-align:center;">
-              <span class="badge" style="background:<?= $loc['is_active'] ? 'var(--accent-bg)' : 'var(--bg-subtle)' ?>;color:<?= $loc['is_active'] ? 'var(--accent-text)' : 'var(--text-muted)' ?>;">
-                <?= $loc['is_active'] ? __('label.active') : __('label.disabled') ?>
-              </span>
+              <span class="badge" style="background:<?= $loc['is_active'] ? 'var(--accent-bg)' : 'var(--bg-subtle)' ?>;color:<?= $loc['is_active'] ? 'var(--accent-text)' : 'var(--text-muted)' ?>;"><?= $loc['is_active'] ? __('label.active') : __('label.disabled') ?></span>
             </td>
             <td style="text-align:right;white-space:nowrap;">
               <?php if (can('settings','edit')): ?>

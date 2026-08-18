@@ -10,9 +10,7 @@
         <span style="font-size:14px;font-weight:400;color:var(--text-muted);margin-left:8px;"><?= htmlspecialchars($receipt['reference']) ?></span>
       <?php endif; ?>
     </h1>
-    <span class="badge" style="background:<?= $receipt['status']==='confirmed'?'var(--accent-bg)':'#faeeda' ?>;color:<?= $receipt['status']==='confirmed'?'var(--accent-text)':'#633806' ?>;">
-      <?= ucfirst($receipt['status']) ?>
-    </span>
+    <span class="badge" style="background:<?= $receipt['status']==='confirmed'?'var(--accent-bg)':'#faeeda' ?>;color:<?= $receipt['status']==='confirmed'?'var(--accent-text)':'#633806' ?>;"><?= ucfirst($receipt['status']) ?></span>
   </div>
 
   <?php if ($success ?? null): ?>
