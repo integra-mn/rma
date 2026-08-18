@@ -73,10 +73,15 @@ class RmaController {
                          -- order — but a renumbered case breaks that, and on
                          -- 2026-08-18 two of them did: 52181 and 52185 were
                          -- created after 52188 and sat above it in the list.
-                         -- The number is what people look for, so the number is
-                         -- what it sorts by. Text order matches numeric order
-                         -- while the format stays fixed-width ({SEQ5}).
-                         ORDER BY r.rma_number DESC
+                         --
+                         -- Padded because the number is text: sorted as text,
+                         -- '100000' lands below '52150' the moment the sequence
+                         -- passes 99999, since '1' precedes '5'. str_pad in
+                         -- rma_number() does not truncate, so a sixth digit
+                         -- simply appears and the list would silently reorder.
+                         -- LPAD is the same in Postgres and MySQL, and leaves a
+                         -- prefixed format (LOC-YEAR-SEQ) sorting sensibly too.
+                         ORDER BY LPAD(r.rma_number, 12, '0') DESC
                          LIMIT {$per_page} OFFSET {$offset}", $params);
 
         $statuses  = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order');
