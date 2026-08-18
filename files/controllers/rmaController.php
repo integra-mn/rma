@@ -1019,6 +1019,59 @@ class RmaController {
         include views_path('layout/footer.php');
     }
 
+    /**
+     * The counter's answer: is this covered, at what participation, and how
+     * much of the allowance is left.
+     *
+     * Worded here rather than in the browser so the sentences live in the
+     * language files with every other string. The numbers are OUR record — a
+     * claim made directly with the insurer is invisible to us — and the wording
+     * says so until a portal can be read.
+     */
+    public function insurance_status(): void {
+        require_login();
+        require_permission('rma', 'create');
+        header('Content-Type: application/json');
+
+        $ident    = trim($_GET['ident'] ?? '');
+        $incident = $this->parse_date($_GET['incident'] ?? '');
+        $damage   = trim($_GET['damage'] ?? '');
+
+        // Nothing useful to say until the device is known. The date and the
+        // damage sharpen the answer but are not needed to give one.
+        if ($ident === '') { echo json_encode(['level' => 'none']); exit; }
+
+        $r      = insurance_check($ident, $incident, $damage ?: null);
+        $policy = $r['policy'] ?? null;
+
+        if ($r['covered']) {
+            $line = __('ins.chk_covered', ['pct' => rtrim(rtrim(number_format($r['participation'], 2, '.', ''), '0'), '.')]);
+            $used = __('ins.chk_used', ['used' => $r['used'], 'allowed' => $r['allowed']]);
+            if ($r['pending'] > 0) $used .= ' ' . __('ins.chk_pending', ['n' => $r['pending']]);
+            echo json_encode(['level' => 'ok', 'message' => $line, 'detail' => $used]);
+            exit;
+        }
+
+        $detail = '';
+        switch ($r['reason']) {
+            case 'expired':
+                $line   = __('ins.chk_expired', ['to' => $policy ? format_date($policy['ends_on']) : '']);
+                break;
+            case 'not_covered':
+                $line   = __('ins.chk_not_covered');
+                $detail = __('ins.chk_paid_repair');
+                break;
+            case 'no_allowance':
+                $line   = __('ins.chk_no_allowance', ['used' => $r['used'] + $r['pending'], 'allowed' => $r['allowed']]);
+                $detail = __('ins.chk_our_record');
+                break;
+            default:
+                $line   = __('ins.chk_no_policy');
+        }
+        echo json_encode(['level' => 'warn', 'message' => $line, 'detail' => $detail]);
+        exit;
+    }
+
     public function device_search(): void {
         require_login();
         $sn   = trim($_GET['sn'] ?? '');

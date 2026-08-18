@@ -242,6 +242,9 @@ defined('RMS') or die('Direct access not permitted');
           </div>
         </div>
 
+        <!-- The answer, as soon as there is enough to answer with. -->
+        <div id="ins-verdict" style="display:none;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;"></div>
+
         <!-- Asked whether the policy is new or already known: they belong to the
              damage, not to the policy. The incident date decides which policy
              applies and whether the reporting window has run out. -->
@@ -697,10 +700,54 @@ function fillFromProduct() {
   });
 }
 
+// Asks the server what this device's policy says. Debounced, because the date
+// picker and the damage list both fire as they are used.
+let insCheckTimer = null;
+function refreshInsurance() {
+  clearTimeout(insCheckTimer);
+  insCheckTimer = setTimeout(function () {
+    const box = document.getElementById('ins-verdict');
+    if (!document.getElementById('is-insured').checked) { box.style.display = 'none'; return; }
+
+    const sn   = document.getElementById('serial-number-input').value.trim();
+    const imei = document.getElementById('imei-input').value.trim();
+    const ident = imei || sn;
+    if (!ident) { box.style.display = 'none'; return; }
+
+    const incident = (document.querySelector('input[type=hidden][name="incident_date"]') || {}).value || '';
+    const damage   = document.getElementById('ins-damage').value;
+
+    fetch('/rma/insurance-check?ident=' + encodeURIComponent(ident)
+          + '&incident=' + encodeURIComponent(incident)
+          + '&damage=' + encodeURIComponent(damage))
+      .then(r => r.json())
+      .then(function (v) {
+        if (!v || v.level === 'none') { box.style.display = 'none'; return; }
+        const style = v.level === 'ok'
+          ? 'background:#e1f5ee;border:0.5px solid #5dcaa5;color:#085041;'
+          : 'background:#faeeda;border:0.5px solid #ef9f27;color:#633806;';
+        box.setAttribute('style', 'border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:block;' + style);
+        box.innerHTML = '<strong>' + v.message + '</strong>'
+          + (v.detail ? ' <span style="opacity:0.85;">' + v.detail + '</span>' : '');
+      })
+      .catch(function () { box.style.display = 'none'; });
+  }, 250);
+}
+
 function toggleInsurance() {
   const on = document.getElementById('is-insured').checked;
   document.getElementById('insurance-section').style.display = on ? 'block' : 'none';
+  refreshInsurance();
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+  const damage = document.getElementById('ins-damage');
+  if (damage) damage.addEventListener('change', refreshInsurance);
+  // The date picker dispatches change on the visible field when a day is
+  // picked, which is the only signal it gives.
+  const incident = document.querySelector('input.datefield[data-name="incident_date"]');
+  if (incident) incident.addEventListener('change', refreshInsurance);
+});
 
 // A handset that already carries a policy needs none of it typed again: the
 // device lookup returns what is on file and the entry fields fold away.
@@ -796,6 +843,7 @@ function checkDeviceMatch() {
           document.getElementById('device-match-notice').dataset.deviceId = data.id;
           showRepeat(data.repeat, data.blocked);
           showPolicy(data.policy || null);
+          refreshInsurance();
         } else {
           document.getElementById('device-match-notice').style.display = 'none';
           document.getElementById('device-id-input').value = '';
