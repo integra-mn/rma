@@ -266,9 +266,7 @@
     <?php if (!empty($gsx_submission) && !empty($gsx_submission['vendor_ref'])): ?>
       <!-- Already submitted -->
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;">
-        <span class="badge" style="background:var(--accent-bg);color:var(--accent-text);border:0.5px solid var(--accent);">
-          ✓ <?= __('repair.submitted') ?>
-        </span>
+        <span class="badge" style="background:var(--accent-bg);color:var(--accent-text);border:0.5px solid var(--accent);">✓ <?= __('repair.submitted') ?></span>
         <span><strong><?= __('repair.gsx_repair_no') ?></strong> <span style="font-family:monospace;"><?= htmlspecialchars($gsx_submission['vendor_ref']) ?></span></span>
         <?php if (!empty($gsx_submission['ra_number'])): ?>
           <span style="color:var(--text-muted);">· RA <span style="font-family:monospace;"><?= htmlspecialchars($gsx_submission['ra_number']) ?></span></span>

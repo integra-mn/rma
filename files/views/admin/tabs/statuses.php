@@ -64,9 +64,7 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
                 <span style="color:var(--text-muted);"><?= __('admin.status_roles_all') ?></span>
               <?php else: ?>
                 <?php foreach ($roles as $r): ?>
-                  <span class="badge badge-pill-fixed" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin-right:4px;">
-                    <?= htmlspecialchars(role_label($r)) ?>
-                  </span>
+                  <span class="badge badge-pill-fixed" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin-right:4px;"><?= htmlspecialchars(role_label($r)) ?></span>
                 <?php endforeach; ?>
               <?php endif; ?>
             </td>

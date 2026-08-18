@@ -42,13 +42,9 @@
           <a href="/rma/<?= (int)$c['id'] ?>" style="font-size:15px;font-weight:500;color:var(--accent);text-decoration:none;">
             <?= htmlspecialchars($c['rma_number']) ?>
           </a>
-          <span class="badge badge-status" style="background:<?= htmlspecialchars($c['status_color']) ?>22;color:<?= htmlspecialchars($c['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($c['status_color']) ?>66;">
-            <?= status_label((string)($c['status_code'] ?? ''), $c['status_label']) ?>
-          </span>
+          <span class="badge badge-status" style="background:<?= htmlspecialchars($c['status_color']) ?>22;color:<?= htmlspecialchars($c['status_color']) ?>;border:0.5px solid <?= htmlspecialchars($c['status_color']) ?>66;"><?= status_label((string)($c['status_code'] ?? ''), $c['status_label']) ?></span>
           <?php if ($gap !== null): ?>
-            <span class="badge" style="background:#faeeda;color:#633806;border:0.5px solid #ef9f27;">
-              <?= __('rma.back_after_days', ['days' => $gap]) ?>
-            </span>
+            <span class="badge" style="background:#faeeda;color:#633806;border:0.5px solid #ef9f27;"><?= __('rma.back_after_days', ['days' => $gap]) ?></span>
           <?php endif; ?>
           <span style="margin-left:auto;font-size:12px;color:var(--text-muted);">
             <?= format_date($c['created_at']) ?>
