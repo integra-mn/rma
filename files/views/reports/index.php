@@ -45,7 +45,11 @@
 
     <!-- Actions — pushed to the right, all green. No Generate button: the
          report re-runs automatically whenever a filter changes (see script). -->
-    <?php if ($tab !== 'financial'): $qs = 'tab=' . $tab . '&from=' . urlencode($date_from) . '&to=' . urlencode($date_to) . '&brand=' . $brand_id . '&location=' . $location_id; ?>
+    <?php // Only the tabs export() actually knows about. It whitelists
+          // rma/repairs/parts and silently falls back to 'rma' for anything
+          // else, so on Ponovljena popravka these buttons would have handed
+          // somebody an RMA report wearing the wrong title. ?>
+    <?php if (in_array($tab, ['rma', 'repairs', 'parts'], true)): $qs = 'tab=' . $tab . '&from=' . urlencode($date_from) . '&to=' . urlencode($date_to) . '&brand=' . $brand_id . '&location=' . $location_id; ?>
     <div style="display:flex;gap:6px;align-items:flex-end;margin-left:auto;">
       <a class="btn btn-primary" href="/reports/export?format=xls&<?= $qs ?>"><?= __('reports.export_xls') ?></a>
       <a class="btn btn-primary" href="/reports/export?format=pdf&<?= $qs ?>" target="_blank"><?= __('reports.export_pdf') ?></a>
