@@ -254,9 +254,26 @@ class ReportsController {
             // had already gone out. The gap is measured from that dispatch, not
             // from the customer collecting it: a partner may hold a phone for a
             // month and that is not Integra's doing.
-            $rp_days = repeat_repair_window();
+            // One query, used by the screen and by the export. Two copies of a
+            // join this shape would drift, and a report that disagrees with its
+            // own export is worse than having no export.
+            $repeat_rows = $this->repeat_repair_rows($rma_where, $rma_params);
+        }
 
-            $repeat_rows = db_rows(
+        include views_path('layout/header.php');
+        include views_path('reports/index.php');
+        include views_path('layout/footer.php');
+    }
+
+    // ── Export current report tab to XLS (Excel) or PDF ──────────────────
+    /**
+     * Devices that came back inside the reporting window.
+     *
+     * Shared by the screen and the export so the two cannot disagree.
+     */
+    private function repeat_repair_rows(string $rma_where, array $rma_params): array {
+        $rp_days = repeat_repair_window();
+        return db_rows(
                 "SELECT c.id, c.rma_number, c.created_at, c.ident, c.brand, c.model,
                         c.location_id,
                         p.rma_number AS prev_rma, p.dispatched_at AS prev_out,
@@ -300,21 +317,15 @@ class ReportsController {
                            AND r3.dispatched_at > p.dispatched_at
                     )
                   ORDER BY c.created_at DESC",
-                array_merge($rma_params, [$rp_days])
-            );
-        }
-
-        include views_path('layout/header.php');
-        include views_path('reports/index.php');
-        include views_path('layout/footer.php');
+            array_merge($rma_params, [$rp_days])
+        );
     }
 
-    // ── Export current report tab to XLS (Excel) or PDF ──────────────────
     public function export(): void {
         require_login();
         require_permission('reports', 'view');
 
-        $tab         = in_array($_GET['tab'] ?? 'rma', ['rma','repairs','parts'], true) ? $_GET['tab'] : 'rma';
+        $tab         = in_array($_GET['tab'] ?? 'rma', ['rma','repairs','parts','repeat'], true) ? $_GET['tab'] : 'rma';
         $format      = ($_GET['format'] ?? 'xls') === 'pdf' ? 'pdf' : 'xls';
         $date_from   = $_GET['from']     ?? date('Y-m-01');
         $date_to     = $_GET['to']       ?? date('Y-m-d');
@@ -403,7 +414,49 @@ class ReportsController {
             $sections[] = ['title'=>__('reports.monthly_usage'), 'columns'=>[__('reports.month'), __('reports.qty_used')], 'rows'=>array_map(fn($r)=>[$r['label'], (int)$r['qty']], $rows)];
         }
 
-        $tab_labels = ['rma'=>__('nav.rma'), 'repairs'=>__('reports.repairs'), 'parts'=>__('nav.parts')];
+        if ($tab === 'repeat') {
+            $rows = $this->repeat_repair_rows($rma_where, $rma_params);
+
+            $by_model = [];
+            foreach ($rows as $r) {
+                $k = trim(($r['brand'] ?? '') . ' ' . ($r['model'] ?? '')) ?: '—';
+                $by_model[$k]['count'] = ($by_model[$k]['count'] ?? 0) + 1;
+                $by_model[$k]['days'][] = (int)$r['days'];
+            }
+            uasort($by_model, fn($a, $b) => $b['count'] <=> $a['count']);
+
+            $sections[] = ['title' => __('reports.repeat_count'), 'columns' => $metric, 'rows' => [
+                [__('reports.repeat_count'),  count($rows)],
+                [__('reports.repeat_window'), repeat_repair_window()],
+            ]];
+
+            // By model first: three of one model coming back points at a part
+            // or a procedure, which is the reason this report exists.
+            $sections[] = [
+                'title'   => __('reports.repeat_by_model'),
+                'columns' => [__('rma.model'), __('reports.repeat_count'), __('reports.repeat_fastest')],
+                'rows'    => array_map(
+                    fn($model, $g) => [$model, $g['count'], min($g['days'])],
+                    array_keys($by_model), array_values($by_model)
+                ),
+            ];
+
+            $sections[] = [
+                'title'   => __('reports.repeat_each'),
+                'columns' => [__('label.rma'), __('rma.model'), __('rma.imei') . ' / ' . __('rma.sn'),
+                              __('reports.repeat_previous'), __('reports.repeat_days'), __('pdf.works_done')],
+                'rows'    => array_map(fn($r) => [
+                    $r['rma_number'],
+                    trim(($r['brand'] ?? '') . ' ' . ($r['model'] ?? '')) ?: '—',
+                    (string)$r['ident'],
+                    (string)$r['prev_rma'],
+                    (int)$r['days'],
+                    trim((string)($r['prev_works'] ?? '')),
+                ], $rows),
+            ];
+        }
+
+        $tab_labels = ['rma'=>__('nav.rma'), 'repairs'=>__('reports.repairs'), 'parts'=>__('nav.parts'), 'repeat'=>__('settings.repeat')];
         $title = __('nav.reports') . ' — ' . $tab_labels[$tab];
         $meta  = __('reports.from') . ': ' . format_date($date_from) . '   ' . __('reports.to') . ': ' . format_date($date_to);
         $fname = 'report-' . $tab . '-' . $date_from . '_' . $date_to;
