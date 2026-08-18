@@ -545,7 +545,10 @@ class PortalController {
             ]);
             audit('created', 'customer', $customer_id);
 
-            $device_id = db_insert('devices', [
+            // Same rule as the counter: a device already known by this IMEI
+            // or serial keeps its row. The portal has no match button at all,
+            // so without this every partner submission made a new device.
+            $device_id = device_find_or_create([
                 'model_id'      => $model_id,
                 'customer_id'   => $customer_id,
                 'partner_id'    => $partner_id,

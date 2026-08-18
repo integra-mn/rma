@@ -203,7 +203,10 @@ class RmaController {
         if ($existing_device_id) {
             $device_id = $existing_device_id;
         } elseif (!empty($_POST['model_id'])) {
-            $device_id = db_insert('devices', [
+            // Matches on IMEI or serial before creating, so a device coming
+            // back keeps one row whether or not anyone pressed the match
+            // button on the form.
+            $device_id = device_find_or_create([
                 'model_id'        => (int)$_POST['model_id'],
                 'customer_id'     => $customer_id ?: null,
                 'partner_id'      => $partner_id  ?: null,

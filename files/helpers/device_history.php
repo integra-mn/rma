@@ -154,3 +154,48 @@ function device_by_identifier(string $identifier): ?array {
         [$identifier, $identifier]
     );
 }
+
+// ── One phone, one row ────────────────────────────────────────
+//
+// The intake form offers a match — the green "Use this device" — and creates a
+// new row when nobody presses it. That is how IMEI 359168420215834 came to hold
+// four rows for one handset. This does automatically what the button does by
+// hand, so identity no longer depends on someone noticing a notice.
+//
+// Deliberately the same behaviour as the button, not more: the existing row is
+// reused as it stands. Its customer and partner are left alone, because a phone
+// that changes hands is still the same phone, and the case carries the new
+// owner anyway.
+
+/**
+ * The id of the device carrying this IMEI or serial, creating one only if no
+ * row carries either.
+ *
+ * @param array $data columns for a new row; 'imei' and 'serial_number' are
+ *                    also what an existing row is matched on.
+ */
+function device_find_or_create(array $data): ?int {
+    $imei   = trim((string)($data['imei'] ?? ''));
+    $serial = trim((string)($data['serial_number'] ?? ''));
+
+    // IMEI first: it identifies a handset worldwide, while a serial is only
+    // unique within a maker's range and is the likelier of the two to collide.
+    foreach ([['imei', $imei], ['serial_number', $serial]] as [$col, $val]) {
+        if ($val === '') continue;
+        $found = db_val("SELECT id FROM devices WHERE {$col} = ? ORDER BY id LIMIT 1", [$val]);
+        if ($found) {
+            // Fill a blank the new case can answer — a device first entered by
+            // IMEI now arriving with its serial — without overwriting anything
+            // already recorded.
+            $row  = db_row('SELECT imei, serial_number FROM devices WHERE id = ?', [(int)$found]);
+            $fill = [];
+            if ($imei   !== '' && trim((string)($row['imei'] ?? '')) === '')          $fill['imei'] = $imei;
+            if ($serial !== '' && trim((string)($row['serial_number'] ?? '')) === '') $fill['serial_number'] = $serial;
+            if ($fill) db_update('devices', $fill, 'id = ?', [(int)$found]);
+            return (int)$found;
+        }
+    }
+
+    if (empty($data['model_id'])) return null;
+    return db_insert('devices', $data);
+}
