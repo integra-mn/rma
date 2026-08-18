@@ -256,10 +256,13 @@ function nav_active(string $prefix): string {
 
   <?php if (can('partners', 'view')): ?>
   <a href="/partners" class="sidebar-link<?= nav_active('/partners') ?>">
+    <?php // A briefcase, because partners are companies — Mtel, One, Tehnomax —
+          // while Korisnici are individuals. Two heads here said the same thing
+          // as the single head there, so the menu used one idea for two
+          // different lists. ?>
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <circle cx="5" cy="5" r="2.5"/>
-      <circle cx="11" cy="5" r="2.5"/>
-      <path d="M1 14c0-2.5 2-4 4.5-4M15 14c0-2.5-2-4-4.5-4"/>
+      <rect x="2" y="5" width="12" height="8.5" rx="1.5"/>
+      <path d="M6 5V3.5h4V5M2 8.75h12"/>
     </svg>
     <?= __('nav.partners') ?>
   </a>
@@ -311,9 +314,18 @@ function nav_active(string $prefix): string {
   <?php endif; ?>
   <?php if (can('settings', 'view')): ?>
   <a href="/settings" class="sidebar-link<?= nav_active('/settings') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <circle cx="8" cy="8" r="2.5"/>
-      <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>
+    <?php // A gear, not a sun. What it had was a hub with eight straight
+          // spokes and no rim, which is how a sun is drawn — a cog reads as a
+          // cog because of the toothed outline.
+          //
+          // 24-unit box, unlike the 16 used elsewhere, because this path needs
+          // the room for its lobes; the artwork still fills 75% of it, matching
+          // 12-in-16. Stroke 2.25 rather than 1.5 for the same reason: at 20px
+          // on screen a 24-box unit is smaller, and 1.5 here would draw thinner
+          // than every icon beside it. 1.875px on screen either way. ?>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
     </svg>
     <?= __('nav.settings') ?>
   </a>
