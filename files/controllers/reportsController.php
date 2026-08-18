@@ -245,6 +245,63 @@ class ReportsController {
                  WHERE {$pu_where}
                  GROUP BY DATE_FORMAT(pu.created_at, '%Y-%m')
                  ORDER BY month", $pu_params);
+        } elseif ($tab === 'repeat') {
+            // Repeated repairs. A device is identified by what is written on it
+            // — IMEI, or serial when it has none — never by devices.id, since
+            // one handset can hold several rows.
+            //
+            // A repeat is a case opened while the same device's previous case
+            // had already gone out. The gap is measured from that dispatch, not
+            // from the customer collecting it: a partner may hold a phone for a
+            // month and that is not Integra's doing.
+            $rp_days = repeat_repair_window();
+
+            $repeat_rows = db_rows(
+                "SELECT c.id, c.rma_number, c.created_at, c.ident, c.brand, c.model,
+                        c.location_id,
+                        p.rma_number AS prev_rma, p.dispatched_at AS prev_out,
+                        DATEDIFF(c.created_at, p.dispatched_at) AS days,
+                        p.works AS prev_works
+                   FROM (
+                        SELECT r.id, r.rma_number, r.created_at, r.location_id,
+                               COALESCE(NULLIF(d.imei, ''), d.serial_number) AS ident,
+                               db2.name AS brand, dm.name AS model
+                          FROM rma_requests r
+                          JOIN devices d ON d.id = r.device_id
+                          LEFT JOIN device_models dm ON dm.id = d.model_id
+                          LEFT JOIN device_brands db2 ON db2.id = dm.brand_id
+                         WHERE {$rma_where}
+                           AND COALESCE(NULLIF(d.imei, ''), d.serial_number) IS NOT NULL
+                   ) c
+                   JOIN (
+                        SELECT r.rma_number, r.dispatched_at,
+                               COALESCE(NULLIF(d.imei, ''), d.serial_number) AS ident,
+                               rj.resolution AS works
+                          FROM rma_requests r
+                          JOIN devices d ON d.id = r.device_id
+                          LEFT JOIN repair_jobs rj ON rj.id = (
+                              SELECT id FROM repair_jobs
+                               WHERE rma_id = r.id AND deleted_at IS NULL
+                               ORDER BY created_at DESC, id DESC LIMIT 1
+                          )
+                         WHERE r.deleted_at IS NULL AND r.dispatched_at IS NOT NULL
+                   ) p ON p.ident = c.ident AND p.dispatched_at < c.created_at
+                  WHERE DATEDIFF(c.created_at, p.dispatched_at) <= ?
+                    -- p must be the visit immediately before this one, or a
+                    -- device with three visits would report the oldest pair as
+                    -- a repeat too.
+                    AND NOT EXISTS (
+                        SELECT 1
+                          FROM rma_requests r3
+                          JOIN devices d3 ON d3.id = r3.device_id
+                         WHERE COALESCE(NULLIF(d3.imei, ''), d3.serial_number) = c.ident
+                           AND r3.dispatched_at IS NOT NULL
+                           AND r3.dispatched_at < c.created_at
+                           AND r3.dispatched_at > p.dispatched_at
+                    )
+                  ORDER BY c.created_at DESC",
+                array_merge($rma_params, [$rp_days])
+            );
         }
 
         include views_path('layout/header.php');

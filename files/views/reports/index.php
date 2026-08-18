@@ -55,7 +55,7 @@
 
   <!-- Tabs -->
   <div class="tab-bar">
-    <?php foreach (['rma'=>__('nav.rma'),'repairs'=>__('reports.repairs'),'parts'=>__('nav.parts'),'financial'=>__('reports.financial')] as $t => $l): ?>
+    <?php foreach (['rma'=>__('nav.rma'),'repairs'=>__('reports.repairs'),'parts'=>__('nav.parts'),'repeat'=>__('settings.repeat'),'financial'=>__('reports.financial')] as $t => $l): ?>
       <a href="?tab=<?= $t ?>&from=<?= urlencode($date_from) ?>&to=<?= urlencode($date_to) ?>&brand=<?= $brand_id ?>&location=<?= $location_id ?>"
          class="tab<?= $tab===$t ? ' active' : '' ?>">
         <?= $l ?>
@@ -386,6 +386,90 @@
       <p style="font-size:13px;color:var(--text-muted);"><?= __('reports.financial_soon') ?></p>
     </div>
 
+  <?php endif; ?>
+
+
+  <!-- ── Repeated repairs ── -->
+  <?php if ($tab === 'repeat'): ?>
+    <?php
+      // Grouped by model, because three of the same model coming back points at
+      // a part or a procedure. Deliberately not grouped by technician: whoever
+      // takes the hard jobs would top that list, and there is no money riding
+      // on this to justify reading it that way.
+      $by_model = [];
+      foreach ($repeat_rows as $r) {
+          $k = trim(($r['brand'] ?? '') . ' ' . ($r['model'] ?? '')) ?: '—';
+          if (!isset($by_model[$k])) $by_model[$k] = ['count' => 0, 'days' => []];
+          $by_model[$k]['count']++;
+          $by_model[$k]['days'][] = (int)$r['days'];
+      }
+      uasort($by_model, fn($a, $b) => $b['count'] <=> $a['count']);
+    ?>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem;">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:28px;font-weight:600;color:#e8860a;"><?= count($repeat_rows) ?></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('reports.repeat_count') ?></div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:28px;font-weight:600;color:var(--text-secondary);"><?= repeat_repair_window() ?></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('reports.repeat_window') ?></div>
+      </div>
+    </div>
+
+    <?php if (!$repeat_rows): ?>
+      <div class="card"><p style="font-size:13px;color:var(--text-muted);margin:0;"><?= __('reports.repeat_none') ?></p></div>
+    <?php else: ?>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;"><?= __('reports.repeat_by_model') ?></h2>
+        <table class="data-table">
+          <thead><tr>
+            <th><?= __('rma.model') ?></th>
+            <th style="width:120px;text-align:center;"><?= __('reports.repeat_count') ?></th>
+            <th style="width:160px;text-align:center;"><?= __('reports.repeat_fastest') ?></th>
+          </tr></thead>
+          <tbody>
+            <?php foreach ($by_model as $model => $g): ?>
+              <tr>
+                <td style="font-weight:500;"><?= htmlspecialchars($model) ?></td>
+                <td style="text-align:center;"><?= $g['count'] ?></td>
+                <td style="text-align:center;color:var(--text-muted);"><?= min($g['days']) ?></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;"><?= __('reports.repeat_each') ?></h2>
+        <table class="data-table">
+          <thead><tr>
+            <th style="width:110px;"><?= __('label.rma') ?></th>
+            <th><?= __('rma.model') ?></th>
+            <th style="width:150px;"><?= __('rma.imei') ?> / <?= __('rma.sn') ?></th>
+            <th style="width:110px;"><?= __('reports.repeat_previous') ?></th>
+            <th style="width:90px;text-align:center;"><?= __('reports.repeat_days') ?></th>
+            <th><?= __('pdf.works_done') ?></th>
+          </tr></thead>
+          <tbody>
+            <?php foreach ($repeat_rows as $r): ?>
+              <tr>
+                <td><a href="/rma/<?= (int)($r['id'] ?? 0) ?>" style="color:var(--accent);text-decoration:none;"><?= htmlspecialchars($r['rma_number']) ?></a></td>
+                <td><?= htmlspecialchars(trim(($r['brand'] ?? '') . ' ' . ($r['model'] ?? '')) ?: '—') ?></td>
+                <td style="font-size:12px;"><a href="/device/<?= rawurlencode((string)$r['ident']) ?>" style="color:var(--accent);text-decoration:none;"><?= htmlspecialchars((string)$r['ident']) ?></a></td>
+                <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars((string)$r['prev_rma']) ?></td>
+                <td style="text-align:center;">
+                  <span class="badge" style="background:#faeeda;color:#633806;border:0.5px solid #ef9f27;"><?= (int)$r['days'] ?></span>
+                </td>
+                <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars(mb_strimwidth((string)($r['prev_works'] ?? ''), 0, 90, '…')) ?></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+
+    <?php endif; ?>
   <?php endif; ?>
 
 </div>
