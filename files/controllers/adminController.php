@@ -535,6 +535,9 @@ class AdminController {
             $repair_statuses = db_rows('SELECT * FROM repair_statuses ORDER BY sort_order, label');
         } elseif ($tab === 'couriers') {
             $couriers = db_rows('SELECT * FROM couriers ORDER BY name');
+        } elseif ($tab === 'insurance') {
+            $insurers       = db_rows('SELECT * FROM insurers WHERE deleted_at IS NULL ORDER BY name');
+            $coverage_items = db_rows('SELECT * FROM insurance_coverage_items ORDER BY sort_order, label');
         }
 
         include views_path('layout/header.php');
@@ -639,6 +642,109 @@ class AdminController {
         $_SESSION['flash'] = ['type'=>'success','message'=>__('admin.status_updated')];
         header('Location: /administration?tab=statuses');
         exit;
+    }
+
+    // ── Insurance: insurers and the coverage list ────────────────
+    //
+    // Both are configuration rather than daily work — a handful of rows that
+    // policies then point at — so they live in Administracija. Policies
+    // themselves are operational and get their own screen.
+
+    private function insurer_data(): array {
+        return [
+            'name'           => trim($_POST['name'] ?? ''),
+            'contact_person' => trim($_POST['contact_person'] ?? '') ?: null,
+            'email'          => trim($_POST['email'] ?? '') ?: null,
+            'phone'          => trim($_POST['phone'] ?? '') ?: null,
+            'portal_url'     => trim($_POST['portal_url'] ?? '') ?: null,
+            // How long after the incident this insurer accepts a report. Left at
+            // 0 until somebody asks them, so the app never invents a deadline.
+            'report_hours'   => max(0, min(8760, (int)($_POST['report_hours'] ?? 0))),
+        ];
+    }
+
+    public function insurer_store(): void {
+        require_login();
+        require_permission('administration', 'create');
+        $data = $this->insurer_data();
+        if ($data['name'] === '') {
+            $_SESSION['flash'] = ['type' => 'danger', 'message' => __('ins.name_required')];
+            header('Location: /administration?tab=insurance'); exit;
+        }
+        $id = db_insert('insurers', $data);
+        audit('created', 'insurer', $id);
+        $_SESSION['flash'] = ['type' => 'success', 'message' => __('ins.insurer_saved')];
+        header('Location: /administration?tab=insurance'); exit;
+    }
+
+    public function insurer_update(): void {
+        require_login();
+        require_permission('administration', 'edit');
+        $id   = (int)($_POST['id'] ?? 0);
+        $data = $this->insurer_data();
+        if (!$id || $data['name'] === '') {
+            $_SESSION['flash'] = ['type' => 'danger', 'message' => __('ins.name_required')];
+            header('Location: /administration?tab=insurance'); exit;
+        }
+        db_update('insurers', $data, 'id = ?', [$id]);
+        audit('updated', 'insurer', $id);
+        $_SESSION['flash'] = ['type' => 'success', 'message' => __('ins.insurer_saved')];
+        header('Location: /administration?tab=insurance'); exit;
+    }
+
+    private function coverage_data(): array {
+        return [
+            'label'      => trim($_POST['label'] ?? ''),
+            'label_me'   => trim($_POST['label_me'] ?? '') ?: null,
+            'code'       => trim($_POST['code'] ?? ''),
+            'sort_order' => max(0, min(999, (int)($_POST['sort_order'] ?? 10))),
+        ];
+    }
+
+    public function coverage_store(): void {
+        require_login();
+        require_permission('administration', 'create');
+        $data = $this->coverage_data();
+        if ($data['label'] === '' || $data['code'] === '') {
+            $_SESSION['flash'] = ['type' => 'danger', 'message' => __('admin.status_label_code_required')];
+            header('Location: /administration?tab=insurance'); exit;
+        }
+        $data['is_active'] = 1;
+        $id = db_insert('insurance_coverage_items', $data);
+        audit('created', 'coverage_item', $id);
+        $_SESSION['flash'] = ['type' => 'success', 'message' => __('ins.coverage_saved')];
+        header('Location: /administration?tab=insurance'); exit;
+    }
+
+    public function coverage_update(): void {
+        require_login();
+        require_permission('administration', 'edit');
+        $id   = (int)($_POST['id'] ?? 0);
+        $data = $this->coverage_data();
+        if (!$id || $data['label'] === '' || $data['code'] === '') {
+            $_SESSION['flash'] = ['type' => 'danger', 'message' => __('admin.status_label_code_required')];
+            header('Location: /administration?tab=insurance'); exit;
+        }
+
+        // Policies store the code, not the id, so renaming one in use would
+        // quietly drop that item from every policy that ticked it. Labels are
+        // free to change — a code that is in use is not.
+        $old = db_val('SELECT code FROM insurance_coverage_items WHERE id = ?', [$id]);
+        $locked = false;
+        if ($old !== null && $old !== $data['code']) {
+            $in_use = (int) db_val(
+                'SELECT COUNT(*) FROM insurance_policies WHERE deleted_at IS NULL AND coverage LIKE ?',
+                ['%' . $old . '%']
+            );
+            if ($in_use) { unset($data['code']); $locked = true; }
+        }
+
+        db_update('insurance_coverage_items', $data, 'id = ?', [$id]);
+        audit('updated', 'coverage_item', $id);
+        $_SESSION['flash'] = $locked
+            ? ['type' => 'success', 'message' => __('ins.code_locked')]
+            : ['type' => 'success', 'message' => __('ins.coverage_saved')];
+        header('Location: /administration?tab=insurance'); exit;
     }
 
     /**
