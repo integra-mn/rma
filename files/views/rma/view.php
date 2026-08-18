@@ -12,7 +12,7 @@
         <?php if ($rma['location_name'] ?? null): ?>&nbsp;&middot;&nbsp;<?= htmlspecialchars($rma['location_name']) ?><?php endif; ?>
       </p>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-          <span class="badge" style="<?= ($rma['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;' : 'background:'.htmlspecialchars($rma['status_color']).'22;color:'.htmlspecialchars($rma['status_color']).';'.'border:0.5px solid '.htmlspecialchars($rma['status_color']).'66;' ?>">
+          <span class="badge" style="<?= ($rma['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;' : 'background:'.htmlspecialchars($rma['status_color']).'22;color:'.htmlspecialchars($rma['status_color']).';' ?>">
             <?= status_label((string)($rma['status_code'] ?? ''), $rma['status_label']) ?>
           </span>
           <?php if ($rma['is_warranty']): ?>
