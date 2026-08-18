@@ -1017,7 +1017,6 @@ Track the repair here:
     'ins.claim_split'            => 'insurer :insurer €, customer :customer € (:pct%)',
     'ins.claim_saved'            => 'Claim updated.',
     'ins.claim_bad_move'         => 'A claim cannot go from where it is to there. Nothing was changed.',
-    'ins.queue'             => 'Claims',
     'ins.q_to_report'       => 'To report',
     'ins.q_with_them'       => 'With the insurer',
     'ins.q_with_us'         => 'Waiting on us',

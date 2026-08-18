@@ -18,7 +18,7 @@ class ClaimsController {
         require_login();
         require_permission('claims', 'view');
 
-        $page_title = __('ins.queue');
+        $page_title = __('ins.title');
 
         // Everything the queue needs about a claim, in one shape.
         $base = "SELECT c.*, p.policy_number, p.participation_pct,

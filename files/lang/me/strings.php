@@ -1017,7 +1017,6 @@ Status popravke pratite ovdje:
     'ins.claim_split'            => 'osiguranje :insurer €, korisnik :customer € (:pct%)',
     'ins.claim_saved'            => 'Prijava je ažurirana.',
     'ins.claim_bad_move'         => 'Prijava ne može iz trenutnog stanja preći u to. Ništa nije promijenjeno.',
-    'ins.queue'             => 'Prijave',
     'ins.q_to_report'       => 'Za prijavu',
     'ins.q_with_them'       => 'Kod osiguravača',
     'ins.q_with_us'         => 'Čeka nas',
