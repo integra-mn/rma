@@ -118,7 +118,11 @@ body.theme-focus {
   padding: 16px 12px 0;
 }
 .sidebar-logo {
-  padding: 8px 12px;   /* + sidebar's 16px top / 12px sides = 24px above & left */
+  /* + sidebar's 16px top / 12px sides = 24px above & left, which is exactly
+     where the menu icons begin (12 + 12) — logo edge and icon column form one
+     line. It therefore sits ~2.75px left of the icons' visible artwork, which
+     is inset inside its box; looked at on screen and accepted, so leave it. */
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   margin-bottom: 25px;   /* ~40px of clear space below the logo */
