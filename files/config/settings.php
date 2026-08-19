@@ -17,6 +17,37 @@ function setting_on(string $key, bool $default = false): bool {
     return $v === true || $v === 1 || $v === '1';
 }
 
+/**
+ * What Appearance looks like before anybody touches it.
+ *
+ * These numbers were written out three times — in the layout that renders them,
+ * in the form that edits them and in the handler that saves them — and the three
+ * had already drifted: border_radius read 12 in one and 8 in the other two. A
+ * fallback that disagrees with itself is worse than no fallback, because reading
+ * the code tells you the wrong thing about a running system.
+ *
+ * The values are the ones Rajo settled on: 16px text throughout, a 22px icon,
+ * 14px between the two (that last one lives in app.css, where the sidebar is
+ * drawn — it is not a saved setting).
+ */
+const APPEARANCE_DEFAULTS = [
+    'sidebar_width'     => 280,
+    'topbar_height'     => 60,
+    'font_size'         => 16,
+    'sidebar_font_size' => 16,
+    'border_radius'     => 6,
+];
+
+/** One appearance default, by name. */
+function appearance_default(string $key): int {
+    return APPEARANCE_DEFAULTS[$key] ?? 0;
+}
+
+/** A saved appearance value, or the shared default when nothing is saved. */
+function appearance(string $key): int {
+    return (int) setting($key, appearance_default($key));
+}
+
 function setting(string $key, mixed $default = null, ?int $location_id = null): mixed {
     static $cache = [];
 

@@ -85,11 +85,11 @@ function nav_active(string $prefix): string {
     // Apply admin appearance settings as CSS overrides. Colour values are
     // already validated in settings_save (#RRGGBB), so we only do a final
     // belt-and-braces filter_var() before interpolation.
-    $sw   = (int)setting('sidebar_width', 250);
-    $th   = (int)setting('topbar_height', 64);
-    $fs   = (int)setting('font_size', 14);
-    $sfs  = (int)setting('sidebar_font_size', 13);
-    $br   = (int)setting('border_radius', 12);
+    $sw   = appearance('sidebar_width');
+    $th   = appearance('topbar_height');
+    $fs   = appearance('font_size');
+    $sfs  = appearance('sidebar_font_size');
+    $br   = appearance('border_radius');
     $td   = setting('table_density', 'normal');
     $td_pad = match($td) { 'compact' => '5px 8px', 'comfortable' => '13px 12px', default => '9px 10px' };
 

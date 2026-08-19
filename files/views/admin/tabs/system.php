@@ -298,23 +298,23 @@
       <div class="form-grid" style="grid-template-columns:repeat(5,1fr)">
         <div class="field">
           <label><?= __('settings.sidebar_width') ?></label>
-          <input type="number" name="sidebar_width" value="<?= (int)setting('sidebar_width', 250) ?>" min="200" max="360">
+          <input type="number" name="sidebar_width" value="<?= appearance('sidebar_width') ?>" min="200" max="360">
         </div>
         <div class="field">
           <label><?= __('settings.topbar_height') ?></label>
-          <input type="number" name="topbar_height" value="<?= (int)setting('topbar_height', 64) ?>" min="48" max="100">
+          <input type="number" name="topbar_height" value="<?= appearance('topbar_height') ?>" min="48" max="100">
         </div>
         <div class="field">
           <label><?= __('settings.base_font_size') ?></label>
-          <input type="number" name="font_size" value="<?= (int)setting('font_size', 14) ?>" min="12" max="18">
+          <input type="number" name="font_size" value="<?= appearance('font_size') ?>" min="12" max="18">
         </div>
         <div class="field">
           <label><?= __('settings.sidebar_font_size') ?></label>
-          <input type="number" name="sidebar_font_size" value="<?= (int)setting('sidebar_font_size', 13) ?>" min="12" max="18">
+          <input type="number" name="sidebar_font_size" value="<?= appearance('sidebar_font_size') ?>" min="12" max="18">
         </div>
         <div class="field">
           <label><?= __('settings.border_radius') ?></label>
-          <input type="number" name="border_radius" value="<?= (int)setting('border_radius', 8) ?>" min="0" max="20">
+          <input type="number" name="border_radius" value="<?= appearance('border_radius') ?>" min="0" max="20">
         </div>
       </div>
 

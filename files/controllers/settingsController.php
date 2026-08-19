@@ -49,11 +49,11 @@ class SettingsController {
     private function save_appearance(): void {
         // Layout / typography stay global.
         $fields = [
-            'sidebar_width'          => ['int',    (string)max(200, min(360, (int)($_POST['sidebar_width'] ?? 250)))],
-            'topbar_height'          => ['int',    (string)max(48,  min(100, (int)($_POST['topbar_height'] ?? 64)))],
-            'font_size'              => ['int',    (string)max(12,  min(18,  (int)($_POST['font_size'] ?? 14)))],
-            'sidebar_font_size'      => ['int',    (string)max(12,  min(18,  (int)($_POST['sidebar_font_size'] ?? 13)))],
-            'border_radius'          => ['int',    (string)max(0,   min(20,  (int)($_POST['border_radius'] ?? 8)))],
+            'sidebar_width'          => ['int',    (string)max(200, min(360, (int)($_POST['sidebar_width'] ?? appearance_default('sidebar_width'))))],
+            'topbar_height'          => ['int',    (string)max(48,  min(100, (int)($_POST['topbar_height'] ?? appearance_default('topbar_height'))))],
+            'font_size'              => ['int',    (string)max(12,  min(18,  (int)($_POST['font_size'] ?? appearance_default('font_size'))))],
+            'sidebar_font_size'      => ['int',    (string)max(12,  min(18,  (int)($_POST['sidebar_font_size'] ?? appearance_default('sidebar_font_size'))))],
+            'border_radius'          => ['int',    (string)max(0,   min(20,  (int)($_POST['border_radius'] ?? appearance_default('border_radius'))))],
             'table_density'          => ['string', in_array($_POST['table_density']??'',['compact','normal','comfortable']) ? $_POST['table_density'] : 'normal'],
             'app_font'               => ['string', array_key_exists($_POST['app_font'] ?? '', APP_FONTS) ? $_POST['app_font'] : 'Montserrat'],
             'tab_style'              => ['string', in_array($_POST['tab_style'] ?? '', ['underline','boxed']) ? $_POST['tab_style'] : 'underline'],

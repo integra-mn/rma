@@ -137,7 +137,11 @@ body.theme-focus {
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 12px;
+  /* 14px, which reads as ~16.75px: the artwork fills the middle 75% of its box,
+     so a 22px icon carries 2.75px of its own margin on each side. Set against
+     16px text and 22px icons — the three were chosen together and only look
+     right together. */
+  gap: 14px;
   padding: 8px 12px;   /* + sidebar's 12px = 24px, aligned with the logo */
   font-size: 15px;
   color: var(--sidebar-text);
