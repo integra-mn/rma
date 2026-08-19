@@ -284,9 +284,18 @@ function nav_active(string $prefix): string {
 
   <?php if (can('customers', 'view')): ?>
   <a href="/customers" class="sidebar-link<?= nav_active('/customers') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <circle cx="8" cy="5" r="3"/>
-      <path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5"/>
+    <?php // Zaposleni from Odmori, drawn line for line: one figure in front and
+          // a second behind it. Korisnici is a list of people, and a list reads
+          // as more than one — the single head that stood here said "a person",
+          // not "the people we serve".
+          //
+          // 24-unit box, so stroke 2.25 for the same reason as the gear and the
+          // wrench beside it: at 20px on screen a 24-box unit is smaller than a
+          // 16-box one, and 1.5 would draw this thinner than its neighbours.
+          // Odmori's own 1.75 belongs to a sidebar at a different size. ?>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="8" r="3.5"/>
+      <path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.9-1.9-5-4.5-5.7"/>
     </svg>
     <?= __('nav.customers') ?>
   </a>
