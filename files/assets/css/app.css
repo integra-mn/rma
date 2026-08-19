@@ -171,7 +171,11 @@ body.theme-focus {
   border-left: 5px solid var(--accent);
   border-radius: 0;
 }
-.sidebar-link svg { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.7; }
+/* 24px, drawn on a 24-unit grid at stroke 1.75 — the same three numbers Odmori
+   uses, so one unit in the file is one pixel on screen and the two apps' menus
+   weigh the same. Resting opacity matches too: at 0.7 the icons sat further
+   back than the words beside them. */
+.sidebar-link svg { width: 24px; height: 24px; flex-shrink: 0; opacity: 0.85; }
 .sidebar-link.active svg, .sidebar-link:hover svg { opacity: 1; }
 .sidebar-footer {
   margin-top: auto;

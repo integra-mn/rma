@@ -154,24 +154,34 @@ function nav_active(string $prefix): string {
   <?php if (can('rma', 'view') || can('repair', 'view') || can('parts', 'view')): ?>
   <?php endif; ?>
 
-  <?php if ($role === 'partner'): ?>
+  <?php
+  // Icon rule for this menu, in one place. Every icon: viewBox 0 0 24 24,
+  // stroke 1.75, round caps and joins, artwork inset 3 -> 21 (75% of the box).
+  // The CSS renders them at 24px, so one drawing unit is one screen pixel and
+  // the numbers in these files mean what they say — no per-icon arithmetic.
+  //
+  // These are Odmori's three numbers. The two apps sit on the same desk and
+  // their menus now weigh the same. Anything copied from there drops straight
+  // in; anything drawn for a 16 grid has to be scaled by 1.5 first.
+?>
+<?php if ($role === 'partner'): ?>
     <!-- Partner portal sidebar — only portal routes visible. -->
     <a href="/portal" class="sidebar-link<?= $uri === '/portal' ? ' active' : '' ?>" style="margin-top:7px;">
-      <?php // Inset 2 -> 14, so the portal's Pregled is drawn exactly like the
-            // staff one. Same concept, same picture — the portal is this app
-            // wearing a different hat, not a different app. ?>
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="2" y="2" width="5" height="5" rx="1"/>
-        <rect x="9" y="2" width="5" height="5" rx="1"/>
-        <rect x="2" y="9" width="5" height="5" rx="1"/>
-        <rect x="9" y="9" width="5" height="5" rx="1"/>
+      <?php // Drawn exactly like the staff Pregled. Same concept, same picture
+            // — the portal is this app wearing a different hat, not a
+            // different app. ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/>
+        <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/>
+        <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/>
+        <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>
       </svg>
       <?= __('nav.dashboard') ?>
     </a>
       <a href="/portal/rma" class="sidebar-link<?= nav_active('/portal/rma') ?>">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="2" y="2" width="12" height="12" rx="2"/>
-        <path d="M5 8h6M5 5h6M5 11h4"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <path d="M7.5 12h9M7.5 7.5h9M7.5 16.5h6"/>
       </svg>
       <?= __('nav.my_rmas') ?>
     </a>
@@ -179,24 +189,23 @@ function nav_active(string $prefix): string {
   <?php else: ?>
   <!-- Staff sidebar — permissions-gated per module. -->
   <a href="/" class="sidebar-link<?= $uri === '/' ? ' active' : '' ?>" style="margin-top:7px;">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <?php // Inset to 2 -> 14 like every other icon in this menu. Drawn
-            // 1 -> 15 before, which is a 14-unit shape in a box the others fill
-            // to 12 — same frame, artwork 17% larger, and it read heavier than
-            // its neighbours. ?>
-      <rect x="2" y="2" width="5" height="5" rx="1"/>
-      <rect x="9" y="2" width="5" height="5" rx="1"/>
-      <rect x="2" y="9" width="5" height="5" rx="1"/>
-      <rect x="9" y="9" width="5" height="5" rx="1"/>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <?php // Inset like every other icon in this menu. It once ran nearly
+            // edge to edge, which put a larger shape in the same frame and made
+            // it read heavier than its neighbours. ?>
+      <rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/>
+      <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/>
+      <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/>
+      <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>
     </svg>
     <?= __('nav.dashboard') ?>
   </a>
 
   <?php if (can('rma', 'view')): ?>
   <a href="/rma" class="sidebar-link<?= nav_active('/rma') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <rect x="2" y="2" width="12" height="12" rx="2"/>
-      <path d="M5 8h6M5 5h6M5 11h4"/>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="3"/>
+      <path d="M7.5 12h9M7.5 7.5h9M7.5 16.5h6"/>
     </svg>
     <?= __('nav.rma') ?>
   </a>
@@ -208,10 +217,8 @@ function nav_active(string $prefix): string {
           // shaft with a round head and no opening, which is a screwdriver at
           // best.
           //
-          // 24-unit box and stroke 2.25 for the same reason as the gear: at
-          // 20px on screen a 24-box unit is smaller, so 1.5 would draw this
-          // thinner than the icons beside it. Both land on 1.875px. ?>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+          // Was already on the 24 grid before the menu moved there. ?>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
       <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
     </svg>
     <?= __('nav.repairs') ?>
@@ -220,9 +227,9 @@ function nav_active(string $prefix): string {
 
   <?php if (can('claims', 'view')): ?>
   <a href="/claims" class="sidebar-link<?= nav_active('/claims') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M8 1.5 2.5 3.5v4c0 3 2.3 5.6 5.5 6.9 3.2-1.3 5.5-3.9 5.5-6.9v-4L8 1.5z"/>
-      <path d="M5.8 7.8 7.3 9.3l3-3.2"/>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2.25 3.75 5.25v6c0 4.5 3.45 8.4 8.25 10.35 4.8-1.95 8.25-5.85 8.25-10.35v-6L12 2.25z"/>
+      <path d="M8.7 11.7 10.95 13.95l4.5-4.8"/>
     </svg>
     <?= __('ins.title') ?>
   </a>
@@ -230,12 +237,12 @@ function nav_active(string $prefix): string {
 
   <?php if (can('shipments', 'view')): ?>
   <a href="/shipments" class="sidebar-link<?= nav_active('/shipments') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
       <?php // The carton Dijelovi carried until now: a parcel is what this
-            // section moves. The van it replaces was drawn 1 -> 15, wider than
-            // anything else in the menu. ?>
-      <path d="M8 2L14 5.5v5L8 14 2 10.5v-5L8 2z"/>
-      <path d="M8 2v12M2 5.5l6 3.5 6-3.5"/>
+            // section moves. The van it replaces ran nearly edge to edge,
+            // wider than anything else in the menu. ?>
+      <path d="M12 3L21 8.25v7.5L12 21 3 15.75v-7.5L12 3z"/>
+      <path d="M12 3v18M3 8.25l9 5.25 9-5.25"/>
     </svg>
     <?= __('nav.shipments') ?>
   </a>
@@ -245,11 +252,11 @@ function nav_active(string $prefix): string {
   <!-- Suppliers is a Parts tab but keeps its own /suppliers URL, so the
        highlight has to cover both or the sidebar goes blank on that tab. -->
   <a href="/parts" class="sidebar-link<?= nav_active('/parts') ?: nav_active('/suppliers') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
       <?php // A component, not a carton — the carton has gone to Posiljke,
             // where a parcel is the thing being described. ?>
-      <rect x="4.5" y="4.5" width="7" height="7" rx="1"/>
-      <path d="M6.5 2v2.5M9.5 2v2.5M6.5 11.5V14M9.5 11.5V14M2 6.5h2.5M2 9.5h2.5M11.5 6.5H14M11.5 9.5H14"/>
+      <rect x="6.75" y="6.75" width="10.5" height="10.5" rx="1.5"/>
+      <path d="M9.75 3v3.75M14.25 3v3.75M9.75 17.25V21M14.25 17.25V21M3 9.75h3.75M3 14.25h3.75M17.25 9.75H21M17.25 14.25H21"/>
     </svg>
     <?= __('nav.parts') ?>
   </a>
@@ -257,9 +264,9 @@ function nav_active(string $prefix): string {
 
   <?php if (can('devices', 'view')): ?>
   <a href="/devices" class="sidebar-link<?= nav_active('/devices') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="4.5" y="1.5" width="7" height="13" rx="1.5"/>
-      <line x1="6.8" y1="12.6" x2="9.2" y2="12.6"/>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6.75" y="2.25" width="10.5" height="19.5" rx="2.25"/>
+      <line x1="10.2" y1="18.9" x2="13.8" y2="18.9"/>
     </svg>
     <?= __('nav.devices') ?>
   </a>
@@ -273,9 +280,9 @@ function nav_active(string $prefix): string {
           // while Korisnici are individuals. Two heads here said the same thing
           // as the single head there, so the menu used one idea for two
           // different lists. ?>
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <rect x="2" y="5" width="12" height="8.5" rx="1.5"/>
-      <path d="M6 5V3.5h4V5M2 8.75h12"/>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="7.5" width="18" height="12.75" rx="2.25"/>
+      <path d="M9 7.5V5.25h6V7.5M3 13.125h18"/>
     </svg>
     <?= __('nav.partners') ?>
   </a>
@@ -289,11 +296,8 @@ function nav_active(string $prefix): string {
           // as more than one — the single head that stood here said "a person",
           // not "the people we serve".
           //
-          // 24-unit box, so stroke 2.25 for the same reason as the gear and the
-          // wrench beside it: at 20px on screen a 24-box unit is smaller than a
-          // 16-box one, and 1.5 would draw this thinner than its neighbours.
-          // Odmori's own 1.75 belongs to a sidebar at a different size. ?>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+          // Odmori's file, unchanged — same grid, same stroke, same size. ?>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="9" cy="8" r="3.5"/>
       <path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.9-1.9-5-4.5-5.7"/>
     </svg>
@@ -303,12 +307,12 @@ function nav_active(string $prefix): string {
 
   <?php if (can('invoicing', 'view')): ?>
   <a href="/invoices" class="sidebar-link<?= nav_active('/invoices') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
       <?php // A clipboard rather than a bare sheet. The old one reached
-            // 1 -> 15, taller than every icon beside it. ?>
-      <rect x="3" y="2.5" width="10" height="11.5" rx="1.5"/>
-      <path d="M6 2.5V4h4V2.5"/>
-      <path d="M5.8 7.5h4.4M5.8 10.5h3"/>
+            // nearly edge to edge, taller than every icon beside it. ?>
+      <rect x="4.5" y="3.75" width="15" height="17.25" rx="2.25"/>
+      <path d="M9 3.75V6h6V3.75"/>
+      <path d="M8.7 11.25h6.6M8.7 15.75h4.5"/>
     </svg>
     <?= __('nav.invoices') ?>
   </a>
@@ -316,17 +320,14 @@ function nav_active(string $prefix): string {
 
   <?php if (can('reports', 'view')): ?>
   <a href="/reports" class="sidebar-link<?= nav_active('/reports') ?>">
-    <?php // Bars on a baseline. The frame this replaces ran 1 -> 15 and read as
-          // a filled square before it read as a chart — one of the last two
-          // icons touching the edges of its box. ?>
     <?php // A board on a stand with a rising line: a report being shown to
           // somebody, rather than a chart floating on its own. The screen is
-          // 8 units deep, so it stays lighter than the full-bleed frame this
-          // section carried before today. ?>
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="2" y="2.5" width="12" height="8" rx="1"/>
-      <path d="M8 10.5v3M5.5 13.5h5"/>
-      <path d="M4.8 8 7 5.9l1.6 1.5L11.2 4.7"/>
+          // half the box deep, so it stays lighter than the full-bleed frame
+          // this section carried before. ?>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3.75" width="18" height="12" rx="1.5"/>
+      <path d="M12 15.75v4.5M8.25 20.25h7.5"/>
+      <path d="M7.2 12 10.5 8.85l2.4 2.25L16.8 7.05"/>
     </svg>
     <?= __('nav.reports') ?>
   </a>
@@ -337,10 +338,10 @@ function nav_active(string $prefix): string {
        you could tick the boxes and nothing happened. -->
   <?php if (can('administration', 'view')): ?>
   <a href="/administration" class="sidebar-link<?= nav_active('/administration') ?>">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-      <circle cx="6" cy="5" r="2.5"/>
-      <path d="M1 14c0-3 2.2-4.5 5-4.5s5 1.5 5 4.5"/>
-      <path d="M11 2l1.5 1.5L14 2M11 5l1.5 1.5L14 5"/>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="7.5" r="3.75"/>
+      <path d="M1.5 21c0-4.5 3.3-6.75 7.5-6.75s7.5 2.25 7.5 6.75"/>
+      <path d="M16.5 3l2.25 2.25L21 3M16.5 7.5l2.25 2.25L21 7.5"/>
     </svg>
     <?= __('nav.administration') ?>
   </a>
@@ -351,12 +352,9 @@ function nav_active(string $prefix): string {
           // spokes and no rim, which is how a sun is drawn — a cog reads as a
           // cog because of the toothed outline.
           //
-          // 24-unit box, unlike the 16 used elsewhere, because this path needs
-          // the room for its lobes; the artwork still fills 75% of it, matching
-          // 12-in-16. Stroke 2.25 rather than 1.5 for the same reason: at 20px
-          // on screen a 24-box unit is smaller, and 1.5 here would draw thinner
-          // than every icon beside it. 1.875px on screen either way. ?>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+          // The first icon here to need the 24 grid, back when the rest of the
+          // menu was drawn on 16. ?>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="3"/>
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
     </svg>
