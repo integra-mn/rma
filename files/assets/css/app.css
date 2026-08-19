@@ -171,11 +171,13 @@ body.theme-focus {
   border-left: 5px solid var(--accent);
   border-radius: 0;
 }
-/* 24px, drawn on a 24-unit grid at stroke 1.75 — the same three numbers Odmori
-   uses, so one unit in the file is one pixel on screen and the two apps' menus
-   weigh the same. Resting opacity matches too: at 0.7 the icons sat further
-   back than the words beside them. */
-.sidebar-link svg { width: 24px; height: 24px; flex-shrink: 0; opacity: 0.85; }
+/* Drawn on a 24-unit grid at stroke 1.75 (Odmori's numbers) but rendered a
+   shade smaller: 22px against 16px menu text, where 24 sat a little large.
+   The grid is untouched, so icons still move between the two apps unedited —
+   only the frame they are painted into is 2px narrower, which draws the lines
+   at 1.6px rather than 1.75px. Resting opacity 0.85: at 0.7 the icons sat
+   further back than the words beside them. */
+.sidebar-link svg { width: 22px; height: 22px; flex-shrink: 0; opacity: 0.85; }
 .sidebar-link.active svg, .sidebar-link:hover svg { opacity: 1; }
 .sidebar-footer {
   margin-top: auto;
