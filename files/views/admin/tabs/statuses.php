@@ -143,16 +143,23 @@ $type   = 'rma';   // the store/update handlers still route on it
       </div>
       <div class="field">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
-          <input type="checkbox" name="is_terminal" id="f-terminal" value="1"
+          <input type="checkbox" name="notify" id="f-notify" value="1"
                  style="width:auto;height:auto;">
-          <?= __('admin.status_terminal') ?>
+          <?= __('admin.status_notify_label') ?>
         </label>
       </div>
       <div class="field">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
-          <input type="checkbox" name="notify" id="f-notify" value="1"
+          <input type="checkbox" name="can_recur" id="f-recur" value="1"
                  style="width:auto;height:auto;">
-          <?= __('admin.status_notify_label') ?>
+          <?= __('admin.status_recur_label') ?>
+        </label>
+      </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+          <input type="checkbox" name="is_terminal" id="f-terminal" value="1"
+                 style="width:auto;height:auto;">
+          <?= __('admin.status_terminal') ?>
         </label>
       </div>
       <div class="field">
@@ -167,14 +174,6 @@ $type   = 'rma';   // the store/update handlers still route on it
             </label>
           <?php endforeach; ?>
         </div>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_roles_hint') ?></p>
-      </div>
-      <div class="field">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
-          <input type="checkbox" name="can_recur" id="f-recur" value="1"
-                 style="width:auto;height:auto;">
-          <?= __('admin.status_recur_label') ?>
-        </label>
       </div>
       <?php // Boxes rather than a dropdown, because "oboje" was never a third
             // thing — there are two records a status can sit on, and both can be
