@@ -16,30 +16,34 @@ $type   = 'rma';   // the store/update handlers still route on it
       <?= __('admin.add_rma_status') ?>
     </button>
   </div>
+  <?php // Percentages, not pixels: table-layout:fixed shares the width out by
+        // proportion, and the pixel widths this carried added to 1210 in a
+        // 1200px table - over budget before Akcije was given anything, so the
+        // browser was shrinking all of them to fit. Rajo's split, adding to 100. ?>
   <table class="data-table" style="table-layout:fixed;width:100%;">
     <thead>
       <tr>
-        <th style="width:100px;"><?= __('label.color') ?></th>
+        <th style="width:5%;"><?= __('label.color') ?></th>
         <?php // The English name is only worth a column to somebody reading in
               // English; in Montenegrin it is a second copy of the next column.
               // Kod is gone altogether — it belongs to the database, and the
               // edit dialog still shows it to anyone who needs it. ?>
         <?php if ($lang_en): ?>
-          <th style="width:300px;"><?= __('admin.status_label') ?></th>
-          <th style="width:300px;"><?= __('admin.status_label_me') ?></th>
+          <th style="width:12.5%;"><?= __('admin.status_label') ?></th>
+          <th style="width:12.5%;"><?= __('admin.status_label_me') ?></th>
         <?php else: ?>
-          <th style="width:340px;"><?= __('admin.status_label') ?></th>
+          <th style="width:25%;"><?= __('admin.status_label') ?></th>
         <?php endif; ?>
         <?php // Same order as the dialog: the three yes/no answers, then the
               // two "which of these" ones. Reading a row should feel like
               // reading the form that produced it. ?>
-        <th style="width:110px;text-align:center;"><?= __('admin.status_notify') ?></th>
-        <th style="width:110px;text-align:center;"><?= __('admin.status_recur') ?></th>
-        <th style="width:110px;text-align:center;"><?= __('admin.status_terminal_col') ?></th>
-        <th style="width:190px;"><?= __('admin.status_roles') ?></th>
-        <th style="width:150px;"><?= __('admin.status_applies') ?></th>
-        <th style="width:100px;text-align:center;"><?= __('label.sort_order') ?></th>
-        <th style="text-align:right;"><?= __('label.actions') ?></th>
+        <th style="width:10%;text-align:center;"><?= __('admin.status_notify') ?></th>
+        <th style="width:10%;text-align:center;"><?= __('admin.status_recur') ?></th>
+        <th style="width:10%;text-align:center;"><?= __('admin.status_terminal_col') ?></th>
+        <th style="width:12%;"><?= __('admin.status_roles') ?></th>
+        <th style="width:12%;"><?= __('admin.status_applies') ?></th>
+        <th style="width:8%;text-align:center;"><?= __('label.sort_order') ?></th>
+        <th style="width:8%;text-align:right;"><?= __('label.actions') ?></th>
       </tr>
     </thead>
     <tbody>
