@@ -815,7 +815,7 @@ return [
     'devices.new_brand' => 'Nova marka',
     'devices.edit_brand' => 'Izmjena brenda',
     'devices.brand_name_ph' => 'npr. Apple',
-    'devices.brand' => 'Marka',
+    'devices.brand' => 'Brand',
     'devices.confirm_delete_brand' => 'Obrisati ovu marku?',
     'devices.search_models' => 'Pretraga modela',
     'devices.new_model' => 'Novi model',
