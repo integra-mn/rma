@@ -5,7 +5,9 @@ defined('RMS') or die('Direct access not permitted');
 $sub = $_GET['sub'] ?? 'error';
 if (!in_array($sub, REPAIR_CODE_KINDS, true)) $sub = 'error';
 
-$rows = array_values(array_filter($codes, fn($c) => $c['kind'] === $sub));
+// The controller already selected this kind and paged it; filtering again
+// here would drop rows the pager has counted.
+$rows = $codes;
 // Same rule as Statusi: one name column, in the language the app is set to.
 $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
 ?>
@@ -100,6 +102,16 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
       <?php endforeach; ?>
     </tbody>
   </table>
+  <?php
+    // Shared pager. sub, and any filter in play, travel with the page number so
+    // paging inside a filtered list stays inside it.
+    $pg_page     = $code_page ?? 1;
+    $pg_total    = $code_total ?? count($rows);
+    $pg_per_page = $code_per_page ?? 100;
+    $pg_query    = ['tab' => 'codes', 'sub' => $sub, 'q' => $_GET['q'] ?? '',
+                    'brand' => $_GET['brand'] ?? '', 'category' => $_GET['category'] ?? ''];
+    include views_path('_partials/pager.php');
+  ?>
   <?php endif; ?>
 </div>
 

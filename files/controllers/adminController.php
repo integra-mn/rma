@@ -550,8 +550,13 @@ class AdminController {
             // fine for the handful of codes typed in by hand — TCL's import
             // brought 1,257, and a page holding all of them is a page nobody
             // waits for.
-            $code_where  = ['c.deleted_at IS NULL'];
-            $code_params = [];
+            // The kind belongs in the query, not in the view. It used to be
+            // filtered after paging, so a page of 100 rows could arrive holding
+            // 8 of the kind on screen and the pager counted both kinds.
+            $code_kind = in_array($_GET['sub'] ?? '', REPAIR_CODE_KINDS, true) ? $_GET['sub'] : 'error';
+
+            $code_where  = ['c.deleted_at IS NULL', 'c.kind = ?'];
+            $code_params = [$code_kind];
             if ($b = (int)($_GET['brand'] ?? 0))    { $code_where[] = 'c.brand_id = ?';    $code_params[] = $b; }
             if ($k = (int)($_GET['category'] ?? 0)) { $code_where[] = 'c.category_id = ?'; $code_params[] = $k; }
             if (($q = trim($_GET['q'] ?? '')) !== '') {
@@ -560,15 +565,23 @@ class AdminController {
             }
             $code_sql = implode(' AND ', $code_where);
 
-            $code_total = (int) db_val("SELECT COUNT(*) FROM repair_codes c WHERE {$code_sql}", $code_params);
-            $code_limit = 200;
+            // Paged rather than capped. A cap answers "here are the first 200"
+            // and says nothing about the rest, so a code on row 400 simply is
+            // not there as far as the reader can tell. 100 a page: a screenful
+            // to scan, and the shared pager keeps its width whether that is
+            // three pages or forty.
+            $code_total    = (int) db_val("SELECT COUNT(*) FROM repair_codes c WHERE {$code_sql}", $code_params);
+            $code_per_page = 100;
+            $code_page     = max(1, (int)($_GET['page'] ?? 1));
+            $code_offset   = ($code_page - 1) * $code_per_page;
+
             $codes = db_rows("SELECT c.*, b.name AS brand_name, cat.name AS category_name
                                 FROM repair_codes c
                                 LEFT JOIN device_brands b ON b.id = c.brand_id
                                 LEFT JOIN device_categories cat ON cat.id = c.category_id
                                WHERE {$code_sql}
                                ORDER BY c.kind, c.vendor_line, c.sort_order, c.code
-                               LIMIT {$code_limit}", $code_params);
+                               LIMIT {$code_per_page} OFFSET {$code_offset}", $code_params);
             // Two lists, because the two dropdowns ask different questions.
             // The form asks what a new code could belong to, so it offers every
             // brand. The filter asks what is worth narrowing to, so it offers
