@@ -22,10 +22,14 @@ $type   = 'rma';   // the store/update handlers still route on it
         <th style="width:280px;"><?= __('admin.status_label') ?></th>
         <th style="width:280px;"><?= __('admin.status_label_me') ?></th>
         <th style="width:180px;"><?= __('label.code') ?></th>
+        <?php // Same order as the dialog: the three yes/no answers, then the
+              // two "which of these" ones. Reading a row should feel like
+              // reading the form that produced it. ?>
         <th style="width:110px;text-align:center;"><?= __('admin.status_notify') ?></th>
-          <th style="width:190px;"><?= __('admin.status_roles') ?></th>
-          <th style="width:150px;"><?= __('admin.status_applies') ?></th>
-          <th style="width:110px;text-align:center;"><?= __('admin.status_recur') ?></th>
+        <th style="width:110px;text-align:center;"><?= __('admin.status_recur') ?></th>
+        <th style="width:110px;text-align:center;"><?= __('admin.status_terminal_col') ?></th>
+        <th style="width:190px;"><?= __('admin.status_roles') ?></th>
+        <th style="width:150px;"><?= __('admin.status_applies') ?></th>
         <th style="width:100px;text-align:center;"><?= __('label.sort_order') ?></th>
         <th style="text-align:right;"><?= __('label.actions') ?></th>
       </tr>
@@ -39,13 +43,17 @@ $type   = 'rma';   // the store/update handlers still route on it
           <td style="font-weight:500;"><?= htmlspecialchars($s['label']) ?></td>
           <td style="color:var(--text-secondary);"><?= htmlspecialchars($s['label_me'] ?? '') ?: '—' ?></td>
           <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars($s['code']) ?></td>
-          <td style="text-align:center;">
-            <?php if (!empty($s['notify'])): ?>
-              <span class="badge badge-pill-fixed" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('label.yes') ?></span>
-            <?php else: ?>
-              <span style="color:var(--text-muted);">&mdash;</span>
-            <?php endif; ?>
-          </td>
+          <?php
+            // Three columns, one question each, both answers spelled out. A
+            // dash for one side and nothing for the other made the reader work
+            // out which way each column ran.
+            $yn = fn(bool $on) => $on
+              ? '<span class="badge badge-pill-fixed" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;">' . __('label.yes') . '</span>'
+              : '<span class="badge badge-pill-fixed" style="background:#f4f4f0;color:#5f5e5a;border:0.5px solid #d3d1c7;">' . __('label.no') . '</span>';
+          ?>
+          <td style="text-align:center;"><?= $yn(!empty($s['notify'])) ?></td>
+          <td style="text-align:center;"><?= $yn((int)($s['can_recur'] ?? 1) === 1) ?></td>
+          <td style="text-align:center;"><?= $yn((int)($s['is_terminal'] ?? 0) === 1) ?></td>
             <?php $roles = status_roles($s['roles'] ?? null); ?>
             <td>
               <?php if (!$roles): ?>
@@ -70,15 +78,6 @@ $type   = 'rma';   // the store/update handlers still route on it
                     : 'background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;' ?>"><?= $scope_label ?></span>
               <?php if ((int)($s['is_terminal_job'] ?? 0) === 1 && $scope !== 'rma'): ?>
                 <div style="font-size:11px;color:var(--text-muted);margin-top:3px;"><?= __('admin.status_terminal_job_short') ?></div>
-              <?php endif; ?>
-            </td>
-            <?php // Da or Ne, both spelled out. A dash for "yes" and a phrase
-                  // for "no" made the reader work out which way the column ran. ?>
-            <td style="text-align:center;">
-              <?php if ((int)($s['can_recur'] ?? 1) === 1): ?>
-                <span class="badge badge-pill-fixed" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('label.yes') ?></span>
-              <?php else: ?>
-                <span class="badge badge-pill-fixed" style="background:#f4f4f0;color:#5f5e5a;border:0.5px solid #d3d1c7;"><?= __('label.no') ?></span>
               <?php endif; ?>
             </td>
           <td style="text-align:center;color:var(--text-muted);"><?= (int)$s['sort_order'] ?></td>
