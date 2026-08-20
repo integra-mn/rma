@@ -154,7 +154,6 @@ $type   = 'rma';   // the store/update handlers still route on it
                  style="width:auto;height:auto;">
           <?= __('admin.status_notify_label') ?>
         </label>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_notify_hint') ?></p>
       </div>
       <div class="field">
         <label><?= __('admin.status_roles_label') ?></label>
@@ -176,7 +175,6 @@ $type   = 'rma';   // the store/update handlers still route on it
                  style="width:auto;height:auto;">
           <?= __('admin.status_recur_label') ?>
         </label>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_recur_hint') ?></p>
       </div>
       <div class="field">
         <label><?= __('admin.status_applies_label') ?></label>
