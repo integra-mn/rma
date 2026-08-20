@@ -1480,4 +1480,14 @@ Status popravke pratite ovdje:
     'codes.not_found'            => 'Kod nije pronadjen.',
     'codes.code_label_required'  => 'Kod i naziv su obavezni.',
     'label.inactive'             => 'Neaktivno',
+    // Jedna lista statusa — gdje važi i završetak posla (korak 1)
+    'admin.status_applies'            => 'Koristi se na',
+    'admin.status_applies_label'      => 'Koristi se na',
+    'admin.status_applies_rma'        => 'Reklamacija',
+    'admin.status_applies_repair'     => 'Popravka',
+    'admin.status_applies_both'       => 'Oboje',
+    'admin.status_applies_hint'       => 'Gdje se ovaj status može postaviti: na reklamaciji na recepciji, na popravci u servisu, ili na oboje.',
+    'admin.status_terminal_job_label' => 'Završava rad u servisu',
+    'admin.status_terminal_job_hint'  => 'Odvojeno od završetka reklamacije. Popravljeno završava rad, a reklamacija ide dalje na Otpremljeno i Zatvoreno.',
+    'admin.status_terminal_job_short' => 'završava rad',
 ];

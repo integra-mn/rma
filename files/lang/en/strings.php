@@ -1480,4 +1480,14 @@ Track the repair here:
     'codes.not_found'            => 'Code not found.',
     'codes.code_label_required'  => 'Code and name are required.',
     'label.inactive'             => 'Inactive',
+    // One status list — scope and the bench's own terminal flag (step 1)
+    'admin.status_applies'            => 'Used on',
+    'admin.status_applies_label'      => 'Used on',
+    'admin.status_applies_rma'        => 'Case',
+    'admin.status_applies_repair'     => 'Repair',
+    'admin.status_applies_both'       => 'Both',
+    'admin.status_applies_hint'       => 'Where this status may be set: on the case at the counter, on the repair job at the bench, or on both.',
+    'admin.status_terminal_job_label' => 'Reaching it ends the repair work',
+    'admin.status_terminal_job_hint'  => 'Separate from the case being finished. Popravljeno ends the work while the case carries on to Otpremljeno and Zatvoreno.',
+    'admin.status_terminal_job_short' => 'ends the work',
 ];

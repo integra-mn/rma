@@ -683,6 +683,13 @@ class AdminController {
             // leaves the dropdown once passed. Ticked by default: a new status
             // hides from nobody until somebody says so.
             $data['can_recur'] = isset($_POST['can_recur']) ? 1 : 0;
+            // Where the status may be used, and — where work happens — whether
+            // reaching it ends that work. Case-only statuses keep 0: the form
+            // hides the tick, so an absent box must not read as "unticked by
+            // the admin" on something that never had the question.
+            $scope = status_applies_to($_POST['applies_to'] ?? null);
+            $data['applies_to']      = $scope;
+            $data['is_terminal_job'] = ($scope !== 'rma' && isset($_POST['is_terminal_job'])) ? 1 : 0;
         }
 
         db_insert($table, $data);
@@ -730,6 +737,13 @@ class AdminController {
         if ($type === 'rma') {
             $data['roles']     = $this->status_roles_input();
             $data['can_recur'] = isset($_POST['can_recur']) ? 1 : 0;
+            // Where the status may be used, and — where work happens — whether
+            // reaching it ends that work. Case-only statuses keep 0: the form
+            // hides the tick, so an absent box must not read as "unticked by
+            // the admin" on something that never had the question.
+            $scope = status_applies_to($_POST['applies_to'] ?? null);
+            $data['applies_to']      = $scope;
+            $data['is_terminal_job'] = ($scope !== 'rma' && isset($_POST['is_terminal_job'])) ? 1 : 0;
         }
 
         db_update($table, $data, 'id = ?', [$id]);

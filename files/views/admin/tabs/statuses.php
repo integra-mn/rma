@@ -35,6 +35,7 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         <th style="width:110px;text-align:center;"><?= __('admin.status_notify') ?></th>
         <?php if ($sub === 'rma'): ?>
           <th style="width:190px;"><?= __('admin.status_roles') ?></th>
+          <th style="width:150px;"><?= __('admin.status_applies') ?></th>
           <th style="width:110px;text-align:center;"><?= __('admin.status_recur') ?></th>
         <?php endif; ?>
         <th style="width:100px;text-align:center;"><?= __('label.sort_order') ?></th>
@@ -66,6 +67,22 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
                 <?php foreach ($roles as $r): ?>
                   <span class="badge badge-pill-fixed" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin-right:4px;"><?= htmlspecialchars(role_label($r)) ?></span>
                 <?php endforeach; ?>
+              <?php endif; ?>
+            </td>
+            <?php
+              // Both desks, or one. Shown beside Postavlja because the two
+              // answer neighbouring questions: who may set it, and where.
+              $scope = status_applies_to($s['applies_to'] ?? null);
+              $scope_label = ['rma' => __('admin.status_applies_rma'),
+                              'repair' => __('admin.status_applies_repair'),
+                              'both' => __('admin.status_applies_both')][$scope];
+            ?>
+            <td>
+              <span class="badge badge-pill-fixed" style="<?= $scope === 'both'
+                    ? 'background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;'
+                    : 'background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;' ?>"><?= $scope_label ?></span>
+              <?php if ((int)($s['is_terminal_job'] ?? 0) === 1 && $scope !== 'rma'): ?>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:3px;"><?= __('admin.status_terminal_job_short') ?></div>
               <?php endif; ?>
             </td>
             <td style="text-align:center;">
@@ -160,6 +177,25 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         </label>
         <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_recur_hint') ?></p>
       </div>
+      <div class="field">
+        <label><?= __('admin.status_applies_label') ?></label>
+        <select name="applies_to" id="f-applies" onchange="syncJobTerminal()">
+          <option value="rma"><?= __('admin.status_applies_rma') ?></option>
+          <option value="repair"><?= __('admin.status_applies_repair') ?></option>
+          <option value="both"><?= __('admin.status_applies_both') ?></option>
+        </select>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_applies_hint') ?></p>
+      </div>
+      <?php // Hidden while the status is case-only: there is no bench work to
+            // finish, so the tick would be a question about nothing. ?>
+      <div class="field" id="f-job-terminal-wrap">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+          <input type="checkbox" name="is_terminal_job" id="f-terminal-job" value="1"
+                 style="width:auto;height:auto;">
+          <?= __('admin.status_terminal_job_label') ?>
+        </label>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_terminal_job_hint') ?></p>
+      </div>
       <?php endif; ?>
       <div style="display:flex;gap:8px;margin-top:1rem;">
         <button type="submit" class="btn btn-primary" style="min-width:100px;" id="modal-save"><?= __('btn.save') ?></button>
@@ -207,6 +243,11 @@ function openModal(type) {
   document.getElementById('f-notify').checked = false;
   setRoles('');
   setRecur(true);
+  var ap = document.getElementById('f-applies');
+  if (ap) { ap.value = 'rma'; }
+  var tj = document.getElementById('f-terminal-job');
+  if (tj) { tj.checked = false; }
+  syncJobTerminal();
   document.getElementById('modal-save').textContent = SAVE_LABEL;
   document.getElementById('status-modal').style.display = 'flex';
   document.getElementById('f-label').focus();
@@ -229,9 +270,22 @@ function editStatus(type, s) {
   // Absent on repair statuses and on a database that has not run the migration;
   // both mean "can recur", which is the harmless answer.
   setRecur(s.can_recur === undefined || !!parseInt(s.can_recur));
+  var ap2 = document.getElementById('f-applies');
+  if (ap2) { ap2.value = s.applies_to || 'rma'; }
+  var tj2 = document.getElementById('f-terminal-job');
+  if (tj2) { tj2.checked = parseInt(s.is_terminal_job || 0) === 1; }
+  syncJobTerminal();
   document.getElementById('modal-save').textContent = SAVE_CHANGES_LABEL;
   document.getElementById('status-modal').style.display = 'flex';
   document.getElementById('f-label').focus();
+}
+
+// "Finishes the work" only means something where work happens.
+function syncJobTerminal() {
+  var sel = document.getElementById('f-applies');
+  var box = document.getElementById('f-job-terminal-wrap');
+  if (!sel || !box) return;
+  box.style.display = sel.value === 'rma' ? 'none' : '';
 }
 
 function closeModal() {

@@ -132,7 +132,30 @@ function can(string $module, string $action): bool {
 
 // The roles a status may be set by. Only these two are split; everybody else
 // is answered by the rules below rather than by the list.
-const STATUS_ROLES = ['reception', 'technician'];
+// Who may put a case into a status. Partner joined the list when the two
+// status lists were merged: the portal produces Kreirano, so the desk that
+// produces it should be nameable. Partners hold no rma.edit today, so ticking
+// it grants nothing — it describes, rather than opens, a door.
+const STATUS_ROLES = ['reception', 'technician', 'partner'];
+
+/** Where a status may be used: the case, the bench job, or both. */
+const STATUS_SCOPES = ['rma', 'repair', 'both'];
+
+/** Normalise the stored value; anything unrecognised means the case. */
+function status_applies_to(?string $v): string {
+    $v = trim((string)$v);
+    return in_array($v, STATUS_SCOPES, true) ? $v : 'rma';
+}
+
+/** Does this status belong on a repair job? */
+function status_for_repair(array $status): bool {
+    return in_array(status_applies_to($status['applies_to'] ?? null), ['repair', 'both'], true);
+}
+
+/** Does this status belong on a case? */
+function status_for_rma(array $status): bool {
+    return in_array(status_applies_to($status['applies_to'] ?? null), ['rma', 'both'], true);
+}
 
 /** Parse the stored list. Unknown or empty entries are dropped. */
 function status_roles(?string $roles): array {
