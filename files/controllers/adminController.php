@@ -533,6 +533,17 @@ class AdminController {
         } elseif ($tab === 'statuses') {
             $rma_statuses    = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order, label');
             $repair_statuses = db_rows('SELECT * FROM repair_statuses ORDER BY sort_order, label');
+        } elseif ($tab === 'codes') {
+            // Every code, both kinds — the view splits them by sub-tab and the
+            // brand/type filters work on the rows already in the page.
+            $codes = db_rows('SELECT c.*, b.name AS brand_name, cat.name AS category_name
+                                FROM repair_codes c
+                                LEFT JOIN device_brands b ON b.id = c.brand_id
+                                LEFT JOIN device_categories cat ON cat.id = c.category_id
+                               WHERE c.deleted_at IS NULL
+                               ORDER BY c.kind, c.sort_order, c.code');
+            $brands     = db_rows('SELECT id, name FROM device_brands WHERE is_active = 1 ORDER BY name');
+            $categories = db_rows('SELECT id, name FROM device_categories WHERE is_active = 1 ORDER BY sort_order, name');
         } elseif ($tab === 'couriers') {
             $couriers = db_rows('SELECT * FROM couriers ORDER BY name');
         } elseif ($tab === 'insurance') {
@@ -548,6 +559,85 @@ class AdminController {
         include views_path('layout/header.php');
         include views_path('admin/index.php');
         include views_path('layout/footer.php');
+    }
+
+    // ── Vendor codes ─────────────────────────────────────────────
+
+    /**
+     * One code, read off the form and validated.
+     *
+     * Brand and type come back as null rather than 0 when left on "any": the
+     * lookup asks `brand_id IS NULL OR brand_id = ?`, and a 0 would match no
+     * brand at all instead of every one.
+     */
+    private function code_input(): array {
+        $brand    = (int)($_POST['brand_id'] ?? 0);
+        $category = (int)($_POST['category_id'] ?? 0);
+        $note     = trim((string)($_POST['note'] ?? ''));
+
+        return [
+            'code'        => trim((string)($_POST['code'] ?? '')),
+            'label'       => trim((string)($_POST['label'] ?? '')),
+            'label_me'    => trim((string)($_POST['label_me'] ?? '')) ?: null,
+            'note'        => $note !== '' ? $note : null,
+            'brand_id'    => $brand ?: null,
+            'category_id' => $category ?: null,
+            'sort_order'  => max(0, min(999, (int)($_POST['sort_order'] ?? 10))),
+            'is_active'   => isset($_POST['is_active']) ? 1 : 0,
+        ];
+    }
+
+    private function code_redirect(string $kind, string $type, string $msg): void {
+        $_SESSION['flash'] = ['type' => $type, 'message' => $msg];
+        header('Location: /administration?tab=codes&sub=' . urlencode($kind));
+        exit;
+    }
+
+    public function code_store(): void {
+        require_login();
+        require_permission('administration', 'create');
+
+        $kind = (string)($_POST['kind'] ?? '');
+        if (!in_array($kind, REPAIR_CODE_KINDS, true)) $kind = 'error';
+
+        $data = $this->code_input();
+        if ($data['code'] === '' || $data['label'] === '') {
+            $this->code_redirect($kind, 'danger', __('codes.code_label_required'));
+        }
+
+        $data['kind'] = $kind;
+        db_insert('repair_codes', $data);
+        audit('code_added', 'repair_code', 0, ['new' => $data]);
+
+        $this->code_redirect($kind, 'success', __('codes.added'));
+    }
+
+    public function code_update(): void {
+        require_login();
+        require_permission('administration', 'edit');
+
+        $id   = (int)($_POST['id'] ?? 0);
+        $kind = (string)($_POST['kind'] ?? '');
+        if (!in_array($kind, REPAIR_CODE_KINDS, true)) $kind = 'error';
+
+        $before = $id ? db_row('SELECT * FROM repair_codes WHERE id = ?', [$id]) : null;
+        if (!$before) {
+            $this->code_redirect($kind, 'danger', __('codes.not_found'));
+        }
+
+        $data = $this->code_input();
+        if ($data['code'] === '' || $data['label'] === '') {
+            $this->code_redirect($kind, 'danger', __('codes.code_label_required'));
+        }
+
+        // kind is not editable: a job already pointing at this row picked it
+        // from one of the two dropdowns, and flipping the kind would move the
+        // technician's answer into the other box behind their back.
+        $data['updated_at'] = date('Y-m-d H:i:s');
+        db_update('repair_codes', $data, 'id = ?', [$id]);
+        audit('code_updated', 'repair_code', $id, ['old' => $before, 'new' => $data]);
+
+        $this->code_redirect((string)$before['kind'], 'success', __('codes.saved'));
     }
 
     // ── Status store ─────────────────────────────────────────────

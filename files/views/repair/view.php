@@ -136,6 +136,45 @@
           <textarea name="resolution" style="resize:none;height:150px;"><?= htmlspecialchars($job['resolution'] ?? '') ?></textarea>
         </div>
       </div>
+
+      <?php // Under each box, the coded answer for the same thing: what was
+            // wrong under the findings, what was done under the works. Typed
+            // text stays the record — the code is what a vendor's system can
+            // read. Only codes written for this brand and device type are
+            // offered, plus the ones marked for every device. ?>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+        <div class="field" style="margin-bottom:0;">
+          <label><?= __('codes.kind_error') ?></label>
+          <?php if ($error_codes): ?>
+            <select name="error_code_id">
+              <option value=""><?= __('codes.none_selected') ?></option>
+              <?php foreach ($error_codes as $c): ?>
+                <option value="<?= (int)$c['id'] ?>" <?= (int)($job['error_code_id'] ?? 0) === (int)$c['id'] ? 'selected' : '' ?>>
+                  <?= htmlspecialchars(repair_code_label($c)) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          <?php else: ?>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:6px;"><?= __('codes.none_for_device') ?></p>
+          <?php endif; ?>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label><?= __('codes.kind_resolution') ?></label>
+          <?php if ($resolution_codes): ?>
+            <select name="resolution_code_id">
+              <option value=""><?= __('codes.none_selected') ?></option>
+              <?php foreach ($resolution_codes as $c): ?>
+                <option value="<?= (int)$c['id'] ?>" <?= (int)($job['resolution_code_id'] ?? 0) === (int)$c['id'] ? 'selected' : '' ?>>
+                  <?= htmlspecialchars(repair_code_label($c)) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          <?php else: ?>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:6px;"><?= __('codes.none_for_device') ?></p>
+          <?php endif; ?>
+        </div>
+      </div>
+
       <div style="display:flex;justify-content:flex-end;">
         <button type="submit" class="btn btn-primary" style="min-width:120px;"><?= __('btn.save') ?></button>
       </div>
@@ -151,6 +190,35 @@
       <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;"><?= __('repair.resolution') ?></h2>
       <p style="font-size:13px;line-height:1.6;white-space:pre-wrap;"><?= htmlspecialchars($job['resolution']) ?></p>
     <?php endif; ?>
+  </div>
+  <?php endif; ?>
+
+  <?php
+    // The codes, wherever the reader stands: the technician sees them chosen in
+    // the form above, everyone else sees them here. Read back by id rather than
+    // from the offered lists — a code later narrowed to another brand, or
+    // switched off, must still show on the job that used it.
+    $picked_error      = repair_code($job['error_code_id'] ?? null);
+    $picked_resolution = repair_code($job['resolution_code_id'] ?? null);
+  ?>
+  <?php if ($picked_error || $picked_resolution): ?>
+  <div class="card" style="margin-bottom:1rem;">
+    <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;"><?= __('codes.title') ?></h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+      <?php foreach ([[__('codes.kind_error'), $picked_error], [__('codes.kind_resolution'), $picked_resolution]] as [$lbl, $c]): ?>
+        <div>
+          <div style="color:var(--text-secondary);margin-bottom:2px;"><?= $lbl ?></div>
+          <?php if ($c): ?>
+            <div><?= htmlspecialchars(repair_code_label($c)) ?></div>
+            <?php if (!empty($c['note'])): ?>
+              <div style="color:var(--text-muted);font-size:12px;margin-top:2px;white-space:pre-wrap;"><?= htmlspecialchars($c['note']) ?></div>
+            <?php endif; ?>
+          <?php else: ?>
+            <div style="color:var(--text-muted);">&mdash;</div>
+          <?php endif; ?>
+        </div>
+      <?php endforeach; ?>
+    </div>
   </div>
   <?php endif; ?>
 

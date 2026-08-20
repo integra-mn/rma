@@ -7,7 +7,7 @@
 
   <!-- Tabs -->
   <div class="tab-bar">
-    <?php foreach (['users'=>__('admin.users'),'locations'=>__('admin.locations'),'couriers'=>__('admin.couriers'),'statuses'=>__('admin.statuses'),'insurance'=>__('ins.title')] as $t => $l): ?>
+    <?php foreach (['users'=>__('admin.users'),'locations'=>__('admin.locations'),'couriers'=>__('admin.couriers'),'statuses'=>__('admin.statuses'),'codes'=>__('codes.title'),'insurance'=>__('ins.title')] as $t => $l): ?>
       <a href="/administration?tab=<?= $t ?>"
          class="tab<?= $tab===$t ? ' active' : '' ?>">
         <?= $l ?>
@@ -26,6 +26,8 @@
       <?php include views_path('admin/tabs/couriers.php'); ?>
     <?php elseif ($tab === 'statuses'): ?>
       <?php include views_path('admin/tabs/statuses.php'); ?>
+    <?php elseif ($tab === 'codes'): ?>
+      <?php include views_path('admin/tabs/codes.php'); ?>
     <?php elseif ($tab === 'insurance'): ?>
       <?php include views_path('admin/tabs/insurance.php'); ?>
     <?php endif; ?>

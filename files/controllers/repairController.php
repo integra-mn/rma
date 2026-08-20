@@ -143,6 +143,16 @@ class RepairController {
             http_response_code(403); include views_path('errors/403.php'); return;
         }
 
+        // Codes for this device: its brand, its type, plus the ones written
+        // for every device. An empty list is normal — the table ships empty
+        // and fills as Apple's and TCL's real code lists arrive.
+        $error_codes      = repair_codes_for('error',
+                                (int)($job['device_brand_id'] ?? 0) ?: null,
+                                (int)($job['device_category_id'] ?? 0) ?: null);
+        $resolution_codes = repair_codes_for('resolution',
+                                (int)($job['device_brand_id'] ?? 0) ?: null,
+                                (int)($job['device_category_id'] ?? 0) ?: null);
+
         $time_logs = db_rows("SELECT t.*, u.name as user_name
                               FROM repair_time_logs t
                               LEFT JOIN users u ON u.id = t.user_id
@@ -332,6 +342,14 @@ class RepairController {
             }
             if (array_key_exists('resolution', $_POST)) {
                 $data['resolution'] = trim((string)$_POST['resolution']);
+            }
+            // The two coded answers ride with the notes card and nothing else,
+            // so the same rule applies: absent means not submitted, not blank.
+            // Empty string means the technician chose "-" and is clearing it.
+            foreach (['error_code_id', 'resolution_code_id'] as $f) {
+                if (array_key_exists($f, $_POST)) {
+                    $data[$f] = (int)$_POST[$f] ?: null;
+                }
             }
 
             // Also update status if provided
