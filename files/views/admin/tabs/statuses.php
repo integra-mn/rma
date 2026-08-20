@@ -183,7 +183,6 @@ $type   = 'rma';   // the store/update handlers still route on it
           <option value="repair"><?= __('admin.status_applies_repair') ?></option>
           <option value="both"><?= __('admin.status_applies_both') ?></option>
         </select>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_applies_hint') ?></p>
       </div>
       <?php // Hidden while the status is case-only: there is no bench work to
             // finish, so the tick would be a question about nothing. ?>
