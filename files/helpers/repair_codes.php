@@ -37,8 +37,13 @@ function repair_codes_for(string $kind, ?int $brand_id, ?int $category_id): arra
            LEFT JOIN device_brands b ON b.id = c.brand_id
            LEFT JOIN device_categories cat ON cat.id = c.category_id
           WHERE c.deleted_at IS NULL AND c.is_active = 1 AND c.kind = ?
-            AND (c.brand_id IS NULL OR c.brand_id = ?)
-            AND (c.category_id IS NULL OR c.category_id = ?)
+            -- A blank brand or type means every device, but only for a code
+            -- somebody typed in. For an imported one it means the vendor product
+            -- line has no category of ours yet - TCL Accessory and Projector -
+            -- and those must appear nowhere, not everywhere. Left as one rule
+            -- for both, a Projector code was offered on a phone.
+            AND (c.brand_id = ? OR (c.brand_id IS NULL AND c.vendor_id IS NULL))
+            AND (c.category_id = ? OR (c.category_id IS NULL AND c.vendor_id IS NULL))
           ORDER BY CASE WHEN c.brand_id IS NULL THEN 1 ELSE 0 END,
                    c.sort_order, c.code",
         [$kind, $brand_id ?? 0, $category_id ?? 0]
