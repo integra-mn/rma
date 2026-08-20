@@ -45,3 +45,11 @@ CREATE INDEX IF NOT EXISTS idx_repair_codes_pick
 -- today have none.
 ALTER TABLE repair_jobs ADD COLUMN IF NOT EXISTS error_code_id      INTEGER REFERENCES repair_codes(id);
 ALTER TABLE repair_jobs ADD COLUMN IF NOT EXISTS resolution_code_id INTEGER REFERENCES repair_codes(id);
+
+-- Migrations are run as postgres, which then owns whatever they create — and
+-- the app connects as integra_rma, which would be refused on its own new table.
+-- The core tables (rma_statuses, repair_jobs) are owned by the app user; this
+-- follows them. Both the table and the sequence SERIAL made behind it, or
+-- reading works and the first insert fails.
+ALTER TABLE    repair_codes        OWNER TO integra_rma;
+ALTER SEQUENCE repair_codes_id_seq OWNER TO integra_rma;
