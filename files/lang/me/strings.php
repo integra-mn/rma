@@ -1478,7 +1478,7 @@ Status popravke pratite ovdje:
     'codes.code_label_required'  => 'Kod i naziv su obavezni.',
     'label.inactive'             => 'Neaktivno',
     // Jedna lista statusa — gdje važi i završetak posla (korak 1)
-    'admin.status_applies'            => 'Vezan za',
+    'admin.status_applies'            => 'Status prikazan',
     'admin.status_applies_label'      => 'Status je vezan za',
     'admin.status_applies_rma'        => 'Reklamacija',
     'admin.status_applies_repair'     => 'Popravka',
@@ -1491,6 +1491,6 @@ Status popravke pratite ovdje:
     'admin.status_in_use_hint'    => 'Reklamacije su u ovom statusu ili su prolazile kroz njega, pa se ne može obrisati. Umjesto toga promijenite naziv.',
     'admin.status_in_use_refused' => 'Taj status je u upotrebi i ne može se obrisati.',
     'admin.status_applies_required' => 'Izaberite bar jedno na čemu se status koristi.',
-    'admin.status_terminal_col' => 'Završni',
-    'admin.status_terminal_job_col' => 'Završava rad servisa',
+    'admin.status_terminal_col' => 'Završni - RMA',
+    'admin.status_terminal_job_col' => 'Završni - Servis',
 ];

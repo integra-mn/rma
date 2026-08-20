@@ -28,17 +28,17 @@ $type   = 'rma';   // the store/update handlers still route on it
               // second copy of the same status for anyone who only reads one of
               // them. Kod is gone too — it belongs to the database, and the edit
               // dialog still shows it to anyone who needs it. ?>
-        <th style="width:25%;"><?= __('admin.status_label') ?></th>
+        <th style="width:20%;"><?= __('admin.status_label') ?></th>
         <?php // Same order as the dialog: the three yes/no answers, then the
               // two "which of these" ones. Reading a row should feel like
               // reading the form that produced it. ?>
-        <th style="width:10%;text-align:center;"><?= __('admin.status_notify') ?></th>
-        <th style="width:10%;text-align:center;"><?= __('admin.status_recur') ?></th>
-        <th style="width:10%;text-align:center;"><?= __('admin.status_terminal_col') ?></th>
-        <th style="width:10%;text-align:center;"><?= __('admin.status_roles') ?></th>
-        <th style="width:10%;text-align:center;"><?= __('admin.status_applies') ?></th>
-        <th style="width:10%;text-align:center;"><?= __('admin.status_terminal_job_col') ?></th>
-        <th style="width:10%;text-align:right;"><?= __('label.actions') ?></th>
+        <th style="width:9%;text-align:center;"><?= __('admin.status_notify') ?></th>
+        <th style="width:9%;text-align:center;"><?= __('admin.status_recur') ?></th>
+        <th style="width:12%;text-align:center;"><?= __('admin.status_terminal_col') ?></th>
+        <th style="width:12%;text-align:center;"><?= __('admin.status_roles') ?></th>
+        <th style="width:12%;text-align:center;"><?= __('admin.status_applies') ?></th>
+        <th style="width:12%;text-align:center;"><?= __('admin.status_terminal_job_col') ?></th>
+        <th style="width:9%;text-align:right;"><?= __('label.actions') ?></th>
       </tr>
     </thead>
     <tbody>

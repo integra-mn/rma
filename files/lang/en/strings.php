@@ -1478,7 +1478,7 @@ Track the repair here:
     'codes.code_label_required'  => 'Code and name are required.',
     'label.inactive'             => 'Inactive',
     // One status list — where a status is used, and whether it ends the repair
-    'admin.status_applies'            => 'Belongs to',
+    'admin.status_applies'            => 'Status shown on',
     'admin.status_applies_label'      => 'Status belongs to',
     'admin.status_applies_rma'        => 'Case',
     'admin.status_applies_repair'     => 'Repair',
@@ -1491,6 +1491,6 @@ Track the repair here:
     'admin.status_in_use_hint'    => 'Cases are in this status or have passed through it, so it cannot be deleted. Rename it instead.',
     'admin.status_in_use_refused' => 'That status is in use and cannot be deleted.',
     'admin.status_applies_required' => 'Choose at least one record the status is used on.',
-    'admin.status_terminal_col' => 'Ends case',
-    'admin.status_terminal_job_col' => 'Ends repair',
+    'admin.status_terminal_col' => 'Final - RMA',
+    'admin.status_terminal_job_col' => 'Final - Service',
 ];
