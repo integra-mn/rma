@@ -6,6 +6,8 @@ $sub = $_GET['sub'] ?? 'error';
 if (!in_array($sub, REPAIR_CODE_KINDS, true)) $sub = 'error';
 
 $rows = array_values(array_filter($codes, fn($c) => $c['kind'] === $sub));
+// Same rule as Statusi: one name column, in the language the app is set to.
+$lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
 ?>
 
 <!-- Sub-tabs: Kodovi greške | Kodovi rješenja -->
@@ -54,21 +56,28 @@ $rows = array_values(array_filter($codes, fn($c) => $c['kind'] === $sub));
   <table class="data-table" style="table-layout:fixed;width:100%;">
     <thead>
       <tr>
-        <th style="width:130px;"><?= __('label.code') ?></th>
-        <th style="width:260px;"><?= __('admin.status_label') ?></th>
-        <th style="width:260px;"><?= __('admin.status_label_me') ?></th>
-        <th style="width:180px;"><?= __('codes.scope') ?></th>
-        <th style="width:90px;text-align:center;"><?= __('label.sort_order') ?></th>
-        <th style="width:90px;text-align:center;"><?= __('label.status') ?></th>
-        <th style="text-align:right;"><?= __('label.actions') ?></th>
+        <?php // Percentages, and Akcije given a share of its own — the pixel
+              // widths here left it unset, so it swallowed whatever the other
+              // columns did not claim. ?>
+        <th style="width:12%;"><?= __('label.code') ?></th>
+        <th style="width:32%;"><?= __('admin.status_label') ?></th>
+        <th style="width:22%;"><?= __('codes.scope') ?></th>
+        <th style="width:10%;text-align:center;"><?= __('label.sort_order') ?></th>
+        <th style="width:12%;text-align:center;"><?= __('label.status') ?></th>
+        <th style="width:12%;text-align:right;"><?= __('label.actions') ?></th>
       </tr>
     </thead>
     <tbody id="codes-body">
       <?php foreach ($rows as $c): ?>
         <tr data-brand="<?= (int)($c['brand_id'] ?? 0) ?>" data-category="<?= (int)($c['category_id'] ?? 0) ?>">
-          <td style="font-weight:500;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;"><?= htmlspecialchars($c['code']) ?></td>
-          <td><?= htmlspecialchars($c['label']) ?></td>
-          <td style="color:var(--text-secondary);"><?= htmlspecialchars($c['label_me'] ?? '') ?: '—' ?></td>
+          <?php // Plain text, like every other cell. The monospace face at 12px
+                // set the code apart as something technical; it is the thing
+                // this screen exists for. ?>
+          <td style="font-weight:500;"><?= htmlspecialchars($c['code']) ?></td>
+          <?php // Falls back to the English name when no ME one is set. ?>
+          <td><?= htmlspecialchars(
+                $lang_en ? $c['label'] : (($c['label_me'] ?? '') !== '' ? $c['label_me'] : $c['label'])
+          ) ?></td>
           <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars(repair_code_scope($c)) ?></td>
           <td style="text-align:center;color:var(--text-muted);"><?= (int)$c['sort_order'] ?></td>
           <td style="text-align:center;">
