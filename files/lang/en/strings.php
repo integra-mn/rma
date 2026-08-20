@@ -1479,8 +1479,8 @@ Track the repair here:
     'codes.code_label_required'  => 'Code and name are required.',
     'label.inactive'             => 'Inactive',
     // One status list — where a status is used, and whether it ends the repair
-    'admin.status_applies'            => 'Used on',
-    'admin.status_applies_label'      => 'What it sits on',
+    'admin.status_applies'            => 'Belongs to',
+    'admin.status_applies_label'      => 'Status belongs to',
     'admin.status_applies_rma'        => 'Case',
     'admin.status_applies_repair'     => 'Repair',
     'admin.status_applies_both'       => 'Both',

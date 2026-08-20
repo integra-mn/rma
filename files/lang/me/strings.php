@@ -1479,8 +1479,8 @@ Status popravke pratite ovdje:
     'codes.code_label_required'  => 'Kod i naziv su obavezni.',
     'label.inactive'             => 'Neaktivno',
     // Jedna lista statusa — gdje važi i završetak posla (korak 1)
-    'admin.status_applies'            => 'Koristi se na',
-    'admin.status_applies_label'      => 'Na čemu se koristi',
+    'admin.status_applies'            => 'Vezan za',
+    'admin.status_applies_label'      => 'Status je vezan za',
     'admin.status_applies_rma'        => 'Reklamacija',
     'admin.status_applies_repair'     => 'Popravka',
     'admin.status_applies_both'       => 'Oboje',
