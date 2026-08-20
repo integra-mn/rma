@@ -1504,6 +1504,5 @@ Track the repair here:
     'vendor.tcl_repair_not_ready'  => 'Sending repairs to TCL is not built yet — the symptom and solution codes are still needed.',
     'rma.no_vendor_for_brand'      => 'No active vendor is configured for this brand.',
     'codes.search'   => 'Search codes',
-    'codes.showing'  => 'Showing :shown of :total',
     'codes.vendor_line' => 'Vendor product line',
 ];

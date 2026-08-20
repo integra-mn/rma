@@ -1459,7 +1459,7 @@ Status popravke pratite ovdje:
     'codes.add'                  => 'Dodaj kod',
     'codes.add_title'            => 'Novi kod',
     'codes.edit_title'           => 'Izmijeni kod',
-    'codes.scope'                => 'Marka',
+    'codes.scope'                => 'Brand',
     'codes.device_type'          => 'Tip uredjaja',
     'codes.any_brand'            => 'Sve marke',
     'codes.any_type'             => 'Svi tipovi',
@@ -1504,6 +1504,5 @@ Status popravke pratite ovdje:
     'vendor.tcl_repair_not_ready'  => 'Slanje popravki TCL-u još nije napravljeno — nedostaju kodovi simptoma i rješenja.',
     'rma.no_vendor_for_brand'      => 'Za ovu marku nije podešen nijedan proizvodjač.',
     'codes.search'   => 'Pretraga kodova',
-    'codes.showing'  => 'Prikazano :shown od :total',
     'codes.vendor_line' => 'Linija proizvoda',
 ];
