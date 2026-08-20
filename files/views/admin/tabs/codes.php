@@ -26,13 +26,18 @@ $rows = array_values(array_filter($codes, fn($c) => $c['kind'] === $sub));
     <?php // Filters narrow the list the same way the repair screen narrows the
           // dropdown, so what an admin sees here is what the bench will get. ?>
     <div style="display:flex;gap:8px;align-items:center;">
-      <select id="filter-brand" onchange="filterCodes()" style="min-width:160px;">
+      <?php // width, not min-width: a select grows to its widest option, so two
+            // with the same floor still render at different sizes - the brand
+            // list stretched to fit "Crnogorski Telekom" while the type list
+            // sat at its floor. 200px holds that name with room for a longer
+            // one, and holds both filters to the same size. ?>
+      <select id="filter-brand" onchange="filterCodes()" style="width:200px;">
         <option value=""><?= __('codes.all_brands') ?></option>
         <?php foreach ($brands as $b): ?>
           <option value="<?= (int)$b['id'] ?>"><?= htmlspecialchars($b['name']) ?></option>
         <?php endforeach; ?>
       </select>
-      <select id="filter-category" onchange="filterCodes()" style="min-width:160px;">
+      <select id="filter-category" onchange="filterCodes()" style="width:200px;">
         <option value=""><?= __('codes.all_types') ?></option>
         <?php foreach ($categories as $c): ?>
           <option value="<?= (int)$c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
