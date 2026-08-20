@@ -72,11 +72,13 @@ $type   = 'rma';   // the store/update handlers still route on it
                 <div style="font-size:11px;color:var(--text-muted);margin-top:3px;"><?= __('admin.status_terminal_job_short') ?></div>
               <?php endif; ?>
             </td>
+            <?php // Da or Ne, both spelled out. A dash for "yes" and a phrase
+                  // for "no" made the reader work out which way the column ran. ?>
             <td style="text-align:center;">
               <?php if ((int)($s['can_recur'] ?? 1) === 1): ?>
-                <span style="color:var(--text-muted);">&mdash;</span>
+                <span class="badge badge-pill-fixed" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('label.yes') ?></span>
               <?php else: ?>
-                <span class="badge badge-pill-fixed" style="background:#faeeda;color:#633806;border:0.5px solid #ef9f27;"><?= __('admin.status_recur_once') ?></span>
+                <span class="badge badge-pill-fixed" style="background:#f4f4f0;color:#5f5e5a;border:0.5px solid #d3d1c7;"><?= __('label.no') ?></span>
               <?php endif; ?>
             </td>
           <td style="text-align:center;color:var(--text-muted);"><?= (int)$s['sort_order'] ?></td>

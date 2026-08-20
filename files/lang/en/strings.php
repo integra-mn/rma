@@ -1041,7 +1041,6 @@ Track the repair here:
     'admin.status_roles_all'    => 'Everyone',
     'admin.status_roles_label'  => 'Status set by',
     'admin.status_recur'        => 'Repeats',
-    'admin.status_recur_once'   => 'Once only',
     'admin.status_recur_label'  => 'Status can repeat during a case',
     'settings.repeat'          => 'Repeated repair',
     'reports.repeat_count'    => 'Repeated repairs',

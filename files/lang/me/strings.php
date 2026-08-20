@@ -1041,7 +1041,6 @@ Status popravke pratite ovdje:
     'admin.status_roles_all'    => 'Svi',
     'admin.status_roles_label'  => 'Status postavlja',
     'admin.status_recur'        => 'Ponavljanje',
-    'admin.status_recur_once'   => 'Samo jednom',
     'admin.status_recur_label'  => 'Status se može ponoviti tokom reklamacije',
     'settings.repeat'          => 'Ponovljena popravka',
     'reports.repeat_count'    => 'Ponovljene popravke',
