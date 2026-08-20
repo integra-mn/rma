@@ -213,7 +213,10 @@ $type   = 'rma';   // the store/update handlers still route on it
       <form method="POST" action="/admin/status/delete" id="status-delete-form" style="margin-left:auto;"
             data-confirm="<?= htmlspecialchars(__('admin.status_confirm_delete'), ENT_QUOTES) ?>">
         <?= csrf_field() ?><input type="hidden" name="id" id="f-delete-id">
-        <button type="submit" class="btn btn-sm" id="modal-delete"><?= __('btn.delete') ?></button>
+        <?php // Same class and the same 100px as the two beside it: btn-sm
+              // matched their height but not their type size, so the row read
+              // as two buttons and an afterthought. ?>
+        <button type="submit" class="btn" style="min-width:100px;" id="modal-delete"><?= __('btn.delete') ?></button>
       </form>
     </div>
   </div>
