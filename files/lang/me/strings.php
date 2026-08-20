@@ -1485,7 +1485,6 @@ Status popravke pratite ovdje:
     'admin.status_applies_both'       => 'Oboje',
     'admin.status_terminal_job_label' => 'Završava rad u servisu',
     'admin.status_terminal_job_hint'  => 'Odvojeno od završetka reklamacije. Popravljeno završava rad, a reklamacija ide dalje na Otpremljeno i Zatvoreno.',
-    'admin.status_terminal_job_short' => 'završava rad',
     'admin.status_confirm_delete' => 'Obrisati ovaj status? Nikada nije korišćen, pa ništa ne gubi istoriju.',
     'admin.status_deleted'        => 'Status je obrisan.',
     'admin.status_not_found'      => 'Status nije pronadjen.',
@@ -1493,4 +1492,5 @@ Status popravke pratite ovdje:
     'admin.status_in_use_refused' => 'Taj status je u upotrebi i ne može se obrisati.',
     'admin.status_applies_required' => 'Izaberite bar jedno na čemu se status koristi.',
     'admin.status_terminal_col' => 'Završni',
+    'admin.status_terminal_job_col' => 'Završava rad servisa',
 ];

@@ -1485,7 +1485,6 @@ Track the repair here:
     'admin.status_applies_both'       => 'Both',
     'admin.status_terminal_job_label' => 'Reaching it ends the repair work',
     'admin.status_terminal_job_hint'  => 'Separate from the case being finished. Popravljeno ends the work while the case carries on to Otpremljeno and Zatvoreno.',
-    'admin.status_terminal_job_short' => 'ends the work',
     'admin.status_confirm_delete' => 'Delete this status? It has never been used, so nothing loses its history.',
     'admin.status_deleted'        => 'Status deleted.',
     'admin.status_not_found'      => 'Status not found.',
@@ -1493,4 +1492,5 @@ Track the repair here:
     'admin.status_in_use_refused' => 'That status is in use and cannot be deleted.',
     'admin.status_applies_required' => 'Choose at least one record the status is used on.',
     'admin.status_terminal_col' => 'Ends case',
+    'admin.status_terminal_job_col' => 'Ends repair',
 ];
