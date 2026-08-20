@@ -24,26 +24,21 @@ $type   = 'rma';   // the store/update handlers still route on it
     <thead>
       <tr>
         <th style="width:5%;"><?= __('label.color') ?></th>
-        <?php // The English name is only worth a column to somebody reading in
-              // English; in Montenegrin it is a second copy of the next column.
-              // Kod is gone altogether — it belongs to the database, and the
-              // edit dialog still shows it to anyone who needs it. ?>
-        <?php if ($lang_en): ?>
-          <th style="width:12.5%;"><?= __('admin.status_label') ?></th>
-          <th style="width:12.5%;"><?= __('admin.status_label_me') ?></th>
-        <?php else: ?>
-          <th style="width:25%;"><?= __('admin.status_label') ?></th>
-        <?php endif; ?>
+        <?php // One name, in the language the app is set to. Showing both was a
+              // second copy of the same status for anyone who only reads one of
+              // them. Kod is gone too — it belongs to the database, and the edit
+              // dialog still shows it to anyone who needs it. ?>
+        <th style="width:25%;"><?= __('admin.status_label') ?></th>
         <?php // Same order as the dialog: the three yes/no answers, then the
               // two "which of these" ones. Reading a row should feel like
               // reading the form that produced it. ?>
         <th style="width:10%;text-align:center;"><?= __('admin.status_notify') ?></th>
         <th style="width:10%;text-align:center;"><?= __('admin.status_recur') ?></th>
         <th style="width:10%;text-align:center;"><?= __('admin.status_terminal_col') ?></th>
-        <th style="width:12%;"><?= __('admin.status_roles') ?></th>
-        <th style="width:12%;"><?= __('admin.status_applies') ?></th>
-        <th style="width:8%;text-align:center;"><?= __('label.sort_order') ?></th>
-        <th style="width:8%;text-align:right;"><?= __('label.actions') ?></th>
+        <th style="width:10%;text-align:center;"><?= __('admin.status_roles') ?></th>
+        <th style="width:10%;text-align:center;"><?= __('admin.status_applies') ?></th>
+        <th style="width:10%;text-align:center;"><?= __('label.sort_order') ?></th>
+        <th style="width:10%;text-align:right;"><?= __('label.actions') ?></th>
       </tr>
     </thead>
     <tbody>
@@ -52,14 +47,11 @@ $type   = 'rma';   // the store/update handlers still route on it
           <td>
             <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:<?= htmlspecialchars($s['color']) ?>;"></span>
           </td>
-          <?php if ($lang_en): ?>
-            <td style="font-weight:500;"><?= htmlspecialchars($s['label']) ?></td>
-            <td style="color:var(--text-secondary);"><?= htmlspecialchars($s['label_me'] ?? '') ?: '—' ?></td>
-          <?php else: ?>
-            <?php // Falls back to the English name when no ME one is set, or a
-                  // half-filled status would show a blank row and look broken. ?>
-            <td style="font-weight:500;"><?= htmlspecialchars(($s['label_me'] ?? '') !== '' ? $s['label_me'] : $s['label']) ?></td>
-          <?php endif; ?>
+          <?php // Falls back to the English name when no ME one is set, or a
+                // half-filled status would show a blank cell and look broken. ?>
+          <td style="font-weight:500;"><?= htmlspecialchars(
+                $lang_en ? $s['label'] : (($s['label_me'] ?? '') !== '' ? $s['label_me'] : $s['label'])
+          ) ?></td>
           <?php
             // Three columns, one question each, both answers spelled out. A
             // dash for one side and nothing for the other made the reader work
@@ -72,12 +64,12 @@ $type   = 'rma';   // the store/update handlers still route on it
           <td style="text-align:center;"><?= $yn((int)($s['can_recur'] ?? 1) === 1) ?></td>
           <td style="text-align:center;"><?= $yn((int)($s['is_terminal'] ?? 0) === 1) ?></td>
             <?php $roles = status_roles($s['roles'] ?? null); ?>
-            <td>
+            <td style="text-align:center;">
               <?php if (!$roles): ?>
                 <span style="color:var(--text-muted);"><?= __('admin.status_roles_all') ?></span>
               <?php else: ?>
                 <?php foreach ($roles as $r): ?>
-                  <span class="badge badge-pill-fixed" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin-right:4px;"><?= htmlspecialchars(role_label($r)) ?></span>
+                  <span class="badge badge-pill-fixed" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin:0 2px;"><?= htmlspecialchars(role_label($r)) ?></span>
                 <?php endforeach; ?>
               <?php endif; ?>
             </td>
@@ -89,7 +81,7 @@ $type   = 'rma';   // the store/update handlers still route on it
                               'repair' => __('admin.status_applies_repair'),
                               'both' => __('admin.status_applies_both')][$scope];
             ?>
-            <td>
+            <td style="text-align:center;">
               <span class="badge badge-pill-fixed" style="<?= $scope === 'both'
                     ? 'background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;'
                     : 'background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;' ?>"><?= $scope_label ?></span>
