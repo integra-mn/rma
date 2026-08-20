@@ -176,13 +176,25 @@ $type   = 'rma';   // the store/update handlers still route on it
           <?= __('admin.status_recur_label') ?>
         </label>
       </div>
+      <?php // Boxes rather than a dropdown, because "oboje" was never a third
+            // thing — there are two records a status can sit on, and both can be
+            // true. It also reads like Postavlja right above it: same shape,
+            // same gesture, same kind of answer. Unticking both is refused on
+            // save, which is the one thing the dropdown got for free. ?>
       <div class="field">
         <label><?= __('admin.status_applies_label') ?></label>
-        <select name="applies_to" id="f-applies" onchange="syncJobTerminal()">
-          <option value="rma"><?= __('admin.status_applies_rma') ?></option>
-          <option value="repair"><?= __('admin.status_applies_repair') ?></option>
-          <option value="both"><?= __('admin.status_applies_both') ?></option>
-        </select>
+        <div style="display:flex;gap:16px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+            <input type="checkbox" name="applies[]" value="rma" id="f-applies-rma"
+                   style="width:auto;height:auto;">
+            <?= __('admin.status_applies_rma') ?>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+            <input type="checkbox" name="applies[]" value="repair" id="f-applies-repair"
+                   onchange="syncJobTerminal()" style="width:auto;height:auto;">
+            <?= __('admin.status_applies_repair') ?>
+          </label>
+        </div>
       </div>
       <?php // Hidden while the status is case-only: there is no bench work to
             // finish, so the tick would be a question about nothing. ?>
@@ -241,8 +253,7 @@ function openModal(type) {
   document.getElementById('f-notify').checked = false;
   setRoles('');
   setRecur(true);
-  var ap = document.getElementById('f-applies');
-  if (ap) { ap.value = 'rma'; }
+  setApplies('rma');
   var tj = document.getElementById('f-terminal-job');
   if (tj) { tj.checked = false; }
   syncJobTerminal();
@@ -268,8 +279,7 @@ function editStatus(type, s) {
   // Absent on repair statuses and on a database that has not run the migration;
   // both mean "can recur", which is the harmless answer.
   setRecur(s.can_recur === undefined || !!parseInt(s.can_recur));
-  var ap2 = document.getElementById('f-applies');
-  if (ap2) { ap2.value = s.applies_to || 'rma'; }
+  setApplies(s.applies_to || 'rma');
   var tj2 = document.getElementById('f-terminal-job');
   if (tj2) { tj2.checked = parseInt(s.is_terminal_job || 0) === 1; }
   syncJobTerminal();
@@ -280,10 +290,20 @@ function editStatus(type, s) {
 
 // "Finishes the work" only means something where work happens.
 function syncJobTerminal() {
-  var sel = document.getElementById('f-applies');
+  var rep = document.getElementById('f-applies-repair');
   var box = document.getElementById('f-job-terminal-wrap');
-  if (!sel || !box) return;
-  box.style.display = sel.value === 'rma' ? 'none' : '';
+  if (!rep || !box) return;
+  box.style.display = rep.checked ? '' : 'none';
+}
+
+// 'rma' | 'repair' | 'both' in the column, two booleans on screen.
+function setApplies(v) {
+  var r = document.getElementById('f-applies-rma');
+  var p = document.getElementById('f-applies-repair');
+  if (!r || !p) return;
+  v = v || 'rma';
+  r.checked = (v === 'rma' || v === 'both');
+  p.checked = (v === 'repair' || v === 'both');
 }
 
 function closeModal() {

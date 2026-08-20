@@ -891,7 +891,7 @@ return [
     'admin.status_label'     => 'Label',
     'admin.status_label_me'  => 'Label (ME)',
     'admin.status_code_hint' => '(lowercase, underscores only)',
-    'admin.status_terminal'  => 'Terminal status (marks RMA as completed)',
+    'admin.status_terminal'  => 'Status ends the case',
     'admin.status_terminal_repair' => 'Terminal status (marks repair as completed)',
     'admin.perm_intro'       => 'Super Admin always has full access. Tick or untick the boxes below to change what Admin, Reception, Technician and Partner can do, then click Save permissions. Admin always keeps Settings access (shown locked) so admins can never lock themselves out.',
     'admin.perm_full_access' => 'Full access to everything',
@@ -1493,4 +1493,5 @@ Track the repair here:
     'admin.status_in_use'         => 'in use',
     'admin.status_in_use_hint'    => 'Cases are in this status or have passed through it, so it cannot be deleted. Rename it instead.',
     'admin.status_in_use_refused' => 'That status is in use and cannot be deleted.',
+    'admin.status_applies_required' => 'Choose at least one record the status is used on.',
 ];

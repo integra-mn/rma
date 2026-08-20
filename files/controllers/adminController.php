@@ -573,6 +573,25 @@ class AdminController {
     }
 
     /**
+     * The two "Na cemu se koristi" boxes, folded back into the column's value.
+     *
+     * Returns null when neither is ticked — a status usable on nothing, which
+     * the dropdown made impossible and checkboxes do not. Refusing the save is
+     * the price of the clearer control, and it is a price the code field and
+     * the name field already pay.
+     */
+    private function status_scope_input(): ?string {
+        $picked = (array)($_POST['applies'] ?? []);
+        $rma    = in_array('rma', $picked, true);
+        $repair = in_array('repair', $picked, true);
+
+        if ($rma && $repair) return 'both';
+        if ($rma)            return 'rma';
+        if ($repair)         return 'repair';
+        return null;
+    }
+
+    /**
      * Remove a status nobody has used.
      *
      * Refused the moment a case sits in it or ever passed through it: both
@@ -731,7 +750,12 @@ class AdminController {
             // reaching it ends that work. Case-only statuses keep 0: the form
             // hides the tick, so an absent box must not read as "unticked by
             // the admin" on something that never had the question.
-            $scope = status_applies_to($_POST['applies_to'] ?? null);
+            $scope = $this->status_scope_input();
+            if ($scope === null) {
+                $_SESSION['flash'] = ['type' => 'danger', 'message' => __('admin.status_applies_required')];
+                header('Location: /administration?tab=statuses');
+                exit;
+            }
             $data['applies_to']      = $scope;
             $data['is_terminal_job'] = ($scope !== 'rma' && isset($_POST['is_terminal_job'])) ? 1 : 0;
         }
@@ -785,7 +809,12 @@ class AdminController {
             // reaching it ends that work. Case-only statuses keep 0: the form
             // hides the tick, so an absent box must not read as "unticked by
             // the admin" on something that never had the question.
-            $scope = status_applies_to($_POST['applies_to'] ?? null);
+            $scope = $this->status_scope_input();
+            if ($scope === null) {
+                $_SESSION['flash'] = ['type' => 'danger', 'message' => __('admin.status_applies_required')];
+                header('Location: /administration?tab=statuses');
+                exit;
+            }
             $data['applies_to']      = $scope;
             $data['is_terminal_job'] = ($scope !== 'rma' && isset($_POST['is_terminal_job'])) ? 1 : 0;
         }

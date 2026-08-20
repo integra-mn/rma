@@ -891,7 +891,7 @@ return [
     'admin.status_label'     => 'Naziv',
     'admin.status_label_me'  => 'Naziv (ME)',
     'admin.status_code_hint' => '(mala slova, samo donje crte)',
-    'admin.status_terminal'  => 'Završni status (označava reklamaciju završenu)',
+    'admin.status_terminal'  => 'Status završava reklamaciju',
     'admin.status_terminal_repair' => 'Završni status (označava popravku završenu)',
     'admin.perm_intro'       => 'Super Admin uvijek ima potpun pristup. Označite ili odznačite polja ispod da promijenite šta Admin, Recepcija, Tehničar i Partner mogu raditi, zatim kliknite Sačuvaj dozvole. Admin uvijek zadržava pristup Podešavanjima (prikazano zaključano) kako administratori nikada ne bi mogli sami sebe zaključati.',
     'admin.perm_full_access' => 'Potpun pristup svemu',
@@ -1493,4 +1493,5 @@ Status popravke pratite ovdje:
     'admin.status_in_use'         => 'u upotrebi',
     'admin.status_in_use_hint'    => 'Reklamacije su u ovom statusu ili su prolazile kroz njega, pa se ne može obrisati. Umjesto toga promijenite naziv.',
     'admin.status_in_use_refused' => 'Taj status je u upotrebi i ne može se obrisati.',
+    'admin.status_applies_required' => 'Izaberite bar jedno na čemu se status koristi.',
 ];
