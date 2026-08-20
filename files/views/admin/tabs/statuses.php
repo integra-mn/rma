@@ -94,25 +94,9 @@ $type   = 'rma';   // the store/update handlers still route on it
               <?php endif; ?>
             </td>
           <td style="text-align:center;color:var(--text-muted);"><?= (int)$s['sort_order'] ?></td>
-          <td style="text-align:right;white-space:nowrap;">
+          <td style="text-align:right;">
             <button type="button" class="btn-link"
               onclick="editStatus('<?= $type ?>', <?= htmlspecialchars(json_encode($s)) ?>)"><?= __('btn.edit') ?></button>
-            <?php
-              // A status any case has ever been in cannot go: rma_status_history
-              // points at it, and deleting would blank a line of somebody's
-              // case history. Unused ones are free to remove.
-              $used = (int)($status_usage[(int)$s['id']] ?? 0);
-            ?>
-            <?php if ($used === 0): ?>
-              <form method="POST" action="/admin/status/delete" style="display:inline;margin-left:10px;"
-                    data-confirm="<?= htmlspecialchars(__('admin.status_confirm_delete'), ENT_QUOTES) ?>">
-                <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int)$s['id'] ?>">
-                <button type="submit" class="btn-link" style="color:#a32d2d;"><?= __('btn.delete') ?></button>
-              </form>
-            <?php else: ?>
-              <span style="margin-left:10px;font-size:11px;color:var(--text-muted);"
-                    title="<?= htmlspecialchars(__('admin.status_in_use_hint'), ENT_QUOTES) ?>"><?= __('admin.status_in_use') ?></span>
-            <?php endif; ?>
           </td>
         </tr>
       <?php endforeach; ?>
@@ -219,21 +203,36 @@ $type   = 'rma';   // the store/update handlers still route on it
         </label>
         <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_terminal_job_hint') ?></p>
       </div>
-      <div style="display:flex;gap:8px;margin-top:1rem;">
-        <button type="submit" class="btn btn-primary" style="min-width:100px;" id="modal-save"><?= __('btn.save') ?></button>
-        <button type="button" class="btn" style="min-width:100px;" onclick="closeModal()"><?= __('btn.cancel') ?></button>
-      </div>
     </form>
+    <?php // Outside the form on purpose: Obrisi needs a form of its own and a
+          // form cannot sit inside another. Sacuvaj reaches back to its own via
+          // the form attribute, which is what that attribute is for. ?>
+    <div style="display:flex;gap:8px;margin-top:1rem;align-items:center;">
+      <button type="submit" form="status-form" class="btn btn-primary" style="min-width:100px;" id="modal-save"><?= __('btn.save') ?></button>
+      <button type="button" class="btn" style="min-width:100px;" onclick="closeModal()"><?= __('btn.cancel') ?></button>
+      <form method="POST" action="/admin/status/delete" id="status-delete-form" style="margin-left:auto;"
+            data-confirm="<?= htmlspecialchars(__('admin.status_confirm_delete'), ENT_QUOTES) ?>">
+        <?= csrf_field() ?><input type="hidden" name="id" id="f-delete-id">
+        <button type="submit" class="btn btn-sm" id="modal-delete"><?= __('btn.delete') ?></button>
+      </form>
+    </div>
   </div>
 </div>
 
 <script>
+// Which statuses a case sits in or has passed through. Those cannot be
+// deleted: rma_status_history points at the id, so removing one would blank a
+// line of somebody's case history.
+const STATUS_USED = <?= json_encode(array_map('intval', $status_usage ?? []), JSON_FORCE_OBJECT) ?>;
+
 const COLOR_PRESETS = ['#888780','#378ADD','#7F77DD','#1D9E75','#EF9F27','#A32D2D','#3B6D11','#E05AAB'];
 const STATUS_TITLES = {
   add:  { rma: <?= json_encode(__('admin.add_rma_status_title')) ?>,  repair: <?= json_encode(__('admin.add_repair_status_title')) ?> },
   edit: { rma: <?= json_encode(__('admin.edit_rma_status_title')) ?>, repair: <?= json_encode(__('admin.edit_repair_status_title')) ?> }
 };
 const SAVE_LABEL = <?= json_encode(__('btn.save')) ?>;
+const DELETE_IN_USE  = <?= json_encode(__('admin.status_in_use_hint')) ?>;
+const DELETE_CONFIRM = <?= json_encode(__('admin.status_confirm_delete')) ?>;
 const SAVE_CHANGES_LABEL = <?= json_encode(__('btn.save_changes')) ?>;
 
 // Every caller below tolerates the role boxes being absent. They were once
@@ -267,6 +266,7 @@ function openModal(type) {
   setRoles('');
   setRecur(true);
   setApplies('rma');
+  setDelete(null);
   var tj = document.getElementById('f-terminal-job');
   if (tj) { tj.checked = false; }
   syncJobTerminal();
@@ -293,6 +293,7 @@ function editStatus(type, s) {
   // both mean "can recur", which is the harmless answer.
   setRecur(s.can_recur === undefined || !!parseInt(s.can_recur));
   setApplies(s.applies_to || 'rma');
+  setDelete(s.id);
   var tj2 = document.getElementById('f-terminal-job');
   if (tj2) { tj2.checked = parseInt(s.is_terminal_job || 0) === 1; }
   syncJobTerminal();
@@ -317,6 +318,32 @@ function setApplies(v) {
   v = v || 'rma';
   r.checked = (v === 'rma' || v === 'both');
   p.checked = (v === 'repair' || v === 'both');
+}
+
+// Shown greyed and unclickable rather than hidden, so the answer to "why can
+// I not delete this" is on the button itself instead of nowhere.
+function setDelete(id) {
+  var form = document.getElementById('status-delete-form');
+  var btn  = document.getElementById('modal-delete');
+  if (!form || !btn) return;
+
+  if (!id) {                       // adding — there is nothing to delete yet
+    form.style.display = 'none';
+    return;
+  }
+  form.style.display = '';
+  document.getElementById('f-delete-id').value = id;
+
+  var used = (STATUS_USED[id] || 0) > 0;
+  btn.disabled = used;
+  btn.classList.toggle('btn-danger', !used);
+  btn.style.opacity = used ? '0.45' : '';
+  btn.style.cursor  = used ? 'not-allowed' : '';
+  btn.title = used ? DELETE_IN_USE : '';
+  // data-confirm lives on the form; a disabled button cannot submit it anyway,
+  // but clearing it keeps the dialog from ever appearing for a refused delete.
+  if (used) { form.removeAttribute('data-confirm'); }
+  else      { form.setAttribute('data-confirm', DELETE_CONFIRM); }
 }
 
 function closeModal() {

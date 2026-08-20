@@ -1489,7 +1489,6 @@ Track the repair here:
     'admin.status_confirm_delete' => 'Delete this status? It has never been used, so nothing loses its history.',
     'admin.status_deleted'        => 'Status deleted.',
     'admin.status_not_found'      => 'Status not found.',
-    'admin.status_in_use'         => 'in use',
     'admin.status_in_use_hint'    => 'Cases are in this status or have passed through it, so it cannot be deleted. Rename it instead.',
     'admin.status_in_use_refused' => 'That status is in use and cannot be deleted.',
     'admin.status_applies_required' => 'Choose at least one record the status is used on.',

@@ -1489,7 +1489,6 @@ Status popravke pratite ovdje:
     'admin.status_confirm_delete' => 'Obrisati ovaj status? Nikada nije korišćen, pa ništa ne gubi istoriju.',
     'admin.status_deleted'        => 'Status je obrisan.',
     'admin.status_not_found'      => 'Status nije pronadjen.',
-    'admin.status_in_use'         => 'u upotrebi',
     'admin.status_in_use_hint'    => 'Reklamacije su u ovom statusu ili su prolazile kroz njega, pa se ne može obrisati. Umjesto toga promijenite naziv.',
     'admin.status_in_use_refused' => 'Taj status je u upotrebi i ne može se obrisati.',
     'admin.status_applies_required' => 'Izaberite bar jedno na čemu se status koristi.',
