@@ -5,7 +5,8 @@ defined('RMS') or die('Direct access not permitted');
 // exist here, marked "Na cemu se koristi = oboje". The bench still reads the
 // old table until step 2 repoints it; nothing on this screen governed that, so
 // removing the tab changes no behaviour.
-$active = $rma_statuses;
+$lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
+$active  = $rma_statuses;
 $type   = 'rma';   // the store/update handlers still route on it
 ?>
 
@@ -19,9 +20,16 @@ $type   = 'rma';   // the store/update handlers still route on it
     <thead>
       <tr>
         <th style="width:100px;"><?= __('label.color') ?></th>
-        <th style="width:280px;"><?= __('admin.status_label') ?></th>
-        <th style="width:280px;"><?= __('admin.status_label_me') ?></th>
-        <th style="width:180px;"><?= __('label.code') ?></th>
+        <?php // The English name is only worth a column to somebody reading in
+              // English; in Montenegrin it is a second copy of the next column.
+              // Kod is gone altogether — it belongs to the database, and the
+              // edit dialog still shows it to anyone who needs it. ?>
+        <?php if ($lang_en): ?>
+          <th style="width:300px;"><?= __('admin.status_label') ?></th>
+          <th style="width:300px;"><?= __('admin.status_label_me') ?></th>
+        <?php else: ?>
+          <th style="width:340px;"><?= __('admin.status_label') ?></th>
+        <?php endif; ?>
         <?php // Same order as the dialog: the three yes/no answers, then the
               // two "which of these" ones. Reading a row should feel like
               // reading the form that produced it. ?>
@@ -40,9 +48,14 @@ $type   = 'rma';   // the store/update handlers still route on it
           <td>
             <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:<?= htmlspecialchars($s['color']) ?>;"></span>
           </td>
-          <td style="font-weight:500;"><?= htmlspecialchars($s['label']) ?></td>
-          <td style="color:var(--text-secondary);"><?= htmlspecialchars($s['label_me'] ?? '') ?: '—' ?></td>
-          <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars($s['code']) ?></td>
+          <?php if ($lang_en): ?>
+            <td style="font-weight:500;"><?= htmlspecialchars($s['label']) ?></td>
+            <td style="color:var(--text-secondary);"><?= htmlspecialchars($s['label_me'] ?? '') ?: '—' ?></td>
+          <?php else: ?>
+            <?php // Falls back to the English name when no ME one is set, or a
+                  // half-filled status would show a blank row and look broken. ?>
+            <td style="font-weight:500;"><?= htmlspecialchars(($s['label_me'] ?? '') !== '' ? $s['label_me'] : $s['label']) ?></td>
+          <?php endif; ?>
           <?php
             // Three columns, one question each, both answers spelled out. A
             // dash for one side and nothing for the other made the reader work
