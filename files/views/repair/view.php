@@ -126,7 +126,7 @@
     <form method="POST" action="/repair/<?= (int)$job['id'] ?>/update">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="details">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
         <div class="field" style="margin-bottom:0;">
           <label><?= __('repair.description_findings') ?></label>
           <textarea name="description" style="resize:none;height:150px;"><?= htmlspecialchars($job['description'] ?? '') ?></textarea>
@@ -142,7 +142,7 @@
             // text stays the record — the code is what a vendor's system can
             // read. Only codes written for this brand and device type are
             // offered, plus the ones marked for every device. ?>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
         <div class="field" style="margin-bottom:0;">
           <label><?= __('codes.kind_error') ?></label>
           <?php if ($error_codes): ?>
