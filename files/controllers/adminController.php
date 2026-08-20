@@ -545,14 +545,30 @@ class AdminController {
                 $status_usage[(int)$row['id']] = (int)$row['used'];
             }
         } elseif ($tab === 'codes') {
-            // Every code, both kinds — the view splits them by sub-tab and the
-            // brand/type filters work on the rows already in the page.
-            $codes = db_rows('SELECT c.*, b.name AS brand_name, cat.name AS category_name
+            // Filtered in SQL, not in the browser. It began as one query for
+            // everything with the filters hiding rows client-side, which was
+            // fine for the handful of codes typed in by hand — TCL's import
+            // brought 1,257, and a page holding all of them is a page nobody
+            // waits for.
+            $code_where  = ['c.deleted_at IS NULL'];
+            $code_params = [];
+            if ($b = (int)($_GET['brand'] ?? 0))    { $code_where[] = 'c.brand_id = ?';    $code_params[] = $b; }
+            if ($k = (int)($_GET['category'] ?? 0)) { $code_where[] = 'c.category_id = ?'; $code_params[] = $k; }
+            if (($q = trim($_GET['q'] ?? '')) !== '') {
+                $code_where[]  = '(c.code LIKE ? OR c.label LIKE ? OR c.label_me LIKE ?)';
+                array_push($code_params, "%{$q}%", "%{$q}%", "%{$q}%");
+            }
+            $code_sql = implode(' AND ', $code_where);
+
+            $code_total = (int) db_val("SELECT COUNT(*) FROM repair_codes c WHERE {$code_sql}", $code_params);
+            $code_limit = 200;
+            $codes = db_rows("SELECT c.*, b.name AS brand_name, cat.name AS category_name
                                 FROM repair_codes c
                                 LEFT JOIN device_brands b ON b.id = c.brand_id
                                 LEFT JOIN device_categories cat ON cat.id = c.category_id
-                               WHERE c.deleted_at IS NULL
-                               ORDER BY c.kind, c.sort_order, c.code');
+                               WHERE {$code_sql}
+                               ORDER BY c.kind, c.vendor_line, c.sort_order, c.code
+                               LIMIT {$code_limit}", $code_params);
             $brands     = db_rows('SELECT id, name FROM device_brands WHERE is_active = 1 ORDER BY name');
             $categories = db_rows('SELECT id, name FROM device_categories WHERE is_active = 1 ORDER BY sort_order, name');
         } elseif ($tab === 'couriers') {

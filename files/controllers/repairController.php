@@ -152,6 +152,9 @@ class RepairController {
         $resolution_codes = repair_codes_for('resolution',
                                 (int)($job['device_brand_id'] ?? 0) ?: null,
                                 (int)($job['device_category_id'] ?? 0) ?: null);
+        // Which solutions each offered symptom allows, so picking one can narrow
+        // the other list in the browser without a round trip.
+        $code_links = repair_code_links(array_column($error_codes, 'id'));
 
         $time_logs = db_rows("SELECT t.*, u.name as user_name
                               FROM repair_time_logs t

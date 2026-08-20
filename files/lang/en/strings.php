@@ -1469,7 +1469,6 @@ Track the repair here:
     'codes.note'                 => 'Meaning / what to do',
     'codes.active_label'         => 'Offered to technicians',
     'codes.empty'                => 'No codes yet. Add the ones the vendor documents, and they appear on the repair screen for matching devices.',
-    'codes.none_match'           => 'No code matches this filter.',
     'codes.none_selected'        => '—',
     'codes.none_for_device'      => 'No codes for this brand and device type yet.',
     'codes.added'                => 'Code added.',
@@ -1505,4 +1504,7 @@ Track the repair here:
     'vendor.tcl_no_credentials'    => 'Enter the TCL account and password first.',
     'vendor.tcl_repair_not_ready'  => 'Sending repairs to TCL is not built yet — the symptom and solution codes are still needed.',
     'rma.no_vendor_for_brand'      => 'No active vendor is configured for this brand.',
+    'codes.search'   => 'Search codes',
+    'codes.showing'  => 'Showing :shown of :total',
+    'codes.vendor_line' => 'Vendor product line',
 ];

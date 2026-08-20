@@ -1469,7 +1469,6 @@ Status popravke pratite ovdje:
     'codes.note'                 => 'Značenje / šta uraditi',
     'codes.active_label'         => 'Dostupno tehničarima',
     'codes.empty'                => 'Još nema kodova. Unesite one koje proizvodjač navodi i pojaviće se na popravci za odgovarajuće uredjaje.',
-    'codes.none_match'           => 'Nema koda za ovaj filter.',
     'codes.none_selected'        => '—',
     'codes.none_for_device'      => 'Još nema kodova za ovu marku i tip uredjaja.',
     'codes.added'                => 'Kod je dodat.',
@@ -1505,4 +1504,7 @@ Status popravke pratite ovdje:
     'vendor.tcl_no_credentials'    => 'Prvo unesite TCL nalog i lozinku.',
     'vendor.tcl_repair_not_ready'  => 'Slanje popravki TCL-u još nije napravljeno — nedostaju kodovi simptoma i rješenja.',
     'rma.no_vendor_for_brand'      => 'Za ovu marku nije podešen nijedan proizvodjač.',
+    'codes.search'   => 'Pretraga kodova',
+    'codes.showing'  => 'Prikazano :shown od :total',
+    'codes.vendor_line' => 'Linija proizvoda',
 ];

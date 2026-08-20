@@ -25,27 +25,29 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
     <button type="button" class="btn btn-primary" style="min-width:140px;" onclick="openCodeModal('<?= $sub ?>')">
       <?= __('codes.add') ?>
     </button>
-    <?php // Filters narrow the list the same way the repair screen narrows the
-          // dropdown, so what an admin sees here is what the bench will get. ?>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <?php // width, not min-width: a select grows to its widest option, so two
-            // with the same floor still render at different sizes - the brand
-            // list stretched to fit "Crnogorski Telekom" while the type list
-            // sat at its floor. 200px holds that name with room for a longer
-            // one, and holds both filters to the same size. ?>
-      <select id="filter-brand" onchange="filterCodes()" style="width:200px;">
+    <?php // A real form now: with TCL's 1,257 codes the filtering has to happen
+          // in the database, so choosing one reloads rather than hiding rows.
+          // width, not min-width — a select grows to its widest option, and the
+          // brand list stretches to fit "Crnogorski Telekom" while the type
+          // list would sit at its floor. ?>
+    <form method="GET" action="/administration" style="display:flex;gap:8px;align-items:center;">
+      <input type="hidden" name="tab" value="codes">
+      <input type="hidden" name="sub" value="<?= htmlspecialchars($sub) ?>">
+      <input type="search" name="q" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>"
+             placeholder="<?= __('codes.search') ?>" style="width:200px;">
+      <select name="brand" onchange="this.form.submit()" style="width:200px;">
         <option value=""><?= __('codes.all_brands') ?></option>
         <?php foreach ($brands as $b): ?>
-          <option value="<?= (int)$b['id'] ?>"><?= htmlspecialchars($b['name']) ?></option>
+          <option value="<?= (int)$b['id'] ?>" <?= (int)($_GET['brand'] ?? 0) === (int)$b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['name']) ?></option>
         <?php endforeach; ?>
       </select>
-      <select id="filter-category" onchange="filterCodes()" style="width:200px;">
+      <select name="category" onchange="this.form.submit()" style="width:200px;">
         <option value=""><?= __('codes.all_types') ?></option>
         <?php foreach ($categories as $c): ?>
-          <option value="<?= (int)$c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+          <option value="<?= (int)$c['id'] ?>" <?= (int)($_GET['category'] ?? 0) === (int)$c['id'] ? 'selected' : '' ?>><?= htmlspecialchars($c['name']) ?></option>
         <?php endforeach; ?>
       </select>
-    </div>
+    </form>
   </div>
 
   <?php if (!$rows): ?>
@@ -53,6 +55,12 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
       <?= __('codes.empty') ?>
     </div>
   <?php else: ?>
+  <?php // Say what is on screen against what matched. A silent cap reads as
+        // "this is all of them", which after the TCL import it very often is
+        // not. ?>
+  <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
+    <?= __('codes.showing', ['shown' => count($rows), 'total' => (int)($code_total ?? count($rows))]) ?>
+  </p>
   <table class="data-table" style="table-layout:fixed;width:100%;">
     <thead>
       <tr>
@@ -69,7 +77,7 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
     </thead>
     <tbody id="codes-body">
       <?php foreach ($rows as $c): ?>
-        <tr data-brand="<?= (int)($c['brand_id'] ?? 0) ?>" data-category="<?= (int)($c['category_id'] ?? 0) ?>">
+        <tr>
           <?php // Plain text, like every other cell. The monospace face at 12px
                 // set the code apart as something technical; it is the thing
                 // this screen exists for. ?>
@@ -95,7 +103,6 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
       <?php endforeach; ?>
     </tbody>
   </table>
-  <p id="codes-none" style="display:none;font-size:13px;color:var(--text-muted);padding:1rem 0;"><?= __('codes.none_match') ?></p>
   <?php endif; ?>
 </div>
 
@@ -167,24 +174,6 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
 const CODE_TITLES = { add: <?= json_encode(__('codes.add_title')) ?>, edit: <?= json_encode(__('codes.edit_title')) ?> };
 const CODE_SAVE   = <?= json_encode(__('btn.save')) ?>;
 const CODE_SAVE2  = <?= json_encode(__('btn.save_changes')) ?>;
-
-// A row with no brand (or no type) applies to all of them, so it stays visible
-// whatever the filter says — hiding it would suggest the bench will not be
-// offered it, and the bench will.
-function filterCodes() {
-  const b = document.getElementById('filter-brand').value;
-  const c = document.getElementById('filter-category').value;
-  const body = document.getElementById('codes-body');
-  if (!body) return;
-  let shown = 0;
-  body.querySelectorAll('tr').forEach(function (tr) {
-    const rb = tr.dataset.brand, rc = tr.dataset.category;
-    const ok = (!b || rb === '0' || rb === b) && (!c || rc === '0' || rc === c);
-    tr.style.display = ok ? '' : 'none';
-    if (ok) shown++;
-  });
-  document.getElementById('codes-none').style.display = shown ? 'none' : '';
-}
 
 function openCodeModal(kind) {
   document.getElementById('code-modal-title').textContent = CODE_TITLES.add;

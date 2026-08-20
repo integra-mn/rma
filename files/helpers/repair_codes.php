@@ -45,6 +45,31 @@ function repair_codes_for(string $kind, ?int $brand_id, ?int $category_id): arra
     );
 }
 
+/**
+ * Which solutions each of these symptoms allows.
+ *
+ * Returns [error_code_id => [resolution_code_id, ...]]. Empty for codes nobody
+ * has paired — hand-entered ones, and any vendor who does not publish the
+ * relationship — and the screen treats an empty list as "no opinion, show
+ * everything" rather than as "nothing is allowed".
+ *
+ * TCL's list is the reason this exists: the median symptom accepts 22 of the
+ * 207 solutions, so without it a technician scrolls a list that is 90% wrong.
+ */
+function repair_code_links(array $error_ids): array {
+    $ids = array_values(array_unique(array_map('intval', $error_ids)));
+    if (!$ids) return [];
+
+    $in   = implode(',', array_fill(0, count($ids), '?'));
+    $out  = [];
+    foreach (db_rows("SELECT error_code_id, resolution_code_id
+                        FROM repair_code_links
+                       WHERE error_code_id IN ({$in})", $ids) as $r) {
+        $out[(int)$r['error_code_id']][] = (int)$r['resolution_code_id'];
+    }
+    return $out;
+}
+
 /** One code row by id, or null. Deleted rows still resolve: a job that used a
  *  code keeps showing what it was, or its history would rewrite itself. */
 function repair_code(?int $id): ?array {

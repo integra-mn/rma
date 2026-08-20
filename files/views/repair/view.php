@@ -146,7 +146,7 @@
         <div class="field" style="margin-bottom:0;">
           <label><?= __('codes.kind_error') ?></label>
           <?php if ($error_codes): ?>
-            <select name="error_code_id">
+            <select name="error_code_id" id="f-error-code" onchange="narrowSolutions()">
               <option value=""><?= __('codes.none_selected') ?></option>
               <?php foreach ($error_codes as $c): ?>
                 <option value="<?= (int)$c['id'] ?>" <?= (int)($job['error_code_id'] ?? 0) === (int)$c['id'] ? 'selected' : '' ?>>
@@ -161,7 +161,7 @@
         <div class="field" style="margin-bottom:0;">
           <label><?= __('codes.kind_resolution') ?></label>
           <?php if ($resolution_codes): ?>
-            <select name="resolution_code_id">
+            <select name="resolution_code_id" id="f-resolution-code">
               <option value=""><?= __('codes.none_selected') ?></option>
               <?php foreach ($resolution_codes as $c): ?>
                 <option value="<?= (int)$c['id'] ?>" <?= (int)($job['resolution_code_id'] ?? 0) === (int)$c['id'] ? 'selected' : '' ?>>
@@ -175,11 +175,53 @@
         </div>
       </div>
 
-      <div style="display:flex;justify-content:flex-end;">
+      <div style="display:flex;align-items:center;gap:12px;justify-content:flex-end;">
+        <span id="codes-narrowed" style="font-size:12px;color:var(--text-muted);display:none;"></span>
         <button type="submit" class="btn btn-primary" style="min-width:120px;"><?= __('btn.save') ?></button>
       </div>
     </form>
   </div>
+
+  <?php // Picking a symptom narrows the solutions to the ones the vendor
+        // accepts for it. TCL publish that relationship: the median symptom
+        // allows 22 of 207, so without this the right answer is buried.
+        //
+        // Hidden rather than removed, so a code already saved on this job stays
+        // visible even if it is not in the current symptom's list — a job
+        // recorded before the codes were imported must not silently lose it. ?>
+  <script>
+  const CODE_LINKS = <?= json_encode($code_links ?? [], JSON_FORCE_OBJECT) ?>;
+
+  function narrowSolutions() {
+    const err = document.getElementById('f-error-code');
+    const sol = document.getElementById('f-resolution-code');
+    const note = document.getElementById('codes-narrowed');
+    if (!err || !sol) return;
+
+    const allowed = CODE_LINKS[err.value] || null;
+    let shown = 0, total = 0;
+
+    for (const opt of sol.options) {
+      if (!opt.value) continue;            // the "-" entry always stays
+      total++;
+      // No pairing for this symptom means nobody has said which solutions fit,
+      // which is not the same as saying none do.
+      const ok = !allowed || allowed.includes(parseInt(opt.value, 10)) || opt.selected;
+      opt.hidden = !ok;
+      opt.disabled = !ok;
+      if (ok) shown++;
+    }
+    // A hidden option that was selected would leave the box looking blank.
+    if (sol.selectedOptions[0] && sol.selectedOptions[0].hidden) sol.value = '';
+
+    if (note) {
+      const narrowed = allowed && shown < total;
+      note.style.display = narrowed ? '' : 'none';
+      note.textContent = narrowed ? shown + ' / ' + total : '';
+    }
+  }
+  narrowSolutions();
+  </script>
   <?php elseif ($job['description'] || $job['resolution']): ?>
   <div class="card" style="margin-bottom:1rem;">
     <?php if ($job['description']): ?>
