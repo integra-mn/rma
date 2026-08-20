@@ -1042,7 +1042,7 @@ Status popravke pratite ovdje:
     'admin.status_roles_label'  => 'Status može postaviti',
     'admin.status_recur'        => 'Ponavljanje',
     'admin.status_recur_once'   => 'Samo jednom',
-    'admin.status_recur_label'  => 'Reklamacija se može vratiti u ovaj status',
+    'admin.status_recur_label'  => 'Status se može ponoviti tokom reklamacije',
     'settings.repeat'          => 'Ponovljena popravka',
     'reports.repeat_count'    => 'Ponovljene popravke',
     'reports.repeat_window'   => 'Rok (dana)',
