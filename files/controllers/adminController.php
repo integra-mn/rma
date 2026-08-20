@@ -569,8 +569,27 @@ class AdminController {
                                WHERE {$code_sql}
                                ORDER BY c.kind, c.vendor_line, c.sort_order, c.code
                                LIMIT {$code_limit}", $code_params);
+            // Two lists, because the two dropdowns ask different questions.
+            // The form asks what a new code could belong to, so it offers every
+            // brand. The filter asks what is worth narrowing to, so it offers
+            // only brands that have codes — picking Samsung when Samsung has
+            // none is a dead end, and the list grows by itself the moment a
+            // code for a new brand is added.
             $brands     = db_rows('SELECT id, name FROM device_brands WHERE is_active = 1 ORDER BY name');
             $categories = db_rows('SELECT id, name FROM device_categories WHERE is_active = 1 ORDER BY sort_order, name');
+
+            $filter_brands = db_rows(
+                'SELECT DISTINCT b.id, b.name
+                   FROM repair_codes c JOIN device_brands b ON b.id = c.brand_id
+                  WHERE c.deleted_at IS NULL
+                  ORDER BY b.name'
+            );
+            $filter_categories = db_rows(
+                'SELECT DISTINCT cat.id, cat.name, cat.sort_order
+                   FROM repair_codes c JOIN device_categories cat ON cat.id = c.category_id
+                  WHERE c.deleted_at IS NULL
+                  ORDER BY cat.sort_order, cat.name'
+            );
         } elseif ($tab === 'couriers') {
             $couriers = db_rows('SELECT * FROM couriers ORDER BY name');
         } elseif ($tab === 'insurance') {

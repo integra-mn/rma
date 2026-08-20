@@ -37,13 +37,13 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
              placeholder="<?= __('codes.search') ?>" style="width:200px;">
       <select name="brand" onchange="this.form.submit()" style="width:200px;">
         <option value=""><?= __('codes.all_brands') ?></option>
-        <?php foreach ($brands as $b): ?>
+        <?php foreach ($filter_brands as $b): ?>
           <option value="<?= (int)$b['id'] ?>" <?= (int)($_GET['brand'] ?? 0) === (int)$b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['name']) ?></option>
         <?php endforeach; ?>
       </select>
       <select name="category" onchange="this.form.submit()" style="width:200px;">
         <option value=""><?= __('codes.all_types') ?></option>
-        <?php foreach ($categories as $c): ?>
+        <?php foreach ($filter_categories as $c): ?>
           <option value="<?= (int)$c['id'] ?>" <?= (int)($_GET['category'] ?? 0) === (int)$c['id'] ? 'selected' : '' ?>><?= htmlspecialchars($c['name']) ?></option>
         <?php endforeach; ?>
       </select>
