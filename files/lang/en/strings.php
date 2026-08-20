@@ -967,7 +967,7 @@ Track the repair here:
     'settings.notify_partners'  => 'Partners',
     'settings.notify_note'      => 'A partner set as the sole contact with their own customer overrides this — that customer is not contacted on any channel.',
     'admin.status_notify'       => 'Notify',
-    'admin.status_notify_label' => 'Notify when an RMA reaches this status',
+    'admin.status_notify_label' => 'Notification on this status',
     'ins.case_insured'      => 'This device is insured',
     'ins.insurer'           => 'Insurer',
     'ins.select_insurer'    => 'Select insurer',

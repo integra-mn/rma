@@ -967,7 +967,7 @@ Status popravke pratite ovdje:
     'settings.notify_partners'  => 'Partneri',
     'settings.notify_note'      => 'Ako je partner jedini kontakt prema svom korisniku, to ima prednost — taj korisnik se ne obavještava nijednim kanalom.',
     'admin.status_notify'       => 'Obavještenje',
-    'admin.status_notify_label' => 'Obavijesti kada reklamacija dodje u ovaj status',
+    'admin.status_notify_label' => 'Notifikacija prilikom statusa',
     'ins.case_insured'      => 'Uredjaj je osiguran',
     'ins.insurer'           => 'Osiguravač',
     'ins.select_insurer'    => 'Izaberite osiguravača',
