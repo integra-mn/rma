@@ -57,8 +57,13 @@ class DashboardController {
                                          AND r.dispatched_at IS NULL
                                          AND (rs.code IN ('repaired', 'no_fault', 'unrepairable')
                                               OR (rs.code = 'cancelled' AND {$received})){$fr}"),
-            'sla_breached' => db_val("SELECT COUNT(*) FROM rma_requests
-                                      WHERE sla_breached = 1 AND deleted_at IS NULL{$fp}"),
+            // Announced by a partner but not yet here. Read from the status
+            // rather than from a date, because that is what the counter sets
+            // and what it changes the moment the courier arrives.
+            'incoming'     => db_val("SELECT COUNT(*) FROM rma_requests r
+                                        JOIN rma_statuses rs ON rs.id = r.status_id
+                                       WHERE rs.code = 'awaiting_device'
+                                         AND r.deleted_at IS NULL{$fr}"),
             'pending_invoices' => db_val("SELECT COUNT(*) FROM invoices
                                           WHERE status IN ('draft','sent','overdue')
                                           AND deleted_at IS NULL{$fp}"),

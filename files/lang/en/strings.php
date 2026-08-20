@@ -164,7 +164,6 @@ return [
     // ── Dashboard ─────────────────────────────────────────────
     'dashboard.open_rmas'        => 'Open RMAs',
     'dashboard.in_repair'        => 'In repair',
-    'dashboard.sla_breached'     => 'SLA breached',
     'dashboard.pending_invoices' => 'Pending invoices',
     'dashboard.for_pickup'       => 'Devices for pickup',
     'dashboard.recent_rmas'      => 'Recent RMAs',
@@ -1505,4 +1504,5 @@ Track the repair here:
     'rma.no_vendor_for_brand'      => 'No active vendor is configured for this brand.',
     'codes.search'   => 'Search codes',
     'codes.vendor_line' => 'Vendor product line',
+    'dashboard.incoming'         => 'Devices incoming',
 ];
