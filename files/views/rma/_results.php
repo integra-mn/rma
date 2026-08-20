@@ -6,6 +6,7 @@
     <thead>
       <tr>
         <th><?= __('label.rma') ?></th>
+        <th><?= __('codes.scope') ?></th>
         <th><?= __('rma.customer') ?></th>
         <th><?= __('rma.partner') ?></th>
         <th><?= __('label.status') ?></th>
@@ -36,6 +37,7 @@
               <span class="badge" style="background:#fcebeb;color:#a32d2d;margin-left:4px;"><?= __('rma.warranty_refused') ?></span>
             <?php endif; ?>
           </td>
+          <td style="color:var(--text-secondary);"><?= htmlspecialchars($r['brand_name'] ?? '') ?: '—' ?></td>
           <td style="color:var(--text-secondary);"><?= htmlspecialchars($r['customer_name'] ?? '—') ?></td>
           <td style="color:var(--text-secondary);"><?= htmlspecialchars($r['partner_name'] ?? '—') ?></td>
           <td>

@@ -55,6 +55,7 @@ class RepairController {
         $jobs = db_rows("SELECT j.*, s.label as status_label, s.color as status_color, s.code as status_code,
                                 r.rma_number, r.priority,
                                 c.name as customer_name,
+                                db2.name as brand_name,
                                 u.name as tech_name,
                                 l.name as location_name,
                                 (SELECT SUM(minutes) FROM repair_time_logs WHERE job_id = j.id) as total_minutes,
@@ -66,6 +67,8 @@ class RepairController {
                          LEFT JOIN users u ON u.id = j.technician_id
                          LEFT JOIN locations l ON l.id = j.location_id
                          LEFT JOIN devices d ON d.id = r.device_id
+                         LEFT JOIN device_models dm ON dm.id = d.model_id
+                         LEFT JOIN device_brands db2 ON db2.id = dm.brand_id
                          WHERE {$where}
                          ORDER BY j.created_at DESC
                          LIMIT {$per_page} OFFSET {$offset}", $params);

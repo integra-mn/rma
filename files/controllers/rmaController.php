@@ -59,6 +59,10 @@ class RmaController {
         $rmas = db_rows("SELECT r.*, s.code as status_code, s.label as status_label, s.color as status_color,
                                 c.name as customer_name, p.name as partner_name,
                                 l.name as location_name,
+                                -- The brand, from the device's model. Two more
+                                -- joins on a list that already reaches devices
+                                -- for the IMEI search.
+                                db2.name as brand_name,
                                 u.name as tech_name
                          FROM rma_requests r
                          JOIN rma_statuses s ON s.id = r.status_id
@@ -67,6 +71,8 @@ class RmaController {
                          LEFT JOIN locations l ON l.id = r.location_id
                          LEFT JOIN users u ON u.id = r.assigned_tech
                          LEFT JOIN devices d ON d.id = r.device_id
+                         LEFT JOIN device_models dm ON dm.id = d.model_id
+                         LEFT JOIN device_brands db2 ON db2.id = dm.brand_id
                          WHERE {$where}
                          -- Newest number first, not newest row. The two are
                          -- normally the same, since numbers are handed out in

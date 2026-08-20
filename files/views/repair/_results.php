@@ -6,6 +6,7 @@
     <thead>
       <tr>
         <th><?= __('label.work_order') ?></th>
+        <th><?= __('codes.scope') ?></th>
         <th><?= __('rma.customer') ?></th>
         <th><?= __('label.status') ?></th>
         <th><?= __('label.priority') ?></th>
@@ -19,6 +20,7 @@
       <?php foreach ($jobs as $j): ?>
         <tr onclick="window.location='/repair/<?= (int)$j['id'] ?>'">
           <td style="font-weight:500;"><?= htmlspecialchars($j['rma_number']) ?></td>
+          <td style="color:var(--text-secondary);"><?= htmlspecialchars($j['brand_name'] ?? '') ?: '—' ?></td>
           <td style="color:var(--text-secondary);"><?= htmlspecialchars($j['customer_name'] ?? '—') ?></td>
           <td>
             <span class="badge badge-status" style="<?= ($j['status_code'] ?? '') === 'cancelled' ? 'background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;' : 'background:'.htmlspecialchars($j['status_color']).'22;color:'.htmlspecialchars($j['status_color']).';'.'border:0.5px solid '.htmlspecialchars($j['status_color']).'66;' ?>"><?= status_label((string)($j['status_code'] ?? ''), $j['status_label']) ?></span>
