@@ -1,28 +1,18 @@
 <?php
 defined('RMS') or die('Direct access not permitted');
-// Sub-tab state. `sub` query-string param controls which status set we show.
-// Kept short (same naming style as devices' `dtab`) to stay URL-friendly.
-$sub = $_GET['sub'] ?? 'rma';
-if (!in_array($sub, ['rma', 'repair'], true)) $sub = 'rma';
-
-$active = $sub === 'rma' ? $rma_statuses : $repair_statuses;
-$type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update routing
+// One list. Statusi servisa is gone: it held a second vocabulary for the same
+// case — "U toku" beside "Na dijagnostici" — and all six of its statuses now
+// exist here, marked "Na cemu se koristi = oboje". The bench still reads the
+// old table until step 2 repoints it; nothing on this screen governed that, so
+// removing the tab changes no behaviour.
+$active = $rma_statuses;
+$type   = 'rma';   // the store/update handlers still route on it
 ?>
-
-<!-- Sub-tabs: RMA Statuses | Repair Statuses -->
-<div class="tab-bar">
-  <?php foreach (['rma' => __('admin.rma_statuses'), 'repair' => __('admin.repair_statuses')] as $k => $label): ?>
-    <a href="/administration?tab=statuses&sub=<?= $k ?>"
-       class="tab<?= $sub === $k ? ' active' : '' ?>">
-      <?= $label ?>
-    </a>
-  <?php endforeach; ?>
-</div>
 
 <div>
   <div style="margin-bottom:1rem;">
     <button type="button" class="btn btn-primary" style="min-width:140px;" onclick="openModal('<?= $type ?>')">
-      <?= $sub === 'rma' ? __('admin.add_rma_status') : __('admin.add_repair_status') ?>
+      <?= __('admin.add_rma_status') ?>
     </button>
   </div>
   <table class="data-table" style="table-layout:fixed;width:100%;">
@@ -33,11 +23,9 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         <th style="width:280px;"><?= __('admin.status_label_me') ?></th>
         <th style="width:180px;"><?= __('label.code') ?></th>
         <th style="width:110px;text-align:center;"><?= __('admin.status_notify') ?></th>
-        <?php if ($sub === 'rma'): ?>
           <th style="width:190px;"><?= __('admin.status_roles') ?></th>
           <th style="width:150px;"><?= __('admin.status_applies') ?></th>
           <th style="width:110px;text-align:center;"><?= __('admin.status_recur') ?></th>
-        <?php endif; ?>
         <th style="width:100px;text-align:center;"><?= __('label.sort_order') ?></th>
         <th style="text-align:right;"><?= __('label.actions') ?></th>
       </tr>
@@ -58,7 +46,6 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
               <span style="color:var(--text-muted);">&mdash;</span>
             <?php endif; ?>
           </td>
-          <?php if ($sub === 'rma'): ?>
             <?php $roles = status_roles($s['roles'] ?? null); ?>
             <td>
               <?php if (!$roles): ?>
@@ -92,11 +79,26 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
                 <span class="badge badge-pill-fixed" style="background:#faeeda;color:#633806;border:0.5px solid #ef9f27;"><?= __('admin.status_recur_once') ?></span>
               <?php endif; ?>
             </td>
-          <?php endif; ?>
           <td style="text-align:center;color:var(--text-muted);"><?= (int)$s['sort_order'] ?></td>
-          <td style="text-align:right;">
+          <td style="text-align:right;white-space:nowrap;">
             <button type="button" class="btn-link"
               onclick="editStatus('<?= $type ?>', <?= htmlspecialchars(json_encode($s)) ?>)"><?= __('btn.edit') ?></button>
+            <?php
+              // A status any case has ever been in cannot go: rma_status_history
+              // points at it, and deleting would blank a line of somebody's
+              // case history. Unused ones are free to remove.
+              $used = (int)($status_usage[(int)$s['id']] ?? 0);
+            ?>
+            <?php if ($used === 0): ?>
+              <form method="POST" action="/admin/status/delete" style="display:inline;margin-left:10px;"
+                    data-confirm="<?= htmlspecialchars(__('admin.status_confirm_delete'), ENT_QUOTES) ?>">
+                <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int)$s['id'] ?>">
+                <button type="submit" class="btn-link" style="color:#a32d2d;"><?= __('btn.delete') ?></button>
+              </form>
+            <?php else: ?>
+              <span style="margin-left:10px;font-size:11px;color:var(--text-muted);"
+                    title="<?= htmlspecialchars(__('admin.status_in_use_hint'), ENT_QUOTES) ?>"><?= __('admin.status_in_use') ?></span>
+            <?php endif; ?>
           </td>
         </tr>
       <?php endforeach; ?>
@@ -143,7 +145,7 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
           <input type="checkbox" name="is_terminal" id="f-terminal" value="1"
                  style="width:auto;height:auto;">
-          <?= $sub === 'repair' ? __('admin.status_terminal_repair') : __('admin.status_terminal') ?>
+          <?= __('admin.status_terminal') ?>
         </label>
       </div>
       <div class="field">
@@ -154,7 +156,6 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         </label>
         <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_notify_hint') ?></p>
       </div>
-      <?php if ($sub === 'rma'): ?>
       <div class="field">
         <label><?= __('admin.status_roles_label') ?></label>
         <div style="display:flex;gap:16px;margin-top:4px;">
@@ -196,7 +197,6 @@ $type   = $sub; // 'rma' | 'repair' — passed to modal JS for store/update rout
         </label>
         <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('admin.status_terminal_job_hint') ?></p>
       </div>
-      <?php endif; ?>
       <div style="display:flex;gap:8px;margin-top:1rem;">
         <button type="submit" class="btn btn-primary" style="min-width:100px;" id="modal-save"><?= __('btn.save') ?></button>
         <button type="button" class="btn" style="min-width:100px;" onclick="closeModal()"><?= __('btn.cancel') ?></button>
@@ -214,8 +214,9 @@ const STATUS_TITLES = {
 const SAVE_LABEL = <?= json_encode(__('btn.save')) ?>;
 const SAVE_CHANGES_LABEL = <?= json_encode(__('btn.save_changes')) ?>;
 
-// The role boxes only exist on the RMA sub-tab — repair statuses are not
-// split — so every caller here tolerates them being absent.
+// Every caller below tolerates the role boxes being absent. They were once
+// hidden on the repair sub-tab; that tab is gone, but a missing element must
+// still not throw.
 function setRecur(on) {
   var box = document.getElementById('f-recur');
   if (box) box.checked = !!on;

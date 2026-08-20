@@ -532,7 +532,18 @@ class AdminController {
             $locations = db_rows('SELECT * FROM locations WHERE deleted_at IS NULL ORDER BY name');
         } elseif ($tab === 'statuses') {
             $rma_statuses    = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order, label');
-            $repair_statuses = db_rows('SELECT * FROM repair_statuses ORDER BY sort_order, label');
+            // Whether each status has ever been used, so the screen can offer
+            // Delete only where it would succeed rather than offering it
+            // everywhere and refusing half the time. History counts as use: a
+            // case that passed through a status still names it.
+            $status_usage = [];
+            foreach (db_rows(
+                'SELECT s.id,
+                        (SELECT COUNT(*) FROM rma_requests r WHERE r.status_id = s.id AND r.deleted_at IS NULL)
+                      + (SELECT COUNT(*) FROM rma_status_history h WHERE h.status_id = s.id) AS used
+                   FROM rma_statuses s') as $row) {
+                $status_usage[(int)$row['id']] = (int)$row['used'];
+            }
         } elseif ($tab === 'codes') {
             // Every code, both kinds — the view splits them by sub-tab and the
             // brand/type filters work on the rows already in the page.
@@ -559,6 +570,39 @@ class AdminController {
         include views_path('layout/header.php');
         include views_path('admin/index.php');
         include views_path('layout/footer.php');
+    }
+
+    /**
+     * Remove a status nobody has used.
+     *
+     * Refused the moment a case sits in it or ever passed through it: both
+     * rma_requests and rma_status_history carry the id, and the second is
+     * somebody's case history — a line of it would simply vanish. The screen
+     * already hides the button in that case; this is the check that matters.
+     */
+    public function status_delete(): void {
+        require_login();
+        require_permission('administration', 'delete');
+
+        $id  = (int)($_POST['id'] ?? 0);
+        $row = $id ? db_row('SELECT * FROM rma_statuses WHERE id = ?', [$id]) : null;
+        if (!$row) {
+            $_SESSION['flash'] = ['type' => 'danger', 'message' => __('admin.status_not_found')];
+            header('Location: /administration?tab=statuses'); exit;
+        }
+
+        $used = (int) db_val('SELECT COUNT(*) FROM rma_requests WHERE status_id = ? AND deleted_at IS NULL', [$id])
+              + (int) db_val('SELECT COUNT(*) FROM rma_status_history WHERE status_id = ?', [$id]);
+        if ($used > 0) {
+            $_SESSION['flash'] = ['type' => 'danger', 'message' => __('admin.status_in_use_refused')];
+            header('Location: /administration?tab=statuses'); exit;
+        }
+
+        db()->prepare('DELETE FROM rma_statuses WHERE id = ?')->execute([$id]);
+        audit('deleted', 'rma_status', $id, ['old' => $row]);
+
+        $_SESSION['flash'] = ['type' => 'success', 'message' => __('admin.status_deleted')];
+        header('Location: /administration?tab=statuses'); exit;
     }
 
     // ── Vendor codes ─────────────────────────────────────────────

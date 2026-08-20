@@ -203,6 +203,7 @@ $routes = [
         '/admin/coverage/update'               => 'admin/coverage_update',
         '/admin/status/store'                  => 'admin/status_store',
         '/admin/status/update'                 => 'admin/status_update',
+        '/admin/status/delete'                 => 'admin/status_delete',
         '/admin/code/store'                    => 'admin/code_store',
         '/admin/code/update'                   => 'admin/code_update',
         '/admin/permissions/save'              => 'admin/permissions_save',
