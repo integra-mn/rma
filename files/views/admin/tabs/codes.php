@@ -32,18 +32,18 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
           // width, not min-width — a select grows to its widest option, and the
           // brand list stretches to fit "Crnogorski Telekom" while the type
           // list would sit at its floor. ?>
-    <form method="GET" action="/administration" style="display:flex;gap:8px;align-items:center;">
+    <form method="GET" action="/administration" data-live-list style="display:flex;gap:8px;align-items:center;">
       <input type="hidden" name="tab" value="codes">
       <input type="hidden" name="sub" value="<?= htmlspecialchars($sub) ?>">
-      <input type="search" name="q" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>"
-             placeholder="<?= __('codes.search') ?>" style="width:200px;">
-      <select name="brand" onchange="this.form.submit()" style="width:200px;">
+      <input type="search" name="q" id="list-search" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>"
+             placeholder="<?= __('codes.search') ?>" autocomplete="off" style="width:200px;">
+      <select name="brand" style="width:200px;">
         <option value=""><?= __('codes.all_brands') ?></option>
         <?php foreach ($filter_brands as $b): ?>
           <option value="<?= (int)$b['id'] ?>" <?= (int)($_GET['brand'] ?? 0) === (int)$b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['name']) ?></option>
         <?php endforeach; ?>
       </select>
-      <select name="category" onchange="this.form.submit()" style="width:200px;">
+      <select name="category" style="width:200px;">
         <option value=""><?= __('codes.all_types') ?></option>
         <?php foreach ($filter_categories as $c): ?>
           <option value="<?= (int)$c['id'] ?>" <?= (int)($_GET['category'] ?? 0) === (int)$c['id'] ? 'selected' : '' ?>><?= htmlspecialchars($c['name']) ?></option>
@@ -52,67 +52,9 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
     </form>
   </div>
 
-  <?php if (!$rows): ?>
-    <div class="card" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:13px;">
-      <?= __('codes.empty') ?>
-    </div>
-  <?php else: ?>
-  <table class="data-table" style="table-layout:fixed;width:100%;">
-    <thead>
-      <tr>
-        <?php // Percentages, and Akcije given a share of its own — the pixel
-              // widths here left it unset, so it swallowed whatever the other
-              // columns did not claim. ?>
-        <th style="width:5%;"><?= __('label.code') ?></th>
-        <th style="width:63%;"><?= __('admin.status_label') ?></th>
-        <th style="width:8%;text-align:center;"><?= __('codes.scope') ?></th>
-        <th style="width:8%;text-align:center;"><?= __('label.sort_order') ?></th>
-        <th style="width:8%;text-align:center;"><?= __('label.status') ?></th>
-        <th style="width:8%;text-align:right;"><?= __('label.actions') ?></th>
-      </tr>
-    </thead>
-    <tbody id="codes-body">
-      <?php foreach ($rows as $c): ?>
-        <tr>
-          <?php // Plain text, like every other cell. The monospace face at 12px
-                // set the code apart as something technical; it is the thing
-                // this screen exists for. ?>
-          <td style="font-weight:500;"><?= htmlspecialchars($c['code']) ?></td>
-          <?php // Falls back to the English name when no ME one is set. ?>
-          <td><?= htmlspecialchars(
-                $lang_en ? $c['label'] : (($c['label_me'] ?? '') !== '' ? $c['label_me'] : $c['label'])
-          ) ?></td>
-          <?php // The brand alone, now the column is called Marka. It used to
-                // read "TCL · Smartwatch", which no longer matches the heading
-                // and would not fit 10% anyway. Device type is a filter now. ?>
-          <td style="font-size:12px;color:var(--text-muted);text-align:center;"><?= htmlspecialchars($c['brand_name'] ?? '') ?: '—' ?></td>
-          <td style="text-align:center;color:var(--text-muted);"><?= (int)$c['sort_order'] ?></td>
-          <td style="text-align:center;">
-            <?php if ((int)$c['is_active'] === 1): ?>
-              <span class="badge badge-pill-fixed" style="background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;"><?= __('label.active') ?></span>
-            <?php else: ?>
-              <span class="badge badge-pill-fixed" style="background:#f4f4f0;color:#5f5e5a;border:0.5px solid #d3d1c7;"><?= __('label.inactive') ?></span>
-            <?php endif; ?>
-          </td>
-          <td style="text-align:right;">
-            <button type="button" class="btn-link"
-              onclick="editCode(<?= htmlspecialchars(json_encode($c)) ?>)"><?= __('btn.edit') ?></button>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
-  <?php
-    // Shared pager. sub, and any filter in play, travel with the page number so
-    // paging inside a filtered list stays inside it.
-    $pg_page     = $code_page ?? 1;
-    $pg_total    = $code_total ?? count($rows);
-    $pg_per_page = $code_per_page ?? 100;
-    $pg_query    = ['tab' => 'codes', 'sub' => $sub, 'q' => $_GET['q'] ?? '',
-                    'brand' => $_GET['brand'] ?? '', 'category' => $_GET['category'] ?? ''];
-    include views_path('_partials/pager.php');
-  ?>
-  <?php endif; ?>
+  <div id="list-results">
+    <?php include views_path('admin/tabs/_codes_results.php'); ?>
+  </div>
 </div>
 
 <!-- Modal -->
@@ -179,6 +121,10 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
   </div>
 </div>
 
+<?php // Same script the Reklamacije and Popravke lists use: typing swaps the
+      // table, the filters swap it, and the pager links inside the fragment
+      // work through delegation. ?>
+<script src="/assets/js/live-list.js"></script>
 <script>
 const CODE_TITLES = { add: <?= json_encode(__('codes.add_title')) ?>, edit: <?= json_encode(__('codes.edit_title')) ?> };
 const CODE_SAVE   = <?= json_encode(__('btn.save')) ?>;

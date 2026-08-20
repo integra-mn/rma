@@ -582,6 +582,15 @@ class AdminController {
                                WHERE {$code_sql}
                                ORDER BY c.kind, c.vendor_line, c.sort_order, c.code
                                LIMIT {$code_per_page} OFFSET {$code_offset}", $code_params);
+
+            // Live search asks for the table alone. Same variables, same
+            // partial the full page includes, so the two can never drift.
+            if (($_GET['ajax'] ?? '') === '1') {
+                $rows = $codes;
+                $sub  = $code_kind;
+                include views_path('admin/tabs/_codes_results.php');
+                return;
+            }
             // Two lists, because the two dropdowns ask different questions.
             // The form asks what a new code could belong to, so it offers every
             // brand. The filter asks what is worth narrowing to, so it offers

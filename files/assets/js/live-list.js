@@ -17,6 +17,11 @@
 
   function buildParams(page) {
     var p = new URLSearchParams();
+    // Hidden fields first: a list that lives inside a tabbed page carries which
+    // tab it is in, and dropping it sent the request to a different screen.
+    form.querySelectorAll('input[type=hidden][name]').forEach(function (h) {
+      if (h.value) p.set(h.name, h.value);
+    });
     if (search && search.value) p.set('q', search.value);
     form.querySelectorAll('select[name]').forEach(function (sel) {
       if (sel.value) p.set(sel.name, sel.value);
