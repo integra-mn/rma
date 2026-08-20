@@ -867,14 +867,23 @@ class RmaController {
             return;
         }
 
-        // Vendor resolution: explicit override via POST (admin picks vendor)
-        // → fall back to device's brand -> vendor mapping (future) →
-        // default to Apple for now since it's the only adapter shipping.
+        // Vendor resolution: an explicit choice, else the device's own brand.
+        //
+        // It used to fall back to Apple whenever nothing was passed, from when
+        // Apple was the only adapter. That meant asking Apple about a TCL
+        // phone and believing the answer — the brand is right there on the
+        // device and is the only honest way to pick.
         $vendor_id = (int)($_POST['vendor_id'] ?? 0);
         if (!$vendor_id) {
-            $vendor_id = (int) db_val("SELECT id FROM vendors WHERE slug = 'apple' AND is_active = 1 LIMIT 1");
+            $vendor_id = (int) db_val(
+                "SELECT v.id FROM vendors v
+                   JOIN device_brands b ON LOWER(b.name) = LOWER(v.slug) OR LOWER(b.name) = LOWER(v.name)
+                  WHERE b.id = ? AND v.is_active = 1
+                  LIMIT 1",
+                [(int)($rma['brand_id'] ?? 0)]
+            );
         }
-        if (!$vendor_id) { echo json_encode(['ok' => false, 'error' => 'No active vendor configured']); return; }
+        if (!$vendor_id) { echo json_encode(['ok' => false, 'error' => __('rma.no_vendor_for_brand')]); return; }
 
         $result = vendor_warranty_lookup($vendor_id, $identifier);
         if (!$result) { echo json_encode(['ok' => false, 'error' => 'Vendor adapter not available']); return; }

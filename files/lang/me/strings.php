@@ -1493,4 +1493,16 @@ Status popravke pratite ovdje:
     'admin.status_applies_required' => 'Izaberite bar jedno na čemu se status koristi.',
     'admin.status_terminal_col' => 'Završni - RMA',
     'admin.status_terminal_job_col' => 'Završni - Servis',
+    // TCL Smart Care
+    'settings.tcl_domain'          => 'TCL nalog (@tcl.com)',
+    'settings.tcl_ticket_header'   => 'Naziv zaglavlja za ticket',
+    'settings.tcl_ticket_in_query' => 'Šalji ticket u adresi umjesto u zaglavlju',
+    'settings.tcl_uat_hint'        => 'Za probu koristite https://uatcsm.tcl.com:5560 — TCL-ov test sistem.',
+    'settings.tcl_vendor_not_configured' => 'TCL još nije podešen kao proizvodjač.',
+    'settings.timeout_seconds'     => 'Timeout (sekundi)',
+    'settings.last_tested'         => 'Posljednja provjera',
+    'vendor.tcl_ok'                => 'Veza sa TCL-om je uspostavljena.',
+    'vendor.tcl_no_credentials'    => 'Prvo unesite TCL nalog i lozinku.',
+    'vendor.tcl_repair_not_ready'  => 'Slanje popravki TCL-u još nije napravljeno — nedostaju kodovi simptoma i rješenja.',
+    'rma.no_vendor_for_brand'      => 'Za ovu marku nije podešen nijedan proizvodjač.',
 ];

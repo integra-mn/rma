@@ -117,10 +117,20 @@
               <?php if ($rma['serial_number'] ?? null): ?><span style="color:var(--text-secondary);"><?= __('rma.sn') ?>:</span> <?= htmlspecialchars($rma['serial_number']) ?><?php endif; ?>
             </span>
             <?php
-              // The "Provjeri garanciju" button appears for Apple devices when
-              // Apple's "Warranty check" toggle is on (Settings → Integrations → Apple).
-              $show_warranty_btn = strcasecmp(trim((string)($rma['brand_name'] ?? '')), 'Apple') === 0
-                  && (string)setting('gsx_warranty_check', '1') === '1';
+              // Shown when this device's brand has an active vendor adapter and
+              // that vendor's warranty toggle is on. It was hardcoded to Apple,
+              // which both hid the button for TCL and offered it for Apple even
+              // though that adapter answers with invented data.
+              $wb_brand = strtolower(trim((string)($rma['brand_name'] ?? '')));
+              $wb_vendor = $wb_brand === '' ? null : db_row(
+                  "SELECT v.slug FROM vendors v
+                     JOIN vendor_adapters a ON a.vendor_id = v.id
+                    WHERE (LOWER(v.slug) = ? OR LOWER(v.name) = ?)
+                      AND v.is_active = 1 AND a.is_active = 1 LIMIT 1",
+                  [$wb_brand, $wb_brand]
+              );
+              $show_warranty_btn = $wb_vendor
+                  && (string)setting($wb_vendor['slug'] === 'apple' ? 'gsx_warranty_check' : $wb_vendor['slug'] . '_warranty_check', '0') === '1';
             ?>
             <?php if (can('rma', 'edit') && $show_warranty_btn): ?>
               <button type="button" id="warranty-check-btn"

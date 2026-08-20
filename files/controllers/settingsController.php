@@ -276,15 +276,79 @@ class SettingsController {
         ], 'id = ?', [(int)$row['id']]);
     }
 
-    // ── TCL vendor integration (flat settings) ────────────────
+    // ── TCL Smart Care (stored on the vendor_adapters row) ────────────────
+
+    /**
+     * TCL authenticates with a @tcl.com account and a password, not an API
+     * key — the field that used to be here could never have worked. The
+     * credentials go on the adapter row beside Apple's rather than into flat
+     * settings, because that is where vendor_adapter() looks for them.
+     */
     private function save_tcl(): void {
-        $this->set('tcl_enabled',        ($_POST['tcl_enabled'] ?? '0') === '1' ? '1' : '0',        'bool',   'integrations');
-        $this->set('tcl_warranty_check', ($_POST['tcl_warranty_check'] ?? '0') === '1' ? '1' : '0', 'bool',   'integrations');
-        $this->set('tcl_base_url',       trim($_POST['tcl_base_url'] ?? ''),                        'string', 'integrations');
-        // Blank API key means "keep existing".
-        if (!empty($_POST['tcl_api_key'])) {
-            $this->set('tcl_api_key', $_POST['tcl_api_key'], 'string', 'integrations');
-        }
+        // Whether TCL devices show the warranty button. A flat setting so the
+        // toggle still answers even if the adapter row is missing.
+        $this->set('tcl_warranty_check', ($_POST['tcl_warranty_check'] ?? '0') === '1' ? '1' : '0', 'bool', 'integrations');
+
+        $row = db_row(
+            "SELECT a.id, a.credentials
+               FROM vendors v JOIN vendor_adapters a ON a.vendor_id = v.id
+              WHERE v.slug = 'tcl' LIMIT 1"
+        );
+        if (!$row) return;   // not seeded — the migration creates it
+
+        $current = json_decode((string)($row['credentials'] ?? '{}'), true) ?: [];
+
+        $creds = [
+            'domain_name' => trim($_POST['tcl_domain'] ?? ''),
+            // Blank means keep, the same convention the SMTP and GSX secrets
+            // follow: the form never shows the stored password back.
+            'password'    => trim($_POST['tcl_password'] ?? '') !== ''
+                             ? trim($_POST['tcl_password'])
+                             : ($current['password'] ?? ''),
+            // How the ticket is presented to TCL's business APIs is the one
+            // thing their documents never state. Configurable so the first
+            // live call can be corrected without a deploy.
+            'ticket_header'   => trim($_POST['tcl_ticket_header'] ?? '') ?: 'Ticket',
+            'ticket_in_query' => ($_POST['tcl_ticket_in_query'] ?? '0') === '1',
+            'timeout_seconds' => max(5, min(60, (int)($_POST['tcl_timeout'] ?? 20))),
+        ];
+
+        db_update('vendor_adapters', [
+            'endpoint_url' => trim($_POST['tcl_base_url'] ?? '') ?: 'https://csm.tclcom.com:5560',
+            'credentials'  => json_encode($creds),
+            'is_active'    => ($_POST['tcl_enabled'] ?? '0') === '1' ? 1 : 0,
+        ], 'id = ?', [(int)$row['id']]);
+
+        // Changing who we log in as invalidates the parked ticket.
+        setting_set('tcl_ticket', '', 'string');
+    }
+
+    // ── "Test connection" on the TCL card ────────────────────────────────
+
+    public function tcl_test(): void {
+        require_login();
+        require_permission('settings', 'edit');
+        header('Content-Type: application/json');
+
+        $vendor_id = (int) db_val("SELECT id FROM vendors WHERE slug = 'tcl' LIMIT 1");
+        if (!$vendor_id) { echo json_encode(['ok' => false, 'message' => __('settings.tcl_vendor_not_configured')]); return; }
+
+        // vendor_adapter() only returns rows marked active, so a test before
+        // switching TCL on would answer "adapter not loadable" and tell the
+        // admin nothing. Build it directly instead.
+        $row = db_row(
+            "SELECT v.id, v.name, v.slug, a.adapter_class, a.endpoint_url, a.auth_type, a.credentials
+               FROM vendors v JOIN vendor_adapters a ON a.vendor_id = v.id
+              WHERE v.slug = 'tcl' LIMIT 1"
+        );
+        require_once ROOT . '/adapters/Tcl/TclAdapter.php';
+        $adapter = new TclAdapter($row, $row);
+
+        $res = $adapter->ping();
+        db()->prepare('UPDATE vendor_adapters SET last_tested_at = NOW() WHERE vendor_id = ?')
+            ->execute([$vendor_id]);
+
+        echo json_encode(['ok' => !empty($res['ok']), 'message' => $res['message'] ?? '']);
     }
 
     // ── "Test connection" button on the GSX card ──────────────────────────

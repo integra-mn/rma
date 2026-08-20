@@ -1493,4 +1493,16 @@ Track the repair here:
     'admin.status_applies_required' => 'Choose at least one record the status is used on.',
     'admin.status_terminal_col' => 'Final - RMA',
     'admin.status_terminal_job_col' => 'Final - Service',
+    // TCL Smart Care
+    'settings.tcl_domain'          => 'TCL account (@tcl.com)',
+    'settings.tcl_ticket_header'   => 'Ticket header name',
+    'settings.tcl_ticket_in_query' => 'Send ticket in the URL instead',
+    'settings.tcl_uat_hint'        => 'Use https://uatcsm.tcl.com:5560 to test against the TCL test system first.',
+    'settings.tcl_vendor_not_configured' => 'TCL is not set up as a vendor yet.',
+    'settings.timeout_seconds'     => 'Timeout (seconds)',
+    'settings.last_tested'         => 'Last tested',
+    'vendor.tcl_ok'                => 'Connected to TCL.',
+    'vendor.tcl_no_credentials'    => 'Enter the TCL account and password first.',
+    'vendor.tcl_repair_not_ready'  => 'Sending repairs to TCL is not built yet — the symptom and solution codes are still needed.',
+    'rma.no_vendor_for_brand'      => 'No active vendor is configured for this brand.',
 ];

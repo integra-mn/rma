@@ -212,6 +212,7 @@ $routes = [
         '/admin/settings/smtp-test'            => 'settings/smtp_test',
         '/admin/settings/sms-test'             => 'settings/sms_test',
         '/admin/settings/gsx-test'             => 'settings/gsx_test',
+        '/admin/settings/tcl-test'             => 'settings/tcl_test',
         '/evidence/upload'                     => 'evidence/upload',
         '/upload/([a-zA-Z0-9]+)'               => 'evidence/mobile',
         '/upload/([a-zA-Z0-9]+)/done'           => 'evidence/mobile_done',

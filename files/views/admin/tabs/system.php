@@ -754,8 +754,16 @@
       <?= csrf_field() ?>
       <input type="hidden" name="tab" value="tcl">
 
+      <?php
+        // Everything but the warranty toggle lives on the adapter row, which is
+        // where vendor_adapter() reads credentials from.
+        $tcl = db_row("SELECT a.endpoint_url, a.credentials, a.is_active, a.last_tested_at
+                         FROM vendors v JOIN vendor_adapters a ON a.vendor_id = v.id
+                        WHERE v.slug = 'tcl' LIMIT 1") ?: [];
+        $tcl_creds = json_decode((string)($tcl['credentials'] ?? '{}'), true) ?: [];
+      ?>
       <div style="display:flex;gap:16px;margin-bottom:1.25rem;">
-        <?php $yesno(__('settings.active'), 'tcl_enabled', (string)setting('tcl_enabled','0') === '1'); ?>
+        <?php $yesno(__('settings.active'), 'tcl_enabled', (int)($tcl['is_active'] ?? 0) === 1); ?>
         <?php $yesno(__('settings.warranty_check'), 'tcl_warranty_check', (string)setting('tcl_warranty_check','0') === '1'); ?>
       </div>
 
@@ -763,20 +771,76 @@
         <div class="field">
           <label><?= __('settings.base_url') ?></label>
           <input type="url" name="tcl_base_url"
-                 value="<?= htmlspecialchars(setting('tcl_base_url','')) ?>"
-                 placeholder="https://api.tcl.com/…" autocomplete="off">
+                 value="<?= htmlspecialchars($tcl['endpoint_url'] ?? 'https://csm.tclcom.com:5560') ?>"
+                 placeholder="https://csm.tclcom.com:5560" autocomplete="off">
+          <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('settings.tcl_uat_hint') ?></p>
         </div>
         <div class="field">
-          <label><?= __('settings.api_key') ?></label>
-          <input type="password" name="tcl_api_key"
-                 placeholder="<?= setting('tcl_api_key') ? __('settings.leave_blank_current') : '' ?>"
+          <label><?= __('settings.tcl_domain') ?></label>
+          <input type="text" name="tcl_domain"
+                 value="<?= htmlspecialchars($tcl_creds['domain_name'] ?? '') ?>"
+                 placeholder="servis@tcl.com" autocomplete="off">
+        </div>
+        <div class="field">
+          <label><?= __('label.password') ?></label>
+          <input type="password" name="tcl_password"
+                 placeholder="<?= !empty($tcl_creds['password']) ? __('settings.leave_blank_current') : '' ?>"
                  autocomplete="new-password">
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
+      <?php // TCL's specs never say how the ticket reaches a business API - no
+            // header is named and no sample carries one. Exposed rather than
+            // guessed in code, so the first live call can be corrected here. ?>
+      <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="field">
+          <label><?= __('settings.tcl_ticket_header') ?></label>
+          <input type="text" name="tcl_ticket_header"
+                 value="<?= htmlspecialchars($tcl_creds['ticket_header'] ?? 'Ticket') ?>" autocomplete="off">
+        </div>
+        <div class="field" style="display:flex;align-items:flex-end;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;margin-bottom:10px;">
+            <input type="checkbox" name="tcl_ticket_in_query" value="1"
+                   <?= !empty($tcl_creds['ticket_in_query']) ? 'checked' : '' ?> style="width:auto;height:auto;">
+            <?= __('settings.tcl_ticket_in_query') ?>
+          </label>
+        </div>
+        <div class="field">
+          <label><?= __('settings.timeout_seconds') ?></label>
+          <input type="number" name="tcl_timeout" min="5" max="60"
+                 value="<?= (int)($tcl_creds['timeout_seconds'] ?? 20) ?>">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button type="submit" class="btn btn-primary" style="min-width:140px;"><?= __('btn.save_changes') ?></button>
+        <button type="button" class="btn" style="min-width:140px;" onclick="tclTest()"><?= __('settings.test_connection') ?></button>
+        <span id="tcl-test-out" style="font-size:12px;"></span>
+        <?php if (!empty($tcl['last_tested_at'])): ?>
+          <span style="font-size:12px;color:var(--text-muted);margin-left:auto;">
+            <?= __('settings.last_tested') ?>: <?= format_datetime($tcl['last_tested_at']) ?>
+          </span>
+        <?php endif; ?>
+      </div>
     </form>
   </div>
+  <script>
+  function tclTest() {
+    var out = document.getElementById('tcl-test-out');
+    out.style.color = 'var(--text-muted)';
+    out.textContent = '…';
+    fetch('/admin/settings/tcl-test', { method: 'POST' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        out.style.color = d.ok ? '#085041' : '#791f1f';
+        out.textContent = (d.ok ? '✓ ' : '✗ ') + (d.message || '');
+      })
+      .catch(function () {
+        out.style.color = '#791f1f';
+        out.textContent = '✗ Network error';
+      });
+  }
+  </script>
   <?php endif; /* /isub */ ?>
 
   <!-- ── FISCALIZATION ── -->
