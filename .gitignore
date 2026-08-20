@@ -42,3 +42,10 @@ Thumbs.db
 desktop.ini
 *.swp
 *~
+
+# VENDOR DOCUMENTATION — TCL's Smart Care booklet carries live account
+# credentials in plain text (three shared IMEI-query logins with passwords),
+# and the API specs are theirs, not ours. Nothing here has ever been committed;
+# this keeps a stray `git add -A` from publishing passwords to GitHub, where a
+# history rewrite would not reliably take them back.
+/API/
