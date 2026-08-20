@@ -90,8 +90,3 @@ function repair_code_label(?array $c): string {
     return trim((string)$c['code']) . ' · ' . $label;
 }
 
-/** Where a code applies, for the admin list: "Apple · Telefon", "Sve". */
-function repair_code_scope(array $c): string {
-    $parts = array_filter([$c['brand_name'] ?? null, $c['category_name'] ?? null]);
-    return $parts ? implode(' · ', $parts) : __('codes.scope_all');
-}

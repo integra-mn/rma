@@ -67,12 +67,12 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
         <?php // Percentages, and Akcije given a share of its own — the pixel
               // widths here left it unset, so it swallowed whatever the other
               // columns did not claim. ?>
-        <th style="width:12%;"><?= __('label.code') ?></th>
-        <th style="width:32%;"><?= __('admin.status_label') ?></th>
-        <th style="width:22%;"><?= __('codes.scope') ?></th>
+        <th style="width:5%;"><?= __('label.code') ?></th>
+        <th style="width:55%;"><?= __('admin.status_label') ?></th>
+        <th style="width:10%;"><?= __('codes.scope') ?></th>
         <th style="width:10%;text-align:center;"><?= __('label.sort_order') ?></th>
-        <th style="width:12%;text-align:center;"><?= __('label.status') ?></th>
-        <th style="width:12%;text-align:right;"><?= __('label.actions') ?></th>
+        <th style="width:10%;text-align:center;"><?= __('label.status') ?></th>
+        <th style="width:10%;text-align:right;"><?= __('label.actions') ?></th>
       </tr>
     </thead>
     <tbody id="codes-body">
@@ -86,7 +86,10 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
           <td><?= htmlspecialchars(
                 $lang_en ? $c['label'] : (($c['label_me'] ?? '') !== '' ? $c['label_me'] : $c['label'])
           ) ?></td>
-          <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars(repair_code_scope($c)) ?></td>
+          <?php // The brand alone, now the column is called Marka. It used to
+                // read "TCL · Smartwatch", which no longer matches the heading
+                // and would not fit 10% anyway. Device type is a filter now. ?>
+          <td style="font-size:12px;color:var(--text-muted);"><?= htmlspecialchars($c['brand_name'] ?? '') ?: '—' ?></td>
           <td style="text-align:center;color:var(--text-muted);"><?= (int)$c['sort_order'] ?></td>
           <td style="text-align:center;">
             <?php if ((int)$c['is_active'] === 1): ?>
