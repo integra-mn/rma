@@ -348,6 +348,27 @@ class SettingsController {
         db()->prepare('UPDATE vendor_adapters SET last_tested_at = NOW() WHERE vendor_id = ?')
             ->execute([$vendor_id]);
 
+        // Recorded like any other vendor call. A failing Test used to leave
+        // nothing behind but a red message on screen, so working out why meant
+        // writing a throwaway script against the live endpoint. The exchange
+        // belongs in the log the rest of the vendor traffic already uses.
+        db_insert('vendor_sync_log', [
+            'vendor_id'   => $vendor_id,
+            'rma_id'      => null,
+            'action'      => 'ping',
+            'request'     => json_encode([
+                'endpoint'      => $row['endpoint_url'] ?? null,
+                // Never the password: this row is readable by anyone who can
+                // read the table, and the account name is enough to identify
+                // which login was tested.
+                'account'       => json_decode((string)$row['credentials'], true)['domain_name'] ?? null,
+                'ticket_header' => json_decode((string)$row['credentials'], true)['ticket_header'] ?? null,
+            ]),
+            'response'    => json_encode($res),
+            'http_status' => $res['status'] ?? null,
+            'success'     => !empty($res['ok']) ? 1 : 0,
+        ]);
+
         echo json_encode(['ok' => !empty($res['ok']), 'message' => $res['message'] ?? '']);
     }
 

@@ -86,9 +86,15 @@ class TclAdapter extends VendorAdapter {
         // the ticket header turns out to be.
         $res = $this->client->imeiQuery('358128870247894');
 
-        return ['ok' => (bool)$res['ok'],
-                'message' => $res['ok'] ? __('vendor.tcl_ok')
-                                        : ($res['error'] ?? $this->client->lastError() ?? 'HTTP ' . $res['status'])];
+        return [
+            'ok'      => (bool)$res['ok'],
+            'status'  => $res['status'] ?? null,
+            'message' => $res['ok'] ? __('vendor.tcl_ok')
+                                    : ($res['error'] ?: ($this->client->lastError() ?: 'HTTP ' . $res['status'])),
+            // What TCL sent back, so a failure is diagnosable from the log
+            // rather than from a second run with a debugger attached.
+            'body'    => $res['body'] ?? null,
+        ];
     }
 
     // ── Response reading ─────────────────────────────────────────────────
