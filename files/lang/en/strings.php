@@ -1039,7 +1039,7 @@ Track the repair here:
     'ins.code_locked'       => 'Saved. The code was kept as it was, because policies already tick this item.',
     'admin.status_roles'        => 'Set by',
     'admin.status_roles_all'    => 'Everyone',
-    'admin.status_roles_label'  => 'Can be set by',
+    'admin.status_roles_label'  => 'Status set by',
     'admin.status_recur'        => 'Repeats',
     'admin.status_recur_once'   => 'Once only',
     'admin.status_recur_label'  => 'Status can repeat during a case',

@@ -1039,7 +1039,7 @@ Status popravke pratite ovdje:
     'ins.code_locked'       => 'Sačuvano. Kod je ostao isti jer polise već označavaju ovu stavku.',
     'admin.status_roles'        => 'Postavlja',
     'admin.status_roles_all'    => 'Svi',
-    'admin.status_roles_label'  => 'Status može postaviti',
+    'admin.status_roles_label'  => 'Status postavlja',
     'admin.status_recur'        => 'Ponavljanje',
     'admin.status_recur_once'   => 'Samo jednom',
     'admin.status_recur_label'  => 'Status se može ponoviti tokom reklamacije',
