@@ -231,9 +231,11 @@ $type   = 'rma';   // the store/update handlers still route on it
 const STATUS_USED = <?= json_encode(array_map('intval', $status_usage ?? []), JSON_FORCE_OBJECT) ?>;
 
 const COLOR_PRESETS = ['#888780','#378ADD','#7F77DD','#1D9E75','#EF9F27','#A32D2D','#3B6D11','#E05AAB'];
+// One list, so one pair of titles. The map used to carry a repair branch for
+// the sub-tab that no longer exists.
 const STATUS_TITLES = {
-  add:  { rma: <?= json_encode(__('admin.add_rma_status_title')) ?>,  repair: <?= json_encode(__('admin.add_repair_status_title')) ?> },
-  edit: { rma: <?= json_encode(__('admin.edit_rma_status_title')) ?>, repair: <?= json_encode(__('admin.edit_repair_status_title')) ?> }
+  add:  <?= json_encode(__('admin.add_rma_status_title')) ?>,
+  edit: <?= json_encode(__('admin.edit_rma_status_title')) ?>
 };
 const SAVE_LABEL = <?= json_encode(__('btn.save')) ?>;
 const DELETE_IN_USE  = <?= json_encode(__('admin.status_in_use_hint')) ?>;
@@ -256,7 +258,7 @@ function setRoles(csv) {
 }
 
 function openModal(type) {
-  document.getElementById('modal-title').textContent = STATUS_TITLES.add[type] || STATUS_TITLES.add.rma;
+  document.getElementById('modal-title').textContent = STATUS_TITLES.add;
   document.getElementById('status-form').action = '/admin/status/store';
   document.getElementById('f-type').value  = type;
   document.getElementById('f-id').value    = '';
@@ -281,7 +283,7 @@ function openModal(type) {
 }
 
 function editStatus(type, s) {
-  document.getElementById('modal-title').textContent = STATUS_TITLES.edit[type] || STATUS_TITLES.edit.rma;
+  document.getElementById('modal-title').textContent = STATUS_TITLES.edit;
   document.getElementById('status-form').action = '/admin/status/update';
   document.getElementById('f-type').value  = type;
   document.getElementById('f-id').value    = s.id;
