@@ -783,7 +783,9 @@ class AdminController {
             exit;
         }
 
-        $table = $type === 'rma' ? 'rma_statuses' : 'repair_statuses';
+        // One table now. The parameter is kept so an old bookmark posting
+        // type=repair lands somewhere sane rather than on a table nothing reads.
+        $table = 'rma_statuses';
         $data  = [
             'label'       => $label,
             'label_me'    => $label_me !== '' ? $label_me : null,
@@ -848,7 +850,9 @@ class AdminController {
             exit;
         }
 
-        $table = $type === 'rma' ? 'rma_statuses' : 'repair_statuses';
+        // One table now. The parameter is kept so an old bookmark posting
+        // type=repair lands somewhere sane rather than on a table nothing reads.
+        $table = 'rma_statuses';
         $data  = [
             'label'       => $label,
             'label_me'    => $label_me !== '' ? $label_me : null,

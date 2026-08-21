@@ -36,9 +36,12 @@ class DashboardController {
             // on the bench, and disagreed with the Otvorene popravke list below
             // it, which has always counted every non-terminal job.
             'in_repair'    => db_val("SELECT COUNT(DISTINCT j.rma_id) FROM repair_jobs j
-                                      JOIN repair_statuses s ON s.id = j.status_id
+                                      JOIN rma_statuses s ON s.id = j.status_id
                                       JOIN rma_requests r ON r.id = j.rma_id
-                                      WHERE s.is_terminal = 0 AND j.deleted_at IS NULL
+                                      -- The job flag, not the case one: Uredjaj
+                                      -- popravljen ends the work while the case
+                                      -- carries on to Otpremljeno.
+                                      WHERE s.is_terminal_job = 0 AND j.deleted_at IS NULL
                                         AND r.deleted_at IS NULL{$fr}"),
             // Asked of the case, not of the repair jobs beneath it. Counting
             // jobs answered "has the workshop nothing left to do", which is not
@@ -77,11 +80,11 @@ class DashboardController {
                    s.code AS status_code, s.label AS status_label, s.color AS status_color,
                    u.name AS technician_name
             FROM repair_jobs j
-            JOIN repair_statuses s ON s.id = j.status_id
+            JOIN rma_statuses s ON s.id = j.status_id
             JOIN rma_requests    r ON r.id = j.rma_id
             LEFT JOIN customers  c ON c.id = r.customer_id
             LEFT JOIN users      u ON u.id = j.technician_id
-            WHERE s.is_terminal = 0 AND j.deleted_at IS NULL{$fr}
+            WHERE s.is_terminal_job = 0 AND j.deleted_at IS NULL{$fr}
             ORDER BY COALESCE(j.started_at, j.created_at) DESC
             LIMIT 10
         ");

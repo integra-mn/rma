@@ -110,7 +110,7 @@ class TrackController {
             "SELECT j.*, s.label as status_label, s.color as status_color,
                     u.name as technician_name
              FROM repair_jobs j
-             LEFT JOIN repair_statuses s ON s.id = j.status_id
+             LEFT JOIN rma_statuses s ON s.id = j.status_id
              LEFT JOIN users u           ON u.id = j.technician_id
              WHERE j.rma_id = ? AND j.deleted_at IS NULL
              ORDER BY j.created_at ASC",

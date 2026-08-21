@@ -516,7 +516,7 @@ class RmaController {
                         s.label AS status_label, s.code AS status_code,
                         u.name AS tech_name
                    FROM repair_jobs j
-                   JOIN repair_statuses s ON s.id = j.status_id
+                   JOIN rma_statuses s ON s.id = j.status_id
                    LEFT JOIN users u ON u.id = j.technician_id
                   WHERE j.rma_id = ? AND j.deleted_at IS NULL
                     AND (j.description <> '' OR j.resolution <> '')

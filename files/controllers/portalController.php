@@ -99,8 +99,8 @@ class PortalController {
             'in_repair' => (int)db_val(
                 "SELECT COUNT(DISTINCT r.id) FROM rma_requests r
                  JOIN repair_jobs j      ON j.rma_id = r.id AND j.deleted_at IS NULL
-                 JOIN repair_statuses js ON js.id   = j.status_id
-                 WHERE r.partner_id = ? AND r.deleted_at IS NULL AND js.is_terminal = 0",
+                 JOIN rma_statuses js ON js.id   = j.status_id
+                 WHERE r.partner_id = ? AND r.deleted_at IS NULL AND js.is_terminal_job = 0",
                 [$partner_id]
             ),
             // Ready pickup = RMA non-terminal AND every repair_job terminal
@@ -110,10 +110,10 @@ class PortalController {
                     FROM rma_requests r
                     JOIN rma_statuses rs    ON rs.id = r.status_id
                     JOIN repair_jobs j      ON j.rma_id = r.id AND j.deleted_at IS NULL
-                    JOIN repair_statuses js ON js.id = j.status_id
+                    JOIN rma_statuses js ON js.id = j.status_id
                     WHERE r.partner_id = ? AND r.deleted_at IS NULL AND rs.is_terminal = 0
                     GROUP BY r.id
-                    HAVING SUM(CASE WHEN js.is_terminal = 0 THEN 1 ELSE 0 END) = 0
+                    HAVING SUM(CASE WHEN js.is_terminal_job = 0 THEN 1 ELSE 0 END) = 0
                  ) t",
                 [$partner_id]
             ),
@@ -241,7 +241,7 @@ class PortalController {
             "SELECT j.*, s.label AS status_label, s.color AS status_color,
                     u.name AS technician_name
              FROM repair_jobs j
-             LEFT JOIN repair_statuses s ON s.id = j.status_id
+             LEFT JOIN rma_statuses s ON s.id = j.status_id
              LEFT JOIN users u           ON u.id = j.technician_id
              WHERE j.rma_id = ? AND j.deleted_at IS NULL
              ORDER BY j.created_at ASC",

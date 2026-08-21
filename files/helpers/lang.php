@@ -82,7 +82,12 @@ function status_label(string $code, string $fallback = '', ?string $lang_overrid
     if ($map === null) {
         $map = [];
         try {
-            foreach (['rma_statuses', 'repair_statuses'] as $t) {
+            // rma_statuses last, so it wins. Both tables hold a 'cancelled'
+            // row, and read in the other order the retired list's "Otkazano"
+            // was overwriting the case's own "Reklamacija otkazana" on every
+            // badge in the app. repair_statuses stays in the list only until
+            // step 3 drops it, so an old history row still finds its label.
+            foreach (['repair_statuses', 'rma_statuses'] as $t) {
                 foreach (db_rows("SELECT code, label, label_me FROM {$t}") as $r) {
                     $map[$r['code']] = $r;
                 }

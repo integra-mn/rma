@@ -44,9 +44,21 @@ class RepairController {
             $params[] = $status_f;
         }
 
+        // Popravke is a work queue, not a register: finished jobs are not work.
+        // Ten of eighteen were finished and the list showed all of them, which
+        // also put it at odds with the U servisu card counting only open ones.
+        //
+        // Unless you ask for something in particular. Choosing a status can only
+        // mean you want to see that status, and a search is somebody looking for
+        // a specific device - answering "not found" because the repair ended
+        // last week would be worse than a longer list.
+        if (!$status_f && $search === '') {
+            $where .= ' AND s.is_terminal_job = 0';
+        }
+
         $total = (int) db_val("SELECT COUNT(*) FROM repair_jobs j
                                 JOIN rma_requests r ON r.id = j.rma_id
-                                JOIN repair_statuses s ON s.id = j.status_id
+                                JOIN rma_statuses s ON s.id = j.status_id
                                 LEFT JOIN customers c ON c.id = r.customer_id
                                 LEFT JOIN users u ON u.id = j.technician_id
                                 LEFT JOIN devices d ON d.id = r.device_id
@@ -62,7 +74,7 @@ class RepairController {
                                 (SELECT COUNT(*) FROM part_usage WHERE job_id = j.id) as parts_used
                          FROM repair_jobs j
                          JOIN rma_requests r ON r.id = j.rma_id
-                         JOIN repair_statuses s ON s.id = j.status_id
+                         JOIN rma_statuses s ON s.id = j.status_id
                          LEFT JOIN customers c ON c.id = r.customer_id
                          LEFT JOIN users u ON u.id = j.technician_id
                          LEFT JOIN locations l ON l.id = j.location_id
@@ -73,7 +85,9 @@ class RepairController {
                          ORDER BY j.created_at DESC
                          LIMIT {$per_page} OFFSET {$offset}", $params);
 
-        $statuses = db_rows('SELECT * FROM repair_statuses ORDER BY sort_order');
+        // What the bench may hold, straight from Administracija -> Statusi.
+        $statuses = db_rows("SELECT * FROM rma_statuses
+                              WHERE applies_to IN ('repair','both') ORDER BY sort_order");
         $success  = $_SESSION['form_success'] ?? null;
         unset($_SESSION['form_success']);
 
@@ -127,7 +141,7 @@ class RepairController {
                               pb.name as partner_branch_name
                        FROM repair_jobs j
                        JOIN rma_requests r ON r.id = j.rma_id
-                       JOIN repair_statuses s ON s.id = j.status_id
+                       JOIN rma_statuses s ON s.id = j.status_id
                        LEFT JOIN customers c ON c.id = r.customer_id
                        LEFT JOIN users u ON u.id = j.technician_id
                        LEFT JOIN locations l ON l.id = j.location_id
@@ -196,7 +210,8 @@ class RepairController {
             [$job['location_id'], $job['device_brand_id'], $job['device_category_id']]
         );
 
-        $statuses    = db_rows('SELECT * FROM repair_statuses ORDER BY sort_order');
+        $statuses    = db_rows("SELECT * FROM rma_statuses
+                                 WHERE applies_to IN ('repair','both') ORDER BY sort_order");
         $technicians = db_rows("SELECT id, name FROM users WHERE role IN ('technician','super_admin','admin') AND is_active = 1 AND deleted_at IS NULL ORDER BY name");
 
         // Vendor submission (GSX for Apple). Only relevant if the device is
@@ -252,8 +267,15 @@ class RepairController {
             exit;
         }
 
-        $first_status = db_row("SELECT id FROM repair_statuses WHERE code = 'pending' LIMIT 1");
-        $status_id    = $first_status['id'] ?? db_val('SELECT id FROM repair_statuses ORDER BY sort_order LIMIT 1');
+        // A new job starts in diagnosis - Rajo's decision. The old list opened
+        // every job at "Na cekanju", which read as waiting for something when
+        // nothing had been asked for yet; five jobs sat there for a week.
+        // Falls back to the first status the bench may hold, so a renamed or
+        // deleted in_diagnosis cannot leave a job with no status at all.
+        $first_status = db_row("SELECT id FROM rma_statuses WHERE code = 'in_diagnosis' LIMIT 1");
+        $status_id    = $first_status['id'] ?? db_val(
+            "SELECT id FROM rma_statuses WHERE applies_to IN ('repair','both') ORDER BY sort_order LIMIT 1");
+        $status_code  = db_val('SELECT code FROM rma_statuses WHERE id = ?', [$status_id]);
 
         // Findings start empty — the technician records their own diagnosis,
         // which doesn't always match the customer's complaint. The complaint
@@ -266,8 +288,10 @@ class RepairController {
             'description'   => null,
         ]);
 
-        // Repair-job creation implies the device is physically in the shop.
-        $this->sync_rma_from_repair((int)$rma_id, 'job_created');
+        // The case follows the job onto the same status, exactly as it does
+        // for every later change. There is no separate "a job was created"
+        // event any more, because there is nothing left to translate.
+        $this->sync_rma_from_repair((int)$rma_id, (string)$status_code);
 
         audit('created', 'repair_job', $job_id);
         $_SESSION['form_success'] = __('repair.job_created');
@@ -292,11 +316,11 @@ class RepairController {
             $data      = ['status_id' => $status_id];
 
             if ($status_id) {
-                $st = db_row('SELECT * FROM repair_statuses WHERE id = ?', [$status_id]);
+                $st = db_row('SELECT * FROM rma_statuses WHERE id = ?', [$status_id]);
                 if ($st && $st['code'] === 'in_progress' && !$job['started_at']) {
                     $data['started_at'] = date('Y-m-d H:i:s');
                 }
-                if ($st && $st['is_terminal'] && !$job['completed_at']) {
+                if ($st && ($st['is_terminal_job'] ?? 0) && !$job['completed_at']) {
                     $data['completed_at'] = date('Y-m-d H:i:s');
                 }
                 db_update('repair_jobs', $data, 'id = ?', [(int)$id]);
@@ -363,11 +387,11 @@ class RepairController {
             $new_code  = null;
             if ($status_id) {
                 $data['status_id'] = $status_id;
-                $st = db_row('SELECT * FROM repair_statuses WHERE id = ?', [$status_id]);
+                $st = db_row('SELECT * FROM rma_statuses WHERE id = ?', [$status_id]);
                 if ($st && $st['code'] === 'in_progress' && !$job['started_at']) {
                     $data['started_at'] = date('Y-m-d H:i:s');
                 }
-                if ($st && $st['is_terminal'] && !$job['completed_at']) {
+                if ($st && ($st['is_terminal_job'] ?? 0) && !$job['completed_at']) {
                     $data['completed_at'] = date('Y-m-d H:i:s');
                 }
                 $new_code = $st['code'] ?? null;
@@ -580,49 +604,36 @@ class RepairController {
     /**
      * Forward-only RMA status advance driven by repair-job transitions.
      *
-     * Mapping (repair event -> target RMA status code):
-     *   job_created -> device_received
-     *   in_progress -> in_diagnosis
-     *   on_hold     -> awaiting_parts
-     *   completed   -> repaired
-     *   no_fault    -> no_fault
-     *   cancelled   -> cancelled (only if no other job is open and the
-     *                  device is still here)
+     * There is no mapping any more. The job and the case read the same list, so
+     * a job moving to Ceka rezervni dio simply puts the case there too - if the
+     * status is one the case may hold at all. The table this used to carry
+     * (in_progress -> in_diagnosis and friends) existed only because the two
+     * halves spoke different words for the same thing.
      *
-     * Rules:
-     *  - Never moves the RMA backward (uses sort_order to compare).
-     *  - Never overrides terminal RMA statuses (closed/cancelled/unrepairable).
-     *  - Logs the transition to rma_status_history with a clear note so
-     *    admins can see it was auto-triggered.
-     *  - Silently no-ops on anything unmapped (e.g. pending, cancelled).
+     * Rules, unchanged:
+     *  - Never moves the case backward (sort_order decides).
+     *  - Never touches a finished case.
+     *  - Writes to rma_status_history so the move is visible to an admin.
+     *  - Does nothing for a status the case cannot hold - Ceka potvrdu
+     *    popravke is the bench's business and the counter never shows it.
      */
     private function sync_rma_from_repair(int $rma_id, string $repair_event): void {
-        static $map = [
-            'job_created' => 'device_received',
-            'in_progress' => 'in_diagnosis',
-            'on_hold'     => 'awaiting_parts',
-            'completed'   => 'repaired',
-            // Without this the case stayed where the technician found it while
-            // the job beneath it was finished — the two disagreed, and the
-            // dashboard believed the job.
-            'no_fault_found' => 'no_fault',
-            // Work called off: the device is going back untouched, so the case
-            // is over too. Guarded below, unlike the others.
-            'cancelled'      => 'cancelled',
-        ];
-        $target_code = $map[$repair_event] ?? null;
-        if (!$target_code) return;
+        // The event is the status code the job just moved to.
+        $target_code = $repair_event;
+
+        $target_row = db_row('SELECT * FROM rma_statuses WHERE code = ? LIMIT 1', [$target_code]);
+        if (!$target_row || !status_for_rma($target_row)) return;
 
         // Cancelling one job is not the same as cancelling the case. A second
         // job may still be running — a quote refused on one repair while
         // another proceeds — and Otkazano is terminal, so getting this wrong
         // ends a live case. Two things must hold: nothing else is open on the
         // bench, and the device has not already gone home.
-        if ($repair_event === 'cancelled') {
+        if ($target_code === 'cancelled') {
             $still_open = (int) db_val(
                 "SELECT COUNT(*) FROM repair_jobs j
-                   JOIN repair_statuses s ON s.id = j.status_id
-                  WHERE j.rma_id = ? AND j.deleted_at IS NULL AND s.is_terminal = 0",
+                   JOIN rma_statuses s ON s.id = j.status_id
+                  WHERE j.rma_id = ? AND j.deleted_at IS NULL AND s.is_terminal_job = 0",
                 [$rma_id]
             );
             if ($still_open > 0) return;

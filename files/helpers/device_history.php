@@ -332,8 +332,8 @@ function device_open_case(string $identifier): ?array {
                   -- still means the device has not left.
                   OR EXISTS (
                       SELECT 1 FROM repair_jobs j
-                        JOIN repair_statuses js ON js.id = j.status_id
-                       WHERE j.rma_id = r.id AND j.deleted_at IS NULL AND js.is_terminal = 0
+                        JOIN rma_statuses js ON js.id = j.status_id
+                       WHERE j.rma_id = r.id AND j.deleted_at IS NULL AND js.is_terminal_job = 0
                   )
             )
           ORDER BY r.id DESC LIMIT 1",
