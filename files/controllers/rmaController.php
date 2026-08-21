@@ -662,6 +662,10 @@ class RmaController {
                 // whichever way round the two happen.
                 stamp_rma_dispatch((int)$id);
 
+                if (($target['code'] ?? '') === 'dispatched') {
+                    $this->close_after_dispatch((int)$id, (int)($rma['partner_id'] ?? 0));
+                }
+
                 // After the write, never before: a gateway refusing a message
                 // must not undo a status the technician has already set.
                 notify_rma_status((int)$id);
@@ -840,6 +844,41 @@ class RmaController {
         $_SESSION['form_success'] = __('ins.claim_saved');
         header("Location: /rma/{$id}");
         exit;
+    }
+
+    /**
+     * Close a case the moment the device leaves, unless somebody is expected
+     * to confirm it arrived.
+     *
+     * Otpremljeno means the device is out of the building and nothing more is
+     * owed. Staff were meant to follow it with Zatvoreno and mostly did not -
+     * nine cases sat at Otpremljeno against one closed - so the count of open
+     * work was wrong by nine and nobody had done anything careless.
+     *
+     * The exception is a partner case while Podesavanja -> Opste says the
+     * partner confirms receipt. Then Otpremljeno means "in transit", the
+     * partner presses the button in their portal when it arrives, and that
+     * closes it. A walk-in customer has nobody to confirm, so it closes on
+     * dispatch whatever the setting says.
+     *
+     * Two history rows, not one: the device leaving and the case closing are
+     * two facts, and a week from now somebody may need to know both.
+     */
+    private function close_after_dispatch(int $rma_id, int $partner_id): void {
+        if ($partner_id > 0 && setting_on('partner_confirms_receipt')) return;
+
+        $closed = db_row("SELECT id FROM rma_statuses WHERE code = 'closed' LIMIT 1");
+        if (!$closed) return;   // renamed or deleted - leave the case where it is
+
+        db_update('rma_requests', ['status_id' => (int)$closed['id']], 'id = ?', [$rma_id]);
+        db_insert('rma_status_history', [
+            'rma_id'     => $rma_id,
+            'status_id'  => (int)$closed['id'],
+            // No name against it: nobody clicked this.
+            'changed_by' => null,
+            'note'       => 'history.auto_closed_on_dispatch',
+        ]);
+        audit('closed_on_dispatch', 'rma', $rma_id);
     }
 
     // ── Comment ───────────────────────────────────────────────

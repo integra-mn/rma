@@ -109,6 +109,17 @@
         </div>
       </div>
 
+      <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;margin-top:1.5rem;"><?= __('settings.closing') ?></h2>
+
+      <div class="field" style="max-width:420px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+          <input type="checkbox" name="partner_confirms_receipt" value="1"
+                 <?= setting_on('partner_confirms_receipt') ? 'checked' : '' ?> style="width:auto;height:auto;">
+          <?= __('settings.partner_confirms') ?>
+        </label>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:4px;"><?= __('settings.partner_confirms_hint') ?></p>
+      </div>
+
       <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;margin-top:1.5rem;"><?= __('settings.repeat') ?></h2>
 
       <div class="form-grid">

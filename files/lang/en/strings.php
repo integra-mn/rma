@@ -1506,4 +1506,8 @@ Track the repair here:
     'codes.vendor_line' => 'Vendor product line',
     'dashboard.incoming'         => 'Devices incoming',
     'rma.status_terminal_exit' => 'This case is finished. It can only be dispatched or closed.',
+    'settings.closing'               => 'Closing a case',
+    'settings.partner_confirms'      => 'Partner confirms receipt before a case closes',
+    'settings.partner_confirms_hint' => 'On: a partner case waits at Otpremljeno until the partner confirms the device arrived, and that closes it. Off: Otpremljeno closes the case straight away. A walk-in customer has nobody to confirm, so those close on dispatch either way.',
+    'history.auto_closed_on_dispatch' => 'Closed automatically when the device was dispatched',
 ];

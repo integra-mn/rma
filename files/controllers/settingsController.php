@@ -117,6 +117,15 @@ class SettingsController {
             // worth mentioning. 0 switches either off.
             'repeat_repair_days' => ['int', max(0, min(3650, (int)($_POST['repeat_repair_days'] ?? 30)))],
             'repeat_seen_days'   => ['int', max(0, min(3650, (int)($_POST['repeat_seen_days'] ?? 180)))],
+            // Otpremljeno means the device left the building, and nothing is
+            // owed after that — so the case closes itself rather than waiting
+            // for somebody to remember. Nine cases sat at Otpremljeno against
+            // one at Zatvoreno, which is a routine nobody was keeping.
+            //
+            // On: a partner case waits for the partner to confirm receipt in
+            // the portal, and that closes it. A walk-in has nobody to confirm,
+            // so it closes on dispatch either way.
+            'partner_confirms_receipt' => ['bool', ($_POST['partner_confirms_receipt'] ?? '0') === '1' ? '1' : '0'],
             'pdf_engine'        => ['string', in_array($_POST['pdf_engine']??'',['html','mpdf']) ? $_POST['pdf_engine'] : 'html'],
             'pdf_paper_size'    => ['string', in_array($_POST['pdf_paper_size']??'',['A4','A5','Letter']) ? $_POST['pdf_paper_size'] : 'A4'],
         ];
