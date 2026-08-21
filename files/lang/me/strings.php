@@ -1509,4 +1509,5 @@ Status popravke pratite ovdje:
     'history.auto_closed_on_dispatch' => 'Automatski zatvoreno pri otpremi uredjaja',
     'partners.confirms_receipt'      => 'Partner potvrdjuje zatvaranje reklamacije nakon povrata uredjaja',
     'partners.confirms_receipt_hint' => 'Označite samo za partnera koji zaista koristi portal. Njegove reklamacije tada čekaju na Otpremljeno dok ne potvrdi prijem uredjaja, i to zatvara reklamaciju. Bez oznake, otprema odmah zatvara reklamaciju.',
+    'history.closed_backfill' => 'Naknadno zatvoreno - uredjaj je već bio otpremljen',
 ];

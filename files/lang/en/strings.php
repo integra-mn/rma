@@ -1509,4 +1509,5 @@ Track the repair here:
     'history.auto_closed_on_dispatch' => 'Closed automatically when the device was dispatched',
     'partners.confirms_receipt'      => 'Partner confirms the case is closed after the device is returned',
     'partners.confirms_receipt_hint' => 'Only tick this for a partner who actually uses the portal. Their cases then wait at Otpremljeno until they confirm the device arrived, and that closes the case. Left unticked, dispatch closes it straight away.',
+    'history.closed_backfill' => 'Closed retrospectively - the device had already been dispatched',
 ];
