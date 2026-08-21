@@ -35,9 +35,9 @@ $type   = 'rma';   // the store/update handlers still route on it
         <th style="width:9%;text-align:center;"><?= __('admin.status_notify') ?></th>
         <th style="width:9%;text-align:center;"><?= __('admin.status_recur') ?></th>
         <th style="width:12%;text-align:center;"><?= __('admin.status_terminal_col') ?></th>
+        <th style="width:12%;text-align:center;"><?= __('admin.status_terminal_job_col') ?></th>
         <th style="width:12%;text-align:center;"><?= __('admin.status_roles') ?></th>
         <th style="width:12%;text-align:center;"><?= __('admin.status_applies') ?></th>
-        <th style="width:12%;text-align:center;"><?= __('admin.status_terminal_job_col') ?></th>
         <th style="width:9%;text-align:right;"><?= __('label.actions') ?></th>
       </tr>
     </thead>
@@ -63,29 +63,14 @@ $type   = 'rma';   // the store/update handlers still route on it
           <td style="text-align:center;"><?= $yn(!empty($s['notify'])) ?></td>
           <td style="text-align:center;"><?= $yn((int)($s['can_recur'] ?? 1) === 1) ?></td>
           <td style="text-align:center;"><?= $yn((int)($s['is_terminal'] ?? 0) === 1) ?></td>
-            <?php $roles = status_roles($s['roles'] ?? null); ?>
-            <td style="text-align:center;">
-              <?php if (!$roles): ?>
-                <span style="color:var(--text-muted);"><?= __('admin.status_roles_all') ?></span>
-              <?php else: ?>
-                <?php foreach ($roles as $r): ?>
-                  <span class="badge badge-pill-fixed" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin:0 2px;"><?= htmlspecialchars(role_label($r)) ?></span>
-                <?php endforeach; ?>
-              <?php endif; ?>
-            </td>
-            <?php
-              // Both desks, or one. Shown beside Postavlja because the two
-              // answer neighbouring questions: who may set it, and where.
-              $scope = status_applies_to($s['applies_to'] ?? null);
-              $scope_label = ['rma' => __('admin.status_applies_rma'),
-                              'repair' => __('admin.status_applies_repair'),
-                              'both' => __('admin.status_applies_both')][$scope];
-            ?>
-            <td style="text-align:center;">
-              <span class="badge badge-pill-fixed" style="<?= $scope === 'both'
-                    ? 'background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;'
-                    : 'background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;' ?>"><?= $scope_label ?></span>
-            </td>
+          <?php
+            // Worked out here rather than lower down, because the Zavrsni -
+            // Servis cell below reads it and the two now sit side by side.
+            $scope = status_applies_to($s['applies_to'] ?? null);
+            $scope_label = ['rma' => __('admin.status_applies_rma'),
+                            'repair' => __('admin.status_applies_repair'),
+                            'both' => __('admin.status_applies_both')][$scope];
+          ?>
           <?php // A dash, not "Ne", where the status has nothing to do with a
                 // Popravka: the question does not exist there, and answering it
                 // would read as a decision somebody made. ?>
@@ -96,6 +81,21 @@ $type   = 'rma';   // the store/update handlers still route on it
               <?= $yn((int)($s['is_terminal_job'] ?? 0) === 1) ?>
             <?php endif; ?>
           </td>
+            <?php $roles = status_roles($s['roles'] ?? null); ?>
+            <td style="text-align:center;">
+              <?php if (!$roles): ?>
+                <span style="color:var(--text-muted);"><?= __('admin.status_roles_all') ?></span>
+              <?php else: ?>
+                <?php foreach ($roles as $r): ?>
+                  <span class="badge badge-pill-fixed" style="background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;margin:0 2px;"><?= htmlspecialchars(role_label($r)) ?></span>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </td>
+            <td style="text-align:center;">
+              <span class="badge badge-pill-fixed" style="<?= $scope === 'both'
+                    ? 'background:#e1f5ee;color:#085041;border:0.5px solid #5dcaa5;'
+                    : 'background:#eef1f7;color:#3b4a63;border:0.5px solid #b9c4d6;' ?>"><?= $scope_label ?></span>
+            </td>
           <td style="text-align:right;">
             <button type="button" class="btn-link"
               onclick="editStatus('<?= $type ?>', <?= htmlspecialchars(json_encode($s)) ?>)"><?= __('btn.edit') ?></button>
