@@ -328,7 +328,7 @@ function device_open_case(string $identifier): ?array {
             AND r.dispatched_at IS NULL
             AND (
                   s.is_terminal = 0
-                  -- Or the case is closed while the bench job is not, which
+                  -- Or the case is closed while Servis job is not, which
                   -- still means the device has not left.
                   OR EXISTS (
                       SELECT 1 FROM repair_jobs j

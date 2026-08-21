@@ -85,7 +85,7 @@ class RepairController {
                          ORDER BY j.created_at DESC
                          LIMIT {$per_page} OFFSET {$offset}", $params);
 
-        // What the bench may hold, straight from Administracija -> Statusi.
+        // What Servis may set, straight from Administracija -> Statusi.
         $statuses = db_rows("SELECT * FROM rma_statuses
                               WHERE applies_to IN ('repair','both') ORDER BY sort_order");
         $success  = $_SESSION['form_success'] ?? null;
@@ -128,7 +128,7 @@ class RepairController {
                               r.rma_number, r.complaint, r.priority, r.is_warranty, r.warranty_refusal, r.partner_id,
                               -- Which box the device is sitting in, and which of
                               -- the partner's branches sent it. Both are on the
-                              -- RMA; the bench needs them just as much, one to
+                              -- RMA; Servis needs them just as much, one to
                               -- find the device and one to know where it goes back.
                               r.service_box,
                               c.name as customer_name,
@@ -270,7 +270,7 @@ class RepairController {
         // A new job starts in diagnosis - Rajo's decision. The old list opened
         // every job at "Na cekanju", which read as waiting for something when
         // nothing had been asked for yet; five jobs sat there for a week.
-        // Falls back to the first status the bench may hold, so a renamed or
+        // Falls back to the first status Servis may set, so a renamed or
         // deleted in_diagnosis cannot leave a job with no status at all.
         $first_status = db_row("SELECT id FROM rma_statuses WHERE code = 'in_diagnosis' LIMIT 1");
         $status_id    = $first_status['id'] ?? db_val(
@@ -615,7 +615,7 @@ class RepairController {
      *  - Never touches a finished case.
      *  - Writes to rma_status_history so the move is visible to an admin.
      *  - Does nothing for a status the case cannot hold - Ceka potvrdu
-     *    popravke is the bench's business and the counter never shows it.
+     *    popravke belongs to Servis and the counter never shows it.
      */
     private function sync_rma_from_repair(int $rma_id, string $repair_event): void {
         // The event is the status code the job just moved to.
@@ -628,7 +628,7 @@ class RepairController {
         // job may still be running — a quote refused on one repair while
         // another proceeds — and Otkazano is terminal, so getting this wrong
         // ends a live case. Two things must hold: nothing else is open on the
-        // bench, and the device has not already gone home.
+        // Servis, and the device has not already gone home.
         if ($target_code === 'cancelled') {
             $still_open = (int) db_val(
                 "SELECT COUNT(*) FROM repair_jobs j

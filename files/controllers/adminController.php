@@ -797,7 +797,7 @@ class AdminController {
         ];
         // Which desk may set this status on an RMA. Nothing ticked means every
         // role, which is what a new status should do until somebody narrows it.
-        // Repair statuses carry no split — the bench job is the technician's
+        // Repair statuses carry no split — Servis job is the technician's
         // either way — so the column only exists on rma_statuses.
         if ($type === 'rma') {
             $data['roles'] = $this->status_roles_input();

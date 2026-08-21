@@ -2,7 +2,7 @@
 defined('RMS') or die('Direct access not permitted');
 // One list. Statusi servisa is gone: it held a second vocabulary for the same
 // case — "U toku" beside "Na dijagnostici" — and all six of its statuses now
-// exist here, marked "Na cemu se koristi = oboje". The bench still reads the
+// exist here, marked "Na cemu se koristi = oboje". Servis still reads the
 // old table until step 2 repoints it; nothing on this screen governed that, so
 // removing the tab changes no behaviour.
 $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
@@ -195,7 +195,7 @@ $type   = 'rma';   // the store/update handlers still route on it
           </label>
         </div>
       </div>
-      <?php // Hidden while the status is case-only: there is no bench work to
+      <?php // Hidden while the status is case-only: there is no repair work to
             // finish, so the tick would be a question about nothing. ?>
       <div class="field" id="f-job-terminal-wrap">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">

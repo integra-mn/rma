@@ -4,7 +4,7 @@ defined('RMS') or die('Direct access not permitted');
 /**
  * Vendor error and resolution codes.
  *
- * Kept per brand and per device type so the bench sees a short list rather
+ * Kept per brand and per device type so Servis sees a short list rather
  * than every code the company has ever recorded. See the migration for why
  * the table starts empty.
  */

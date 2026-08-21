@@ -559,7 +559,7 @@ function auth_policy_by_identifier(string $email): array {
 /**
  * What a new account of this role should start with.
  *
- * Staff work at the counter and the bench, so they have no reason to sign in
+ * Staff work at Recepcija and Servis, so they have no reason to sign in
  * from the internet — they start LAN-only. Partners submit RMAs remotely by
  * definition, so they start unrestricted.
  *

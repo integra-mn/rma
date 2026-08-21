@@ -526,8 +526,16 @@ class RmaController {
         }
 
         // The dropdown offers what this desk may set — reception the counter
-        // steps, the bench the ones in between (Administracija -> Statusi).
-        $all_statuses = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order');
+        // steps, Servis the ones in between (Administracija -> Statusi).
+        // Straight from Administracija -> Statusi, in that order, honouring both
+        // columns set there: "Status je vezan za" decides whether a status
+        // belongs on a case at all, and "Status postavlja" decides whether this
+        // desk may set it. Only the first was being asked, so Ceka potvrdu
+        // popravke - marked Popravka only - was offered on the case.
+        $all_statuses = array_values(array_filter(
+            db_rows('SELECT * FROM rma_statuses ORDER BY sort_order'),
+            'status_for_rma'
+        ));
         $statuses     = statuses_for_user($all_statuses);
         $current_id   = (int)$rma['status_id'];
 

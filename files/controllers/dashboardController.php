@@ -30,10 +30,10 @@ class DashboardController {
                                       JOIN rma_statuses s ON s.id = r.status_id
                                       WHERE s.is_terminal = 0 AND r.deleted_at IS NULL{$fr}"),
             // Devices on the premises: one count per device with a repair job
-            // still open, whether it is being worked on, waiting to be started
-            // or paused for a part — a job exists, so the device is here.
+            // still open — being diagnosed, waiting for a part, whatever it is —
+            // because a job exists, so the device is here.
             // Counting jobs in 'in_progress' alone read 0 while four devices sat
-            // on the bench, and disagreed with the Otvorene popravke list below
+            // in Servis, and disagreed with the Otvorene popravke list below
             // it, which has always counted every non-terminal job.
             'in_repair'    => db_val("SELECT COUNT(DISTINCT j.rma_id) FROM repair_jobs j
                                       JOIN rma_statuses s ON s.id = j.status_id

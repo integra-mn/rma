@@ -59,7 +59,7 @@ const PERMISSION_MATRIX = [
     // separate question, answered by the evidence_delete_hours setting.
     'evidence'  => ['delete'],
     // The claims queue. Its own module because it is one person's work — the
-    // office follows claims, the counter and the bench do not — and because
+    // office follows claims, the counter and Servis do not — and because
     // seeing it means seeing every insured customer's case at once.
     'claims'    => ['view', 'edit'],
     'invoicing' => ['view'],
@@ -121,14 +121,14 @@ function can(string $module, string $action): bool {
 // ── Which desk may set which RMA status ───────────────────────
 //
 // rma.edit says somebody may move a case along. This says how far: reception
-// takes the device in and hands it back, the bench does everything in
+// takes the device in and hands it back, Servis does everything in
 // between. The answer lives on the status itself (rma_statuses.roles, a
 // comma-separated list of role codes) beside `notify`, so it is admin-editable
 // and a status added tomorrow carries its own.
 //
 // It matters because four statuses message the customer — without this,
 // reception can mark a case Popravljeno and text somebody to come and collect
-// a device still on the bench.
+// a device still in Servis.
 
 // The roles a status may be set by. Only these two are split; everybody else
 // is answered by the rules below rather than by the list.
@@ -138,7 +138,7 @@ function can(string $module, string $action): bool {
 // it grants nothing — it describes, rather than opens, a door.
 const STATUS_ROLES = ['reception', 'technician', 'partner'];
 
-/** Where a status may be used: the case, the bench job, or both. */
+/** Where a status may be used: the case, Servis job, or both. */
 const STATUS_SCOPES = ['rma', 'repair', 'both'];
 
 /** Normalise the stored value; anything unrecognised means the case. */
