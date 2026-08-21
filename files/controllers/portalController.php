@@ -378,11 +378,15 @@ class PortalController {
             header('Location: /portal/rma/' . (int)$id); exit;
         }
 
-        // A key, like every other note in the timeline. This one was an English
-        // sentence, so a Montenegrin reader would have found one line of
-        // English in their own history. No partner has pressed the button yet,
-        // so nothing stored needs correcting.
-        $this->advance_status((int)$id, $new_status_id, 'history.partner_confirmed');
+        // Two steps, the same shape as the counter's. The partner's own action
+        // is a status; Zatvoreno is the app's answer to it, exactly as it is to
+        // Otpremljeno for a partner who does not confirm. Recorded as two rows
+        // so the timeline shows who did what.
+        $confirmed_id = (int) db_val("SELECT id FROM rma_statuses WHERE code = 'partner_confirmed' LIMIT 1");
+        if ($confirmed_id) {
+            $this->advance_status((int)$id, $confirmed_id, 'history.partner_confirmed');
+        }
+        $this->advance_status((int)$id, $new_status_id, 'history.closed_after_confirm');
         $_SESSION['form_success'] = __('portal.receipt_confirmed');
         header('Location: /portal/rma/' . (int)$id);
         exit;

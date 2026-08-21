@@ -1504,4 +1504,5 @@ Status popravke pratite ovdje:
     'partners.confirms_receipt'      => 'Partner potvrdjuje zatvaranje reklamacije nakon povrata uredjaja',
     'history.closed_backfill' => 'Naknadno zatvoreno - uredjaj je već bio otpremljen',
     'history.partner_confirmed' => 'Partner potvrdio prijem - reklamacija zatvorena',
+    'history.closed_after_confirm' => 'Automatski zatvoreno nakon potvrde partnera',
 ];

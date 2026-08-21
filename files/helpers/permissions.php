@@ -176,7 +176,11 @@ function status_roles(?string $roles): array {
  * An empty result would strand a case, so the current status is always in the
  * list — choosing it again changes nothing.
  */
-const TERMINAL_EXITS = ['dispatched', 'closed'];
+// partner_confirmed is here because Otpremljeno is a finished status and the
+// partner's confirmation follows it. No staff dropdown offers it - it is the
+// partner's to set - but the rule should be true in general, not only for the
+// screens that happen to enforce it.
+const TERMINAL_EXITS = ['dispatched', 'partner_confirmed', 'closed'];
 
 /**
  * Filter a status list down to what a case in $current may move to.

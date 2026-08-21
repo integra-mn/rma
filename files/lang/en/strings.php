@@ -1504,4 +1504,5 @@ Track the repair here:
     'partners.confirms_receipt'      => 'Partner confirms the case is closed after the device is returned',
     'history.closed_backfill' => 'Closed retrospectively - the device had already been dispatched',
     'history.partner_confirmed' => 'Partner confirmed receipt - case closed',
+    'history.closed_after_confirm' => 'Closed automatically after the partner confirmed',
 ];
