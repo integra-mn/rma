@@ -14,7 +14,8 @@
 
   <div class="card" style="margin-bottom:1rem;">
     <h2 style="font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:1rem;"><?= __('partners.details') ?></h2>
-    <form method="POST" action="/partners/<?= (int)$partner['id'] ?>/update">
+    <form method="POST" action="/partners/<?= (int)$partner['id'] ?>/update"
+          class="partner-gate<?= $partner['is_active'] ? '' : ' locked' ?>">
       <?= csrf_field() ?>
       <!-- Fixed 4-column rows in the same field order as Novi partner, so the
            card doesn't rearrange itself when you open a partner. The default
@@ -51,6 +52,15 @@
                     style="height:40px;min-height:40px;padding:10px;line-height:18px;resize:none;overflow:auto;"><?= htmlspecialchars($partner['notes'] ?? '') ?></textarea>
         </div>
       </div>
+      <?php // The gate. Everything else on the card mutes when this is off, so
+            // an inactive partner reads as a record rather than a form - see
+            // form.partner-gate in app.css. Deliberately not `disabled`: a
+            // disabled input is not submitted, so switching a partner off and
+            // saving would have blanked their details. ?>
+      <div class="gate-row" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <input type="checkbox" id="is_active" name="is_active" value="1" <?= $partner['is_active'] ? 'checked' : '' ?>>
+        <label for="is_active" style="font-size:13px;margin-bottom:0;"><?= __('label.active') ?></label>
+      </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
         <input type="checkbox" id="notify_customer" name="notify_customer" value="1"
                <?= ($partner['notify_customer'] ?? 1) ? 'checked' : '' ?>>
@@ -63,11 +73,7 @@
         <label for="confirms_receipt" style="font-size:13px;margin-bottom:0;"><?= __('partners.confirms_receipt') ?></label>
       </div>
 
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-        <input type="checkbox" id="is_active" name="is_active" value="1" <?= $partner['is_active'] ? 'checked' : '' ?>>
-        <label for="is_active" style="font-size:13px;margin-bottom:0;"><?= __('label.active') ?></label>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="gate-row" style="display:flex;align-items:center;justify-content:space-between;">
         <button type="submit" class="btn btn-primary"><?= __('btn.save_changes') ?></button>
         <a href="/partners" class="btn"><?= __('btn.cancel') ?></a>
         <?php if (can('partners', 'edit') && $rma_count === 0): ?>
@@ -80,6 +86,15 @@
         <?php endif; ?>
       </div>
     </form>
+    <script>
+    // Live, so the card answers the tick without a save.
+    (function () {
+      var form = document.querySelector('form.partner-gate');
+      var box  = document.getElementById('is_active');
+      if (!form || !box) return;
+      box.addEventListener('change', function () { form.classList.toggle('locked', !box.checked); });
+    })();
+    </script>
   </div>
 
   <div class="card">

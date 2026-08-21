@@ -499,3 +499,19 @@ label { display: block; font-size: 12px; color: var(--text-secondary); margin-bo
   .hamburger { display: block; }
   .main-wrapper { width: 100%; }
 }
+
+/* ── Inactive partner: the card mutes ─────────────────────────
+   Unticking Aktivan greys the rest of the form, so a partner who is switched
+   off reads as a record rather than something to fill in. The tick itself and
+   the buttons stay live, or there would be no way back.
+
+   opacity + pointer-events rather than `disabled` on the inputs: a disabled
+   input is not submitted, so switching a partner off and pressing Sačuvaj
+   would have saved their name, address and e-mail as empty. */
+form.partner-gate.locked > *:not(.gate-row) {
+  opacity: 0.45;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.15s;
+}
+form.partner-gate > *:not(.gate-row) { transition: opacity 0.15s; }
