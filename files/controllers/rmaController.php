@@ -504,6 +504,27 @@ class RmaController {
                                  WHERE rma_id = ? AND deleted_at IS NULL
                                  ORDER BY created_at ASC", [(int)$id]);
 
+        // The technician's findings, for the two situations Recepcija has to
+        // settle itself: an intake refused because Find My is still active, and
+        // an insured case. Both are decided at the counter on the strength of
+        // what Servis wrote, and until now that meant opening the Popravka to
+        // read it. Everything else stays where it belongs.
+        $tech_notes = null;
+        if ($rma['status_code'] === 'device_rejected' || !empty($rma['policy_id'])) {
+            $tech_notes = db_row(
+                "SELECT j.description, j.resolution, j.completed_at,
+                        s.label AS status_label, s.code AS status_code,
+                        u.name AS tech_name
+                   FROM repair_jobs j
+                   JOIN repair_statuses s ON s.id = j.status_id
+                   LEFT JOIN users u ON u.id = j.technician_id
+                  WHERE j.rma_id = ? AND j.deleted_at IS NULL
+                    AND (j.description <> '' OR j.resolution <> '')
+                  ORDER BY j.id DESC LIMIT 1",
+                [(int)$id]
+            );
+        }
+
         // The dropdown offers what this desk may set — reception the counter
         // steps, the bench the ones in between (Administracija -> Statusi).
         $all_statuses = db_rows('SELECT * FROM rma_statuses ORDER BY sort_order');

@@ -319,6 +319,30 @@
         <p style="font-size:13px;line-height:1.6;white-space:pre-wrap;"><?= htmlspecialchars($rma['complaint'] ?? '') ?></p>
       </div>
 
+      <?php // Servis wrote it, Recepcija has to act on it. Shown only where the
+            // counter settles the case itself - an intake refused for Find My,
+            // or an insured one - so the page does not repeat the Popravka for
+            // every case. Read-only here whatever the reader's permissions: the
+            // notes belong to whoever did the work. ?>
+      <?php if (!empty($tech_notes) && can('repair', 'view')): ?>
+      <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:1.25rem;margin-bottom:1rem;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px;">
+          <h2 style="font-size:14px;font-weight:500;color:#5f5e5a;margin:0;"><?= __('repair.technician_notes') ?></h2>
+          <span style="font-size:12px;color:var(--text-muted);">
+            <?= htmlspecialchars($tech_notes['tech_name'] ?? '') ?><?= !empty($tech_notes['tech_name']) && !empty($tech_notes['completed_at']) ? ' · ' : '' ?><?= !empty($tech_notes['completed_at']) ? format_datetime($tech_notes['completed_at']) : '' ?>
+          </span>
+        </div>
+        <?php if (!empty($tech_notes['description'])): ?>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:2px;"><?= __('repair.findings') ?></div>
+          <p style="font-size:13px;line-height:1.6;white-space:pre-wrap;margin-bottom:<?= !empty($tech_notes['resolution']) ? '12px' : '0' ?>;"><?= htmlspecialchars($tech_notes['description']) ?></p>
+        <?php endif; ?>
+        <?php if (!empty($tech_notes['resolution'])): ?>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:2px;"><?= __('repair.resolution') ?></div>
+          <p style="font-size:13px;line-height:1.6;white-space:pre-wrap;margin:0;"><?= htmlspecialchars($tech_notes['resolution']) ?></p>
+        <?php endif; ?>
+      </div>
+      <?php endif; ?>
+
       <!-- Reception Photos -->
       <?php
         $ev_repair_id = null;
