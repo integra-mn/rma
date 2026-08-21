@@ -263,8 +263,7 @@ return [
     'partners.company'       => 'Company name',
     'partners.tax_id'        => 'Tax ID / PIB',
     'partners.contact_person'=> 'Contact person',
-    'partners.notify_customer'      => 'Notify the end customer as well',
-    'partners.notify_customer_hint' => 'This partner is always notified about their RMAs. Turn this off if they prefer to be the only point of contact with their own customer.',
+    'partners.notify_customer'      => 'End customers of this partner are notified about statuses',
     'partners.users'         => 'Portal users',
     'partners.no_users'      => 'No portal users yet.',
     'partners.rma_count'     => ':count RMA(s) linked to this partner.',
@@ -1503,6 +1502,5 @@ Track the repair here:
     'rma.status_terminal_exit' => 'This case is finished. It can only be dispatched or closed.',
     'history.auto_closed_on_dispatch' => 'Closed automatically when the device was dispatched',
     'partners.confirms_receipt'      => 'Partner confirms the case is closed after the device is returned',
-    'partners.confirms_receipt_hint' => 'Only tick this for a partner who actually uses the portal. Their cases then wait at Otpremljeno until they confirm the device arrived, and that closes the case. Left unticked, dispatch closes it straight away.',
     'history.closed_backfill' => 'Closed retrospectively - the device had already been dispatched',
 ];

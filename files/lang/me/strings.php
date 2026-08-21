@@ -263,8 +263,7 @@ return [
     'partners.company'       => 'Naziv firme',
     'partners.tax_id'        => 'PIB',
     'partners.contact_person'=> 'Kontakt osoba',
-    'partners.notify_customer'      => 'Obavijesti i krajnjeg korisnika',
-    'partners.notify_customer_hint' => 'Partner se uvijek obavještava o svojim reklamacijama. Isključite ovo ako partner želi da bude jedini kontakt prema svom korisniku.',
+    'partners.notify_customer'      => 'Krajnji korisnici partnera se obavještavaju o statusima',
     'partners.users'         => 'Korisnici portala',
     'partners.no_users'      => 'Još nema korisnika portala.',
     'partners.rma_count'     => ':count RMA nalog(a) vezan za ovog partnera.',
@@ -1503,6 +1502,5 @@ Status popravke pratite ovdje:
     'rma.status_terminal_exit' => 'Reklamacija je završena. Moguće je samo Otpremljeno ili Zatvoreno.',
     'history.auto_closed_on_dispatch' => 'Automatski zatvoreno pri otpremi uredjaja',
     'partners.confirms_receipt'      => 'Partner potvrdjuje zatvaranje reklamacije nakon povrata uredjaja',
-    'partners.confirms_receipt_hint' => 'Označite samo za partnera koji zaista koristi portal. Njegove reklamacije tada čekaju na Otpremljeno dok ne potvrdi prijem uredjaja, i to zatvara reklamaciju. Bez oznake, otprema odmah zatvara reklamaciju.',
     'history.closed_backfill' => 'Naknadno zatvoreno - uredjaj je već bio otpremljen',
 ];
