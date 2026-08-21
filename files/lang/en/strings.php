@@ -1505,4 +1505,5 @@ Track the repair here:
     'codes.search'   => 'Search codes',
     'codes.vendor_line' => 'Vendor product line',
     'dashboard.incoming'         => 'Devices incoming',
+    'rma.status_terminal_exit' => 'This case is finished. It can only be dispatched or closed.',
 ];

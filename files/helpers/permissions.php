@@ -165,6 +165,37 @@ function status_roles(?string $roles): array {
 }
 
 /**
+ * Where a finished case may still go.
+ *
+ * A terminal status ends the case — Prijem odbijen - FMI aktivan, Otkazano,
+ * Popravka nije moguca. What has not happened yet is the paperwork: the device
+ * still goes back to its owner and the case still gets closed. So the only
+ * moves left are Otpremljeno and Zatvoreno, and everything the case has been
+ * through stays exactly as it was.
+ *
+ * An empty result would strand a case, so the current status is always in the
+ * list — choosing it again changes nothing.
+ */
+const TERMINAL_EXITS = ['dispatched', 'closed'];
+
+/**
+ * Filter a status list down to what a case in $current may move to.
+ *
+ * Only bites on terminal statuses; anything mid-flow keeps the whole list.
+ * Admins keep it too — somebody has to be able to undo a wrong turn, which is
+ * the same exception can_recur already makes.
+ */
+function statuses_from(array $statuses, ?array $current, ?array $user = null): array {
+    if (!$current || (int)($current['is_terminal'] ?? 0) !== 1) return $statuses;
+    if (is_admin_user($user ?? current_user())) return $statuses;
+
+    return array_values(array_filter($statuses, fn($s) =>
+        (int)$s['id'] === (int)$current['id']
+        || in_array($s['code'] ?? '', TERMINAL_EXITS, true)
+    ));
+}
+
+/**
  * May this user move an RMA into this status?
  *
  * Admin and Super Admin: always. An absent technician must never leave the

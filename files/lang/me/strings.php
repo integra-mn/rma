@@ -1505,4 +1505,5 @@ Status popravke pratite ovdje:
     'codes.search'   => 'Pretraga kodova',
     'codes.vendor_line' => 'Linija proizvoda',
     'dashboard.incoming'         => 'Uredjaji u dolasku',
+    'rma.status_terminal_exit' => 'Reklamacija je završena. Moguće je samo Otpremljeno ili Zatvoreno.',
 ];

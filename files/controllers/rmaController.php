@@ -548,6 +548,12 @@ class RmaController {
             ));
         }
 
+        // A finished case has only paperwork left: the device goes out and the
+        // case is closed. Nothing else is offered, so what was recorded on the
+        // way to that ending stays as it is.
+        $current_row = db_row('SELECT * FROM rma_statuses WHERE id = ?', [$current_id]);
+        $statuses    = statuses_from($statuses, $current_row);
+
         // Where the case stands is said by the badge in the header and by the
         // timeline. It is offered in the dropdown only when this desk could set
         // it — otherwise the box opens on "no change" and lists this desk's own
@@ -620,6 +626,16 @@ class RmaController {
                 $target = db_row('SELECT * FROM rma_statuses WHERE id = ?', [$status_id]);
                 if (!$target || !can_set_status($target)) {
                     $_SESSION['form_error'] = __('rma.status_not_allowed');
+                    header("Location: /rma/{$id}");
+                    exit;
+                }
+
+                // Same rule the dropdown draws, checked again: a finished case
+                // may only be dispatched or closed. The dropdown is a
+                // convenience; this is where it is decided.
+                $from = db_row('SELECT * FROM rma_statuses WHERE id = ?', [(int)$rma['status_id']]);
+                if (!statuses_from([$target], $from)) {
+                    $_SESSION['form_error'] = __('rma.status_terminal_exit');
                     header("Location: /rma/{$id}");
                     exit;
                 }
