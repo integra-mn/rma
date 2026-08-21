@@ -855,17 +855,23 @@ class RmaController {
      * nine cases sat at Otpremljeno against one closed - so the count of open
      * work was wrong by nine and nobody had done anything careless.
      *
-     * The exception is a partner case while Podesavanja -> Opste says the
-     * partner confirms receipt. Then Otpremljeno means "in transit", the
-     * partner presses the button in their portal when it arrives, and that
-     * closes it. A walk-in customer has nobody to confirm, so it closes on
-     * dispatch whatever the setting says.
+     * The exception is a partner whose own profile says they confirm receipt.
+     * Then Otpremljeno means "in transit", the partner presses the button in
+     * their portal when it arrives, and that closes it. Asked of the partner
+     * rather than of the app, because not every partner uses the portal - one
+     * switch for all of them would park a non-user's cases at Otpremljeno
+     * forever, waiting on a confirmation nobody was going to give.
+     *
+     * A walk-in customer has nobody to confirm, so it closes on dispatch.
      *
      * Two history rows, not one: the device leaving and the case closing are
      * two facts, and a week from now somebody may need to know both.
      */
     private function close_after_dispatch(int $rma_id, int $partner_id): void {
-        if ($partner_id > 0 && setting_on('partner_confirms_receipt')) return;
+        if ($partner_id > 0
+            && (int) db_val('SELECT confirms_receipt FROM partners WHERE id = ?', [$partner_id]) === 1) {
+            return;
+        }
 
         $closed = db_row("SELECT id FROM rma_statuses WHERE code = 'closed' LIMIT 1");
         if (!$closed) return;   // renamed or deleted - leave the case where it is

@@ -58,6 +58,13 @@
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:0 0 16px 24px;"><?= __('partners.notify_customer_hint') ?></p>
 
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <input type="checkbox" id="confirms_receipt" name="confirms_receipt" value="1"
+               <?= !empty($partner['confirms_receipt']) ? 'checked' : '' ?>>
+        <label for="confirms_receipt" style="font-size:13px;margin-bottom:0;"><?= __('partners.confirms_receipt') ?></label>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin:0 0 16px 24px;"><?= __('partners.confirms_receipt_hint') ?></p>
+
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
         <input type="checkbox" id="is_active" name="is_active" value="1" <?= $partner['is_active'] ? 'checked' : '' ?>>
         <label for="is_active" style="font-size:13px;margin-bottom:0;"><?= __('label.active') ?></label>

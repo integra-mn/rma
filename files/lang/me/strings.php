@@ -1506,8 +1506,7 @@ Status popravke pratite ovdje:
     'codes.vendor_line' => 'Linija proizvoda',
     'dashboard.incoming'         => 'Uredjaji u dolasku',
     'rma.status_terminal_exit' => 'Reklamacija je završena. Moguće je samo Otpremljeno ili Zatvoreno.',
-    'settings.closing'               => 'Zatvaranje reklamacije',
-    'settings.partner_confirms'      => 'Partner potvrdjuje prijem prije zatvaranja',
-    'settings.partner_confirms_hint' => 'Uključeno: reklamacija partnera čeka na Otpremljeno dok partner ne potvrdi prijem, i to je zatvara. Isključeno: Otpremljeno odmah zatvara reklamaciju. Kod korisnika koji sam preuzima nema ko da potvrdi, pa se zatvara odmah u oba slučaja.',
     'history.auto_closed_on_dispatch' => 'Automatski zatvoreno pri otpremi uredjaja',
+    'partners.confirms_receipt'      => 'Partner potvrdjuje zatvaranje reklamacije nakon povrata uredjaja',
+    'partners.confirms_receipt_hint' => 'Označite samo za partnera koji zaista koristi portal. Njegove reklamacije tada čekaju na Otpremljeno dok ne potvrdi prijem uredjaja, i to zatvara reklamaciju. Bez oznake, otprema odmah zatvara reklamaciju.',
 ];

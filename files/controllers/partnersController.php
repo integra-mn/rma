@@ -157,6 +157,11 @@ class PartnersController {
             // An RMA with this partner always notifies the partner; this says
             // whether the end user hears from us as well.
             'notify_customer' => isset($_POST['notify_customer']) ? 1 : 0,
+            // Whether this partner works the portal. Off, Otpremljeno closes
+            // their cases outright; on, the case waits for them to confirm the
+            // device arrived. A partner who never signs in must not be ticked,
+            // or their cases wait for a confirmation that never comes.
+            'confirms_receipt' => isset($_POST['confirms_receipt']) ? 1 : 0,
             'is_active'      => isset($_POST['is_active']) ? 1 : 0,
         ];
 
