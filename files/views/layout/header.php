@@ -32,6 +32,11 @@ function nav_active(string $prefix): string {
     // so a deploy changed nothing for anyone who did not hard-refresh — which
     // is everyone. Stamping the file's own mtime on it means a new deploy is a
     // new URL, fetched once, and unchanged files stay cached as before.
+    // Every stylesheet and script goes out stamped with its own mtime, so a
+    // deployed change reaches a browser that already has the old file. Two of
+    // them carried a stamp and the rest did not, which is how a one-line fix to
+    // search-select.css could be live on the server and invisible in the
+    // browser - the file was in cache from days earlier.
     $css_v = static function (string $rel): string {
         $t = @filemtime(ROOT . $rel);
         return $rel . ($t ? '?v=' . $t : '');
@@ -39,8 +44,8 @@ function nav_active(string $prefix): string {
   ?>
   <link rel="stylesheet" href="<?= $css_v('/assets/css/fonts.css') ?>">
   <link rel="stylesheet" href="<?= $css_v('/assets/css/app.css') ?>">
-  <link rel="stylesheet" href="/assets/css/filefield.css">
-  <link rel="stylesheet" href="/assets/css/search-select.css">
+  <link rel="stylesheet" href="<?= $css_v('/assets/css/filefield.css') ?>">
+  <link rel="stylesheet" href="<?= $css_v('/assets/css/search-select.css') ?>">
   <script>
     // Auto-attach CSRF token to same-origin fetch() POST/PUT/PATCH/DELETE.
     // Reads token from <meta name="csrf-token">. Works for existing code
@@ -75,12 +80,12 @@ function nav_active(string $prefix): string {
   </script>
   <script>window.SS_SEARCH = <?= json_encode(__('btn.search')) ?>; window.SS_NO_RESULTS = <?= json_encode(__('msg.no_results')) ?>;
     window.FF_CHOOSE = <?= json_encode(__('label.choose_file')) ?>; window.FF_NONE = <?= json_encode(__('label.no_file')) ?>;</script>
-  <script src="/assets/js/search-select.js" defer></script>
-  <script src="/assets/js/file-field.js" defer></script>
-  <script src="/assets/js/list-state.js" defer></script>
-  <script src="/assets/js/datepicker.js" defer></script>
-  <script src="/assets/js/cities-me.js" defer></script>
-  <script src="/assets/js/qrcode.min.js"></script>
+  <script src="<?= $css_v('/assets/js/search-select.js') ?>" defer></script>
+  <script src="<?= $css_v('/assets/js/file-field.js') ?>" defer></script>
+  <script src="<?= $css_v('/assets/js/list-state.js') ?>" defer></script>
+  <script src="<?= $css_v('/assets/js/datepicker.js') ?>" defer></script>
+  <script src="<?= $css_v('/assets/js/cities-me.js') ?>" defer></script>
+  <script src="<?= $css_v('/assets/js/qrcode.min.js') ?>"></script>
   <?php
     // Apply admin appearance settings as CSS overrides. Colour values are
     // already validated in settings_save (#RRGGBB), so we only do a final

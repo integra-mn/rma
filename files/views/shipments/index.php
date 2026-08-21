@@ -23,4 +23,4 @@
   </div>
 
 </div>
-<script src="/assets/js/live-list.js"></script>
+<script src="/assets/js/live-list.js?v=<?= @filemtime(ROOT . '/assets/js/live-list.js') ?>"></script>

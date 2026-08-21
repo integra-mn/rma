@@ -124,7 +124,7 @@ $lang_en = (current_user()['lang'] ?? setting('default_lang', 'en')) === 'en';
 <?php // Same script the Reklamacije and Popravke lists use: typing swaps the
       // table, the filters swap it, and the pager links inside the fragment
       // work through delegation. ?>
-<script src="/assets/js/live-list.js"></script>
+<script src="/assets/js/live-list.js?v=<?= @filemtime(ROOT . '/assets/js/live-list.js') ?>"></script>
 <script>
 const CODE_TITLES = { add: <?= json_encode(__('codes.add_title')) ?>, edit: <?= json_encode(__('codes.edit_title')) ?> };
 const CODE_SAVE   = <?= json_encode(__('btn.save')) ?>;
