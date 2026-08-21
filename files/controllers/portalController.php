@@ -378,7 +378,11 @@ class PortalController {
             header('Location: /portal/rma/' . (int)$id); exit;
         }
 
-        $this->advance_status((int)$id, $new_status_id, 'Partner confirmed receipt — case closed.');
+        // A key, like every other note in the timeline. This one was an English
+        // sentence, so a Montenegrin reader would have found one line of
+        // English in their own history. No partner has pressed the button yet,
+        // so nothing stored needs correcting.
+        $this->advance_status((int)$id, $new_status_id, 'history.partner_confirmed');
         $_SESSION['form_success'] = __('portal.receipt_confirmed');
         header('Location: /portal/rma/' . (int)$id);
         exit;

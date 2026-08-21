@@ -1503,4 +1503,5 @@ Status popravke pratite ovdje:
     'history.auto_closed_on_dispatch' => 'Automatski zatvoreno pri otpremi uredjaja',
     'partners.confirms_receipt'      => 'Partner potvrdjuje zatvaranje reklamacije nakon povrata uredjaja',
     'history.closed_backfill' => 'Naknadno zatvoreno - uredjaj je već bio otpremljen',
+    'history.partner_confirmed' => 'Partner potvrdio prijem - reklamacija zatvorena',
 ];
